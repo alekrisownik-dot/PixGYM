@@ -2,6 +2,7 @@
  * Logika siłowa liczona w telefonie (offline). Lustro apps/api/src/pixgym/domain.
  * Obie wersje muszą przechodzić packages/test-vectors/strength.json.
  */
+export * from "./badges";
 export * from "./e1rm";
 export * from "./plates";
 export * from "./progression";

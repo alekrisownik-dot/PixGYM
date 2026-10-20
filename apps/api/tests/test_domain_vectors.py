@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from pixgym.domain import e1rm, plates, ranks, records, volume
+from pixgym.domain import badges, e1rm, plates, ranks, records, volume
 from pixgym.domain import progression as pg
 from pixgym.seed.programs_data import PROGRESSION_RULES
 
@@ -100,6 +100,21 @@ DISPATCH = {
     "wendler_sets": lambda a: _targets(pg.wendler_sets(RULES[a["rule"]], a["tm_kg"], a["week"])),
     "wendler_next_tm": lambda a: pg.wendler_next_tm(RULES[a["rule"]], a["tm_kg"], a["is_lower"]),
     "rank_table": lambda a: ranks.rank_table(),
+    "rank_history": lambda a: [
+        asdict(x) for x in badges.rank_history(a["lift"], a["points"], a["sex"])
+    ],
+    "evaluate_badges": lambda a: [
+        asdict(x)
+        for x in badges.evaluate_badges(
+            a["sessions"], a["beaten_records"], a["rank_events"], a["photos"]
+        )
+    ],
+    "photo_reminders": lambda a: [
+        asdict(x) for x in badges.photo_reminders(a["photos"], a["today"])
+    ],
+    "compare_pair": lambda a: _maybe(
+        badges.compare_pair(a["photos"], a["pose"], a.get("before"), a.get("after"))
+    ),
     "rank_for": lambda a: _maybe(
         ranks.rank_for(a["lift"], a["e1rm_kg"], a["bodyweight_kg"], a["sex"])
     ),

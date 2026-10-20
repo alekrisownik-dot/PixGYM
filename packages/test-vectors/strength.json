@@ -3320,5 +3320,1688 @@
         }
       ]
     }
+  ],
+  "rank_history": [
+    {
+      "name": "start, awans, spadek bez zmian, przeskok o dwie rangi",
+      "args": {
+        "lift": "bench_press",
+        "points": [
+          {
+            "date": "2026-01-05",
+            "e1rm_kg": 60,
+            "bodyweight_kg": 80
+          },
+          {
+            "date": "2026-02-02",
+            "e1rm_kg": 82,
+            "bodyweight_kg": 80
+          },
+          {
+            "date": "2026-03-02",
+            "e1rm_kg": 80,
+            "bodyweight_kg": 80
+          },
+          {
+            "date": "2026-04-06",
+            "e1rm_kg": 122,
+            "bodyweight_kg": 81
+          },
+          {
+            "date": "2026-05-04",
+            "e1rm_kg": 103,
+            "bodyweight_kg": null
+          }
+        ],
+        "sex": "male"
+      },
+      "expected": [
+        {
+          "tier": 2,
+          "title": "Firewall Breaker",
+          "date": "2026-01-05",
+          "e1rm_kg": 60
+        },
+        {
+          "tier": 3,
+          "title": "Exploit Dev",
+          "date": "2026-02-02",
+          "e1rm_kg": 82
+        },
+        {
+          "tier": 5,
+          "title": "Root Access",
+          "date": "2026-04-06",
+          "e1rm_kg": 122
+        }
+      ]
+    },
+    {
+      "name": "kolejność wejścia nie ma znaczenia",
+      "args": {
+        "lift": "bench_press",
+        "points": [
+          {
+            "date": "2026-05-04",
+            "e1rm_kg": 103,
+            "bodyweight_kg": null
+          },
+          {
+            "date": "2026-04-06",
+            "e1rm_kg": 122,
+            "bodyweight_kg": 81
+          },
+          {
+            "date": "2026-03-02",
+            "e1rm_kg": 80,
+            "bodyweight_kg": 80
+          },
+          {
+            "date": "2026-02-02",
+            "e1rm_kg": 82,
+            "bodyweight_kg": 80
+          },
+          {
+            "date": "2026-01-05",
+            "e1rm_kg": 60,
+            "bodyweight_kg": 80
+          }
+        ],
+        "sex": "male"
+      },
+      "expected": [
+        {
+          "tier": 2,
+          "title": "Firewall Breaker",
+          "date": "2026-01-05",
+          "e1rm_kg": 60
+        },
+        {
+          "tier": 3,
+          "title": "Exploit Dev",
+          "date": "2026-02-02",
+          "e1rm_kg": 82
+        },
+        {
+          "tier": 5,
+          "title": "Root Access",
+          "date": "2026-04-06",
+          "e1rm_kg": 122
+        }
+      ]
+    },
+    {
+      "name": "bez masy ciała pusto",
+      "args": {
+        "lift": "pull_up",
+        "points": [
+          {
+            "date": "2026-01-01",
+            "e1rm_kg": 90,
+            "bodyweight_kg": null
+          }
+        ],
+        "sex": "male"
+      },
+      "expected": []
+    },
+    {
+      "name": "ten sam dzień: tylko lepszy wynik",
+      "args": {
+        "lift": "dip",
+        "points": [
+          {
+            "date": "2026-01-01",
+            "e1rm_kg": 96,
+            "bodyweight_kg": 80
+          },
+          {
+            "date": "2026-01-01",
+            "e1rm_kg": 81,
+            "bodyweight_kg": 80
+          }
+        ],
+        "sex": "male"
+      },
+      "expected": [
+        {
+          "tier": 2,
+          "title": "Firewall Breaker",
+          "date": "2026-01-01",
+          "e1rm_kg": 96
+        }
+      ]
+    }
+  ],
+  "evaluate_badges": [
+    {
+      "name": "pusto: nic zdobyte, postęp 0",
+      "args": {
+        "sessions": [],
+        "beaten_records": [],
+        "rank_events": {},
+        "photos": []
+      },
+      "expected": [
+        {
+          "slug": "first_blood",
+          "title": "First Blood",
+          "description": "Pierwszy trening",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "buffer_overflow",
+          "title": "Buffer Overflow",
+          "description": "Pierwszy pobity rekord",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "exploit_chain",
+          "title": "Exploit Chain",
+          "description": "5 serii z nowym rekordem na jednym treningu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "brute_force",
+          "title": "Brute Force",
+          "description": "100 ciężkich serii w miesiącu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ddos",
+          "title": "DDoS",
+          "description": "20 ton w jednym tygodniu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "uptime_30d",
+          "title": "Uptime 30d",
+          "description": "30 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "uptime_180d",
+          "title": "Uptime 180d",
+          "description": "180 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "privilege_escalation",
+          "title": "Privilege Escalation",
+          "description": "Pierwszy awans rangi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "sudo",
+          "title": "sudo su",
+          "description": "Ranga Root Access w dowolnym boju",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "full_stack",
+          "title": "Full Stack",
+          "description": "Ranga Exploit Dev we wszystkich bojach rankingowych",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "snapshot",
+          "title": "Snapshot",
+          "description": "Pierwsze zdjęcie postępu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "git_diff",
+          "title": "git diff",
+          "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
+          "earned_at": null,
+          "progress": 0.0
+        }
+      ]
+    },
+    {
+      "name": "pierwszy trening i pierwszy pobity rekord",
+      "args": {
+        "sessions": [
+          {
+            "date": "2026-03-10",
+            "hard_sets": 12,
+            "tonnage_kg": 6000
+          }
+        ],
+        "beaten_records": [
+          {
+            "date": "2026-03-17"
+          }
+        ],
+        "rank_events": {},
+        "photos": []
+      },
+      "expected": [
+        {
+          "slug": "first_blood",
+          "title": "First Blood",
+          "description": "Pierwszy trening",
+          "earned_at": "2026-03-10",
+          "progress": 1.0
+        },
+        {
+          "slug": "buffer_overflow",
+          "title": "Buffer Overflow",
+          "description": "Pierwszy pobity rekord",
+          "earned_at": "2026-03-17",
+          "progress": 1.0
+        },
+        {
+          "slug": "exploit_chain",
+          "title": "Exploit Chain",
+          "description": "5 serii z nowym rekordem na jednym treningu",
+          "earned_at": null,
+          "progress": 0.2
+        },
+        {
+          "slug": "brute_force",
+          "title": "Brute Force",
+          "description": "100 ciężkich serii w miesiącu",
+          "earned_at": null,
+          "progress": 0.12
+        },
+        {
+          "slug": "ddos",
+          "title": "DDoS",
+          "description": "20 ton w jednym tygodniu",
+          "earned_at": null,
+          "progress": 0.3
+        },
+        {
+          "slug": "uptime_30d",
+          "title": "Uptime 30d",
+          "description": "30 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "uptime_180d",
+          "title": "Uptime 180d",
+          "description": "180 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "privilege_escalation",
+          "title": "Privilege Escalation",
+          "description": "Pierwszy awans rangi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "sudo",
+          "title": "sudo su",
+          "description": "Ranga Root Access w dowolnym boju",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "full_stack",
+          "title": "Full Stack",
+          "description": "Ranga Exploit Dev we wszystkich bojach rankingowych",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "snapshot",
+          "title": "Snapshot",
+          "description": "Pierwsze zdjęcie postępu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "git_diff",
+          "title": "git diff",
+          "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
+          "earned_at": null,
+          "progress": 0.0
+        }
+      ]
+    },
+    {
+      "name": "Exploit Chain: 4 serie z rekordem jednego dnia to za mało, 5 innego wystarcza",
+      "args": {
+        "sessions": [],
+        "beaten_records": [
+          {
+            "date": "2026-03-01"
+          },
+          {
+            "date": "2026-03-01"
+          },
+          {
+            "date": "2026-03-01"
+          },
+          {
+            "date": "2026-03-01"
+          },
+          {
+            "date": "2026-03-08"
+          },
+          {
+            "date": "2026-03-08"
+          },
+          {
+            "date": "2026-03-08"
+          },
+          {
+            "date": "2026-03-08"
+          },
+          {
+            "date": "2026-03-08"
+          }
+        ],
+        "rank_events": {},
+        "photos": []
+      },
+      "expected": [
+        {
+          "slug": "first_blood",
+          "title": "First Blood",
+          "description": "Pierwszy trening",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "buffer_overflow",
+          "title": "Buffer Overflow",
+          "description": "Pierwszy pobity rekord",
+          "earned_at": "2026-03-01",
+          "progress": 1.0
+        },
+        {
+          "slug": "exploit_chain",
+          "title": "Exploit Chain",
+          "description": "5 serii z nowym rekordem na jednym treningu",
+          "earned_at": "2026-03-08",
+          "progress": 1.0
+        },
+        {
+          "slug": "brute_force",
+          "title": "Brute Force",
+          "description": "100 ciężkich serii w miesiącu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ddos",
+          "title": "DDoS",
+          "description": "20 ton w jednym tygodniu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "uptime_30d",
+          "title": "Uptime 30d",
+          "description": "30 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "uptime_180d",
+          "title": "Uptime 180d",
+          "description": "180 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "privilege_escalation",
+          "title": "Privilege Escalation",
+          "description": "Pierwszy awans rangi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "sudo",
+          "title": "sudo su",
+          "description": "Ranga Root Access w dowolnym boju",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "full_stack",
+          "title": "Full Stack",
+          "description": "Ranga Exploit Dev we wszystkich bojach rankingowych",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "snapshot",
+          "title": "Snapshot",
+          "description": "Pierwsze zdjęcie postępu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "git_diff",
+          "title": "git diff",
+          "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
+          "earned_at": null,
+          "progress": 0.0
+        }
+      ]
+    },
+    {
+      "name": "Brute Force: 99 w styczniu, 100 w lutym",
+      "args": {
+        "sessions": [
+          {
+            "date": "2026-01-10",
+            "hard_sets": 50,
+            "tonnage_kg": 0
+          },
+          {
+            "date": "2026-01-31",
+            "hard_sets": 49,
+            "tonnage_kg": 0
+          },
+          {
+            "date": "2026-02-01",
+            "hard_sets": 60,
+            "tonnage_kg": 0
+          },
+          {
+            "date": "2026-02-20",
+            "hard_sets": 40,
+            "tonnage_kg": 0
+          }
+        ],
+        "beaten_records": [],
+        "rank_events": {},
+        "photos": []
+      },
+      "expected": [
+        {
+          "slug": "first_blood",
+          "title": "First Blood",
+          "description": "Pierwszy trening",
+          "earned_at": "2026-01-10",
+          "progress": 1.0
+        },
+        {
+          "slug": "buffer_overflow",
+          "title": "Buffer Overflow",
+          "description": "Pierwszy pobity rekord",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "exploit_chain",
+          "title": "Exploit Chain",
+          "description": "5 serii z nowym rekordem na jednym treningu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "brute_force",
+          "title": "Brute Force",
+          "description": "100 ciężkich serii w miesiącu",
+          "earned_at": "2026-02-20",
+          "progress": 1.0
+        },
+        {
+          "slug": "ddos",
+          "title": "DDoS",
+          "description": "20 ton w jednym tygodniu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "uptime_30d",
+          "title": "Uptime 30d",
+          "description": "30 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.03
+        },
+        {
+          "slug": "uptime_180d",
+          "title": "Uptime 180d",
+          "description": "180 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "privilege_escalation",
+          "title": "Privilege Escalation",
+          "description": "Pierwszy awans rangi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "sudo",
+          "title": "sudo su",
+          "description": "Ranga Root Access w dowolnym boju",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "full_stack",
+          "title": "Full Stack",
+          "description": "Ranga Exploit Dev we wszystkich bojach rankingowych",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "snapshot",
+          "title": "Snapshot",
+          "description": "Pierwsze zdjęcie postępu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "git_diff",
+          "title": "git diff",
+          "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
+          "earned_at": null,
+          "progress": 0.0
+        }
+      ]
+    },
+    {
+      "name": "DDoS: tydzień liczony od poniedziałku",
+      "args": {
+        "sessions": [
+          {
+            "date": "2026-10-18",
+            "hard_sets": 0,
+            "tonnage_kg": 15000
+          },
+          {
+            "date": "2026-10-19",
+            "hard_sets": 0,
+            "tonnage_kg": 10000
+          },
+          {
+            "date": "2026-10-25",
+            "hard_sets": 0,
+            "tonnage_kg": 10000
+          }
+        ],
+        "beaten_records": [],
+        "rank_events": {},
+        "photos": []
+      },
+      "expected": [
+        {
+          "slug": "first_blood",
+          "title": "First Blood",
+          "description": "Pierwszy trening",
+          "earned_at": "2026-10-18",
+          "progress": 1.0
+        },
+        {
+          "slug": "buffer_overflow",
+          "title": "Buffer Overflow",
+          "description": "Pierwszy pobity rekord",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "exploit_chain",
+          "title": "Exploit Chain",
+          "description": "5 serii z nowym rekordem na jednym treningu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "brute_force",
+          "title": "Brute Force",
+          "description": "100 ciężkich serii w miesiącu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ddos",
+          "title": "DDoS",
+          "description": "20 ton w jednym tygodniu",
+          "earned_at": "2026-10-25",
+          "progress": 1.0
+        },
+        {
+          "slug": "uptime_30d",
+          "title": "Uptime 30d",
+          "description": "30 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.23
+        },
+        {
+          "slug": "uptime_180d",
+          "title": "Uptime 180d",
+          "description": "180 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.03
+        },
+        {
+          "slug": "privilege_escalation",
+          "title": "Privilege Escalation",
+          "description": "Pierwszy awans rangi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "sudo",
+          "title": "sudo su",
+          "description": "Ranga Root Access w dowolnym boju",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "full_stack",
+          "title": "Full Stack",
+          "description": "Ranga Exploit Dev we wszystkich bojach rankingowych",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "snapshot",
+          "title": "Snapshot",
+          "description": "Pierwsze zdjęcie postępu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "git_diff",
+          "title": "git diff",
+          "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
+          "earned_at": null,
+          "progress": 0.0
+        }
+      ]
+    },
+    {
+      "name": "Uptime: treningi co tydzień przez pół roku",
+      "args": {
+        "sessions": [
+          {
+            "date": "2026-01-01",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-01-08",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-01-15",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-01-22",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-01-29",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-02-05",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-02-12",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-02-19",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-02-26",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-03-05",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-03-12",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-03-19",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-03-26",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-04-02",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-04-09",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-04-16",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-04-23",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-04-30",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-05-07",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-05-14",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-05-21",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-05-28",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-06-04",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-06-11",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-06-18",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-06-25",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          },
+          {
+            "date": "2026-07-02",
+            "hard_sets": 20,
+            "tonnage_kg": 5000
+          }
+        ],
+        "beaten_records": [],
+        "rank_events": {},
+        "photos": []
+      },
+      "expected": [
+        {
+          "slug": "first_blood",
+          "title": "First Blood",
+          "description": "Pierwszy trening",
+          "earned_at": "2026-01-01",
+          "progress": 1.0
+        },
+        {
+          "slug": "buffer_overflow",
+          "title": "Buffer Overflow",
+          "description": "Pierwszy pobity rekord",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "exploit_chain",
+          "title": "Exploit Chain",
+          "description": "5 serii z nowym rekordem na jednym treningu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "brute_force",
+          "title": "Brute Force",
+          "description": "100 ciężkich serii w miesiącu",
+          "earned_at": "2026-01-29",
+          "progress": 1.0
+        },
+        {
+          "slug": "ddos",
+          "title": "DDoS",
+          "description": "20 ton w jednym tygodniu",
+          "earned_at": null,
+          "progress": 0.25
+        },
+        {
+          "slug": "uptime_30d",
+          "title": "Uptime 30d",
+          "description": "30 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": "2026-02-05",
+          "progress": 1.0
+        },
+        {
+          "slug": "uptime_180d",
+          "title": "Uptime 180d",
+          "description": "180 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": "2026-07-02",
+          "progress": 1.0
+        },
+        {
+          "slug": "privilege_escalation",
+          "title": "Privilege Escalation",
+          "description": "Pierwszy awans rangi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "sudo",
+          "title": "sudo su",
+          "description": "Ranga Root Access w dowolnym boju",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "full_stack",
+          "title": "Full Stack",
+          "description": "Ranga Exploit Dev we wszystkich bojach rankingowych",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "snapshot",
+          "title": "Snapshot",
+          "description": "Pierwsze zdjęcie postępu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "git_diff",
+          "title": "git diff",
+          "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
+          "earned_at": null,
+          "progress": 0.0
+        }
+      ]
+    },
+    {
+      "name": "Uptime: 8 dni przerwy zeruje serię",
+      "args": {
+        "sessions": [
+          {
+            "date": "2026-01-01",
+            "hard_sets": 1,
+            "tonnage_kg": 0
+          },
+          {
+            "date": "2026-01-08",
+            "hard_sets": 1,
+            "tonnage_kg": 0
+          },
+          {
+            "date": "2026-01-16",
+            "hard_sets": 1,
+            "tonnage_kg": 0
+          },
+          {
+            "date": "2026-01-23",
+            "hard_sets": 1,
+            "tonnage_kg": 0
+          },
+          {
+            "date": "2026-01-30",
+            "hard_sets": 1,
+            "tonnage_kg": 0
+          },
+          {
+            "date": "2026-02-06",
+            "hard_sets": 1,
+            "tonnage_kg": 0
+          },
+          {
+            "date": "2026-02-15",
+            "hard_sets": 1,
+            "tonnage_kg": 0
+          }
+        ],
+        "beaten_records": [],
+        "rank_events": {},
+        "photos": []
+      },
+      "expected": [
+        {
+          "slug": "first_blood",
+          "title": "First Blood",
+          "description": "Pierwszy trening",
+          "earned_at": "2026-01-01",
+          "progress": 1.0
+        },
+        {
+          "slug": "buffer_overflow",
+          "title": "Buffer Overflow",
+          "description": "Pierwszy pobity rekord",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "exploit_chain",
+          "title": "Exploit Chain",
+          "description": "5 serii z nowym rekordem na jednym treningu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "brute_force",
+          "title": "Brute Force",
+          "description": "100 ciężkich serii w miesiącu",
+          "earned_at": null,
+          "progress": 0.05
+        },
+        {
+          "slug": "ddos",
+          "title": "DDoS",
+          "description": "20 ton w jednym tygodniu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "uptime_30d",
+          "title": "Uptime 30d",
+          "description": "30 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.7
+        },
+        {
+          "slug": "uptime_180d",
+          "title": "Uptime 180d",
+          "description": "180 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.11
+        },
+        {
+          "slug": "privilege_escalation",
+          "title": "Privilege Escalation",
+          "description": "Pierwszy awans rangi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "sudo",
+          "title": "sudo su",
+          "description": "Ranga Root Access w dowolnym boju",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "full_stack",
+          "title": "Full Stack",
+          "description": "Ranga Exploit Dev we wszystkich bojach rankingowych",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "snapshot",
+          "title": "Snapshot",
+          "description": "Pierwsze zdjęcie postępu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "git_diff",
+          "title": "git diff",
+          "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
+          "earned_at": null,
+          "progress": 0.0
+        }
+      ]
+    },
+    {
+      "name": "rangi: awans, sudo i Full Stack",
+      "args": {
+        "sessions": [],
+        "beaten_records": [],
+        "rank_events": {
+          "bench_press": [
+            {
+              "tier": 3,
+              "date": "2026-01-05"
+            },
+            {
+              "tier": 5,
+              "date": "2026-04-06"
+            }
+          ],
+          "pull_up": [
+            {
+              "tier": 3,
+              "date": "2026-02-01"
+            }
+          ],
+          "dip": [
+            {
+              "tier": 4,
+              "date": "2026-01-20"
+            }
+          ],
+          "concentration_curl": [
+            {
+              "tier": 2,
+              "date": "2026-01-03"
+            },
+            {
+              "tier": 3,
+              "date": "2026-05-01"
+            }
+          ]
+        },
+        "photos": []
+      },
+      "expected": [
+        {
+          "slug": "first_blood",
+          "title": "First Blood",
+          "description": "Pierwszy trening",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "buffer_overflow",
+          "title": "Buffer Overflow",
+          "description": "Pierwszy pobity rekord",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "exploit_chain",
+          "title": "Exploit Chain",
+          "description": "5 serii z nowym rekordem na jednym treningu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "brute_force",
+          "title": "Brute Force",
+          "description": "100 ciężkich serii w miesiącu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ddos",
+          "title": "DDoS",
+          "description": "20 ton w jednym tygodniu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "uptime_30d",
+          "title": "Uptime 30d",
+          "description": "30 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "uptime_180d",
+          "title": "Uptime 180d",
+          "description": "180 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "privilege_escalation",
+          "title": "Privilege Escalation",
+          "description": "Pierwszy awans rangi",
+          "earned_at": "2026-04-06",
+          "progress": 1.0
+        },
+        {
+          "slug": "sudo",
+          "title": "sudo su",
+          "description": "Ranga Root Access w dowolnym boju",
+          "earned_at": "2026-04-06",
+          "progress": 1.0
+        },
+        {
+          "slug": "full_stack",
+          "title": "Full Stack",
+          "description": "Ranga Exploit Dev we wszystkich bojach rankingowych",
+          "earned_at": "2026-05-01",
+          "progress": 1.0
+        },
+        {
+          "slug": "snapshot",
+          "title": "Snapshot",
+          "description": "Pierwsze zdjęcie postępu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "git_diff",
+          "title": "git diff",
+          "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
+          "earned_at": null,
+          "progress": 0.0
+        }
+      ]
+    },
+    {
+      "name": "rangi: Full Stack 3 z 4",
+      "args": {
+        "sessions": [],
+        "beaten_records": [],
+        "rank_events": {
+          "bench_press": [
+            {
+              "tier": 4,
+              "date": "2026-01-05"
+            }
+          ],
+          "pull_up": [
+            {
+              "tier": 3,
+              "date": "2026-01-05"
+            }
+          ],
+          "dip": [
+            {
+              "tier": 3,
+              "date": "2026-01-05"
+            }
+          ]
+        },
+        "photos": []
+      },
+      "expected": [
+        {
+          "slug": "first_blood",
+          "title": "First Blood",
+          "description": "Pierwszy trening",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "buffer_overflow",
+          "title": "Buffer Overflow",
+          "description": "Pierwszy pobity rekord",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "exploit_chain",
+          "title": "Exploit Chain",
+          "description": "5 serii z nowym rekordem na jednym treningu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "brute_force",
+          "title": "Brute Force",
+          "description": "100 ciężkich serii w miesiącu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ddos",
+          "title": "DDoS",
+          "description": "20 ton w jednym tygodniu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "uptime_30d",
+          "title": "Uptime 30d",
+          "description": "30 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "uptime_180d",
+          "title": "Uptime 180d",
+          "description": "180 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "privilege_escalation",
+          "title": "Privilege Escalation",
+          "description": "Pierwszy awans rangi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "sudo",
+          "title": "sudo su",
+          "description": "Ranga Root Access w dowolnym boju",
+          "earned_at": null,
+          "progress": 0.8
+        },
+        {
+          "slug": "full_stack",
+          "title": "Full Stack",
+          "description": "Ranga Exploit Dev we wszystkich bojach rankingowych",
+          "earned_at": null,
+          "progress": 0.75
+        },
+        {
+          "slug": "snapshot",
+          "title": "Snapshot",
+          "description": "Pierwsze zdjęcie postępu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "git_diff",
+          "title": "git diff",
+          "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
+          "earned_at": null,
+          "progress": 0.0
+        }
+      ]
+    },
+    {
+      "name": "zdjęcia: 12 tygodni tylko w tej samej pozie",
+      "args": {
+        "sessions": [],
+        "beaten_records": [],
+        "rank_events": {},
+        "photos": [
+          {
+            "pose": "front",
+            "date": "2026-01-01"
+          },
+          {
+            "pose": "side",
+            "date": "2026-03-20"
+          },
+          {
+            "pose": "front",
+            "date": "2026-03-25"
+          },
+          {
+            "pose": "front",
+            "date": "2026-03-26"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "slug": "first_blood",
+          "title": "First Blood",
+          "description": "Pierwszy trening",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "buffer_overflow",
+          "title": "Buffer Overflow",
+          "description": "Pierwszy pobity rekord",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "exploit_chain",
+          "title": "Exploit Chain",
+          "description": "5 serii z nowym rekordem na jednym treningu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "brute_force",
+          "title": "Brute Force",
+          "description": "100 ciężkich serii w miesiącu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ddos",
+          "title": "DDoS",
+          "description": "20 ton w jednym tygodniu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "uptime_30d",
+          "title": "Uptime 30d",
+          "description": "30 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "uptime_180d",
+          "title": "Uptime 180d",
+          "description": "180 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "privilege_escalation",
+          "title": "Privilege Escalation",
+          "description": "Pierwszy awans rangi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "sudo",
+          "title": "sudo su",
+          "description": "Ranga Root Access w dowolnym boju",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "full_stack",
+          "title": "Full Stack",
+          "description": "Ranga Exploit Dev we wszystkich bojach rankingowych",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "snapshot",
+          "title": "Snapshot",
+          "description": "Pierwsze zdjęcie postępu",
+          "earned_at": "2026-01-01",
+          "progress": 1.0
+        },
+        {
+          "slug": "git_diff",
+          "title": "git diff",
+          "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
+          "earned_at": "2026-03-26",
+          "progress": 1.0
+        }
+      ]
+    }
+  ],
+  "photo_reminders": [
+    {
+      "name": "front niedawno, side 19 dni, back nigdy",
+      "args": {
+        "photos": [
+          {
+            "id": "p1",
+            "pose": "front",
+            "date": "2026-08-01"
+          },
+          {
+            "id": "p2",
+            "pose": "front",
+            "date": "2026-09-20"
+          },
+          {
+            "id": "p3",
+            "pose": "side",
+            "date": "2026-10-01"
+          },
+          {
+            "id": "p4",
+            "pose": "front",
+            "date": "2026-10-15"
+          }
+        ],
+        "today": "2026-10-20"
+      },
+      "expected": [
+        {
+          "pose": "front",
+          "last_taken": "2026-10-15",
+          "days_since": 5,
+          "due": false
+        },
+        {
+          "pose": "side",
+          "last_taken": "2026-10-01",
+          "days_since": 19,
+          "due": false
+        },
+        {
+          "pose": "back",
+          "last_taken": null,
+          "days_since": null,
+          "due": true
+        }
+      ]
+    },
+    {
+      "name": "dokładnie 28 dni = pora",
+      "args": {
+        "photos": [
+          {
+            "id": "p1",
+            "pose": "front",
+            "date": "2026-08-01"
+          },
+          {
+            "id": "p2",
+            "pose": "front",
+            "date": "2026-09-20"
+          },
+          {
+            "id": "p3",
+            "pose": "side",
+            "date": "2026-10-01"
+          },
+          {
+            "id": "p4",
+            "pose": "front",
+            "date": "2026-10-15"
+          }
+        ],
+        "today": "2026-10-29"
+      },
+      "expected": [
+        {
+          "pose": "front",
+          "last_taken": "2026-10-15",
+          "days_since": 14,
+          "due": false
+        },
+        {
+          "pose": "side",
+          "last_taken": "2026-10-01",
+          "days_since": 28,
+          "due": true
+        },
+        {
+          "pose": "back",
+          "last_taken": null,
+          "days_since": null,
+          "due": true
+        }
+      ]
+    }
+  ],
+  "compare_pair": [
+    {
+      "name": "domyślnie pierwsze i ostatnie",
+      "args": {
+        "photos": [
+          {
+            "id": "p1",
+            "pose": "front",
+            "date": "2026-08-01"
+          },
+          {
+            "id": "p2",
+            "pose": "front",
+            "date": "2026-09-20"
+          },
+          {
+            "id": "p3",
+            "pose": "side",
+            "date": "2026-10-01"
+          },
+          {
+            "id": "p4",
+            "pose": "front",
+            "date": "2026-10-15"
+          }
+        ],
+        "pose": "front"
+      },
+      "expected": {
+        "before_id": "p1",
+        "after_id": "p4",
+        "days_between": 75
+      }
+    },
+    {
+      "name": "najbliższe datom",
+      "args": {
+        "photos": [
+          {
+            "id": "p1",
+            "pose": "front",
+            "date": "2026-08-01"
+          },
+          {
+            "id": "p2",
+            "pose": "front",
+            "date": "2026-09-20"
+          },
+          {
+            "id": "p3",
+            "pose": "side",
+            "date": "2026-10-01"
+          },
+          {
+            "id": "p4",
+            "pose": "front",
+            "date": "2026-10-15"
+          }
+        ],
+        "pose": "front",
+        "before": "2026-09-01",
+        "after": "2026-10-10"
+      },
+      "expected": {
+        "before_id": "p2",
+        "after_id": "p4",
+        "days_between": 25
+      }
+    },
+    {
+      "name": "daty odwrotnie: zamiana kolejności",
+      "args": {
+        "photos": [
+          {
+            "id": "p1",
+            "pose": "front",
+            "date": "2026-08-01"
+          },
+          {
+            "id": "p2",
+            "pose": "front",
+            "date": "2026-09-20"
+          },
+          {
+            "id": "p3",
+            "pose": "side",
+            "date": "2026-10-01"
+          },
+          {
+            "id": "p4",
+            "pose": "front",
+            "date": "2026-10-15"
+          }
+        ],
+        "pose": "front",
+        "before": "2026-10-20",
+        "after": "2026-08-01"
+      },
+      "expected": {
+        "before_id": "p1",
+        "after_id": "p4",
+        "days_between": 75
+      }
+    },
+    {
+      "name": "obie daty wskazują to samo zdjęcie",
+      "args": {
+        "photos": [
+          {
+            "id": "p1",
+            "pose": "front",
+            "date": "2026-08-01"
+          },
+          {
+            "id": "p2",
+            "pose": "front",
+            "date": "2026-09-20"
+          },
+          {
+            "id": "p3",
+            "pose": "side",
+            "date": "2026-10-01"
+          },
+          {
+            "id": "p4",
+            "pose": "front",
+            "date": "2026-10-15"
+          }
+        ],
+        "pose": "front",
+        "before": "2026-09-19",
+        "after": "2026-09-21"
+      },
+      "expected": null
+    },
+    {
+      "name": "za mało zdjęć w pozie",
+      "args": {
+        "photos": [
+          {
+            "id": "p1",
+            "pose": "front",
+            "date": "2026-08-01"
+          },
+          {
+            "id": "p2",
+            "pose": "front",
+            "date": "2026-09-20"
+          },
+          {
+            "id": "p3",
+            "pose": "side",
+            "date": "2026-10-01"
+          },
+          {
+            "id": "p4",
+            "pose": "front",
+            "date": "2026-10-15"
+          }
+        ],
+        "pose": "side"
+      },
+      "expected": null
+    }
   ]
 }

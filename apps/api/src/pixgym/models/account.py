@@ -1,4 +1,5 @@
 import enum
+import json
 import uuid
 from datetime import datetime
 from decimal import Decimal
@@ -14,6 +15,7 @@ from sqlalchemy import (
     SmallInteger,
     String,
     Text,
+    text,
     true,
 )
 from sqlalchemy.dialects.postgresql import CITEXT, JSONB
@@ -81,7 +83,7 @@ class UserSettings(Versioned, Base):
     e1rm_max_reps: Mapped[int] = mapped_column(SmallInteger, server_default="12")
     bar_weight_kg: Mapped[Decimal] = mapped_column(Numeric(4, 2), server_default="20")
     plate_inventory: Mapped[dict[str, Any]] = mapped_column(
-        JSONB, default=lambda: dict(DEFAULT_PLATES)
+        JSONB, server_default=text(f"'{json.dumps(DEFAULT_PLATES)}'::jsonb")
     )
     default_rest_s: Mapped[int] = mapped_column(SmallInteger, server_default="120")
     # Moduł sylwetki (dane o zdrowiu) działa dopiero po wyrażeniu zgody.
