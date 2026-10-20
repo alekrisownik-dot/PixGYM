@@ -3,7 +3,8 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
 ARG INSTALL_DEV=false
 
-RUN useradd --uid 1000 --create-home app
+RUN useradd --uid 1000 --create-home app \
+    && mkdir -p /data/photos && chown app:app /data/photos && chmod 700 /data/photos
 WORKDIR /app
 
 COPY pyproject.toml ./

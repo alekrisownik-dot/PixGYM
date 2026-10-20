@@ -7,7 +7,7 @@ from pixgym.models.program import (
     ProgramVersion,
     ProgressionRule,
 )
-from pixgym.models.progress import BodyMeasurement, PersonalRecord
+from pixgym.models.progress import BodyMeasurement, PersonalRecord, ProgressPhoto
 from pixgym.models.system import AuditLog, DataJob, SyncConflict, SyncOp
 from pixgym.models.workout import SessionExercise, WorkoutSession, WorkoutSet
 
@@ -28,6 +28,7 @@ __all__ = [
     "ProgramExercise",
     "ProgramVersion",
     "ProgressionRule",
+    "ProgressPhoto",
     "RecoveryCode",
     "RefreshToken",
     "SessionExercise",

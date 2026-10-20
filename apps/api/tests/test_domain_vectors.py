@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 
-from pixgym.domain import e1rm, plates, records, volume
+from pixgym.domain import e1rm, plates, ranks, records, volume
 from pixgym.domain import progression as pg
 from pixgym.seed.programs_data import PROGRESSION_RULES
 
@@ -23,6 +23,10 @@ def _vectors_path() -> Path:
 
 VECTORS = json.loads(_vectors_path().read_text())
 RULES = VECTORS["rules"]
+
+
+def _maybe(x: Any) -> Any:
+    return asdict(x) if x is not None else None
 
 
 def _perf(d: dict[str, Any]) -> pg.Performance:
@@ -95,6 +99,12 @@ DISPATCH = {
     "training_max": lambda a: pg.training_max(RULES[a["rule"]], a["e1rm_kg"]),
     "wendler_sets": lambda a: _targets(pg.wendler_sets(RULES[a["rule"]], a["tm_kg"], a["week"])),
     "wendler_next_tm": lambda a: pg.wendler_next_tm(RULES[a["rule"]], a["tm_kg"], a["is_lower"]),
+    "rank_table": lambda a: ranks.rank_table(),
+    "rank_for": lambda a: _maybe(
+        ranks.rank_for(a["lift"], a["e1rm_kg"], a["bodyweight_kg"], a["sex"])
+    ),
+    "dots": lambda a: ranks.dots(**a),
+    "rank_positions": lambda a: [asdict(x) for x in ranks.rank_positions(a["entries"])],
     "nsuns_next_tm": lambda a: pg.nsuns_next_tm(
         RULES[a["rule"]], a["tm_kg"], a["amrap_reps"], a["is_lower"]
     ),

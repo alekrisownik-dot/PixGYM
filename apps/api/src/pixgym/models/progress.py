@@ -8,6 +8,7 @@ from sqlalchemy import (
     ForeignKey,
     ForeignKeyConstraint,
     Index,
+    Integer,
     Numeric,
     SmallInteger,
     Text,
@@ -88,4 +89,36 @@ class BodyMeasurement(UUIDPk, Versioned, SoftDelete, Base):
     arm_cm: Mapped[Decimal | None] = mapped_column(Numeric(4, 1))
     thigh_cm: Mapped[Decimal | None] = mapped_column(Numeric(4, 1))
     hip_cm: Mapped[Decimal | None] = mapped_column(Numeric(4, 1))
+    notes: Mapped[str | None] = mapped_column(Text)
+
+
+class PhotoPose(enum.StrEnum):
+    front = "front"
+    side = "side"
+    back = "back"
+    other = "other"
+
+
+class ProgressPhoto(UUIDPk, Versioned, SoftDelete, Base):
+    """Zdjęcie sylwetki. Plik leży zaszyfrowany poza bazą (services/photos.py).
+
+    Dane o zdrowiu: dodanie wymaga user_settings.body_consent_at. Po usunięciu plik
+    znika od razu, wiersz zostaje jako znacznik dla synchronizacji.
+    """
+
+    __tablename__ = "progress_photos"
+    __table_args__ = (
+        CheckConstraint("width > 0 AND height > 0", name="dimensions"),
+        Index(None, "user_id", "pose", "taken_at"),
+        Index(None, "user_id", "server_version"),
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    taken_at: Mapped[datetime]
+    pose: Mapped[PhotoPose] = mapped_column(
+        str_enum(PhotoPose), server_default=PhotoPose.front.value
+    )
+    width: Mapped[int] = mapped_column(SmallInteger)
+    height: Mapped[int] = mapped_column(SmallInteger)
+    size_bytes: Mapped[int] = mapped_column(Integer)
     notes: Mapped[str | None] = mapped_column(Text)

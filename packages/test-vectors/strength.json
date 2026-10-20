@@ -2889,5 +2889,436 @@
         }
       ]
     }
+  ],
+  "rank_table": [
+    {
+      "name": "konfiguracja rang",
+      "args": {},
+      "expected": [
+        {
+          "slug": "bench_press",
+          "thresholds_male": [
+            0.5,
+            0.75,
+            1.0,
+            1.25,
+            1.5,
+            1.75,
+            2.0
+          ],
+          "thresholds_female": [
+            0.33,
+            0.49,
+            0.65,
+            0.81,
+            0.98,
+            1.14,
+            1.3
+          ],
+          "titles": [
+            "Script Kiddie",
+            "Packet Sniffer",
+            "Firewall Breaker",
+            "Exploit Dev",
+            "Black Hat",
+            "Root Access",
+            "Zero-Day",
+            "Kernel Panic"
+          ]
+        },
+        {
+          "slug": "pull_up",
+          "thresholds_male": [
+            1.0,
+            1.15,
+            1.3,
+            1.45,
+            1.6,
+            1.8,
+            2.0
+          ],
+          "thresholds_female": [
+            1.0,
+            1.09,
+            1.18,
+            1.27,
+            1.36,
+            1.48,
+            1.6
+          ],
+          "titles": [
+            "Script Kiddie",
+            "Packet Sniffer",
+            "Firewall Breaker",
+            "Exploit Dev",
+            "Black Hat",
+            "Root Access",
+            "Zero-Day",
+            "Kernel Panic"
+          ]
+        },
+        {
+          "slug": "dip",
+          "thresholds_male": [
+            1.0,
+            1.2,
+            1.4,
+            1.6,
+            1.8,
+            2.0,
+            2.3
+          ],
+          "thresholds_female": [
+            1.0,
+            1.12,
+            1.24,
+            1.36,
+            1.48,
+            1.6,
+            1.78
+          ],
+          "titles": [
+            "Script Kiddie",
+            "Packet Sniffer",
+            "Firewall Breaker",
+            "Exploit Dev",
+            "Black Hat",
+            "Root Access",
+            "Zero-Day",
+            "Kernel Panic"
+          ]
+        },
+        {
+          "slug": "concentration_curl",
+          "thresholds_male": [
+            0.1,
+            0.15,
+            0.2,
+            0.27,
+            0.35,
+            0.45,
+            0.55
+          ],
+          "thresholds_female": [
+            0.07,
+            0.1,
+            0.13,
+            0.18,
+            0.23,
+            0.29,
+            0.36
+          ],
+          "titles": [
+            "Script Kiddie",
+            "Packet Sniffer",
+            "Firewall Breaker",
+            "Exploit Dev",
+            "Black Hat",
+            "Root Access",
+            "Zero-Day",
+            "Kernel Panic"
+          ]
+        }
+      ]
+    }
+  ],
+  "rank_for": [
+    {
+      "name": "wyciskanie 107.8 przy 82.4: Black Hat",
+      "args": {
+        "lift": "bench_press",
+        "e1rm_kg": 107.8,
+        "bodyweight_kg": 82.4,
+        "sex": "male"
+      },
+      "expected": {
+        "tier": 4,
+        "title": "Black Hat",
+        "ratio": 1.31,
+        "next_title": "Root Access",
+        "next_at_kg": 123.6,
+        "progress": 0.23
+      }
+    },
+    {
+      "name": "dokładnie na progu",
+      "args": {
+        "lift": "bench_press",
+        "e1rm_kg": 100,
+        "bodyweight_kg": 80,
+        "sex": "male"
+      },
+      "expected": {
+        "tier": 4,
+        "title": "Black Hat",
+        "ratio": 1.25,
+        "next_title": "Root Access",
+        "next_at_kg": 120.0,
+        "progress": 0.0
+      }
+    },
+    {
+      "name": "1 g pod progiem",
+      "args": {
+        "lift": "bench_press",
+        "e1rm_kg": 99.99,
+        "bodyweight_kg": 80,
+        "sex": "male"
+      },
+      "expected": {
+        "tier": 3,
+        "title": "Exploit Dev",
+        "ratio": 1.25,
+        "next_title": "Black Hat",
+        "next_at_kg": 100.0,
+        "progress": 0.99
+      }
+    },
+    {
+      "name": "najwyższa ranga",
+      "args": {
+        "lift": "bench_press",
+        "e1rm_kg": 170,
+        "bodyweight_kg": 80,
+        "sex": "male"
+      },
+      "expected": {
+        "tier": 7,
+        "title": "Kernel Panic",
+        "ratio": 2.13,
+        "next_title": null,
+        "next_at_kg": null,
+        "progress": 1.0
+      }
+    },
+    {
+      "name": "kobieta: progi niższe",
+      "args": {
+        "lift": "bench_press",
+        "e1rm_kg": 60,
+        "bodyweight_kg": 62,
+        "sex": "female"
+      },
+      "expected": {
+        "tier": 4,
+        "title": "Black Hat",
+        "ratio": 0.97,
+        "next_title": "Root Access",
+        "next_at_kg": 60.76,
+        "progress": 0.92
+      }
+    },
+    {
+      "name": "płeć nieznana = progi męskie",
+      "args": {
+        "lift": "bench_press",
+        "e1rm_kg": 30,
+        "bodyweight_kg": 82.4,
+        "sex": null
+      },
+      "expected": {
+        "tier": 0,
+        "title": "Script Kiddie",
+        "ratio": 0.36,
+        "next_title": "Packet Sniffer",
+        "next_at_kg": 41.2,
+        "progress": 0.72
+      }
+    },
+    {
+      "name": "podciąganie z obciążeniem",
+      "args": {
+        "lift": "pull_up",
+        "e1rm_kg": 120,
+        "bodyweight_kg": 80,
+        "sex": "male"
+      },
+      "expected": {
+        "tier": 4,
+        "title": "Black Hat",
+        "ratio": 1.5,
+        "next_title": "Root Access",
+        "next_at_kg": 128.0,
+        "progress": 0.33
+      }
+    },
+    {
+      "name": "podciąganie z asystą",
+      "args": {
+        "lift": "pull_up",
+        "e1rm_kg": 70,
+        "bodyweight_kg": 80,
+        "sex": "male"
+      },
+      "expected": {
+        "tier": 0,
+        "title": "Script Kiddie",
+        "ratio": 0.88,
+        "next_title": "Packet Sniffer",
+        "next_at_kg": 80.0,
+        "progress": 0.87
+      }
+    },
+    {
+      "name": "dipy kobieta",
+      "args": {
+        "lift": "dip",
+        "e1rm_kg": 100,
+        "bodyweight_kg": 80,
+        "sex": "female"
+      },
+      "expected": {
+        "tier": 3,
+        "title": "Exploit Dev",
+        "ratio": 1.25,
+        "next_title": "Black Hat",
+        "next_at_kg": 108.8,
+        "progress": 0.08
+      }
+    },
+    {
+      "name": "uginanie 22 kg",
+      "args": {
+        "lift": "concentration_curl",
+        "e1rm_kg": 22,
+        "bodyweight_kg": 82.4,
+        "sex": "male"
+      },
+      "expected": {
+        "tier": 3,
+        "title": "Exploit Dev",
+        "ratio": 0.27,
+        "next_title": "Black Hat",
+        "next_at_kg": 22.25,
+        "progress": 0.95
+      }
+    },
+    {
+      "name": "brak masy ciała",
+      "args": {
+        "lift": "bench_press",
+        "e1rm_kg": 100,
+        "bodyweight_kg": null,
+        "sex": "male"
+      },
+      "expected": null
+    },
+    {
+      "name": "brak wyniku",
+      "args": {
+        "lift": "dip",
+        "e1rm_kg": null,
+        "bodyweight_kg": 80,
+        "sex": "male"
+      },
+      "expected": null
+    }
+  ],
+  "dots": [
+    {
+      "name": "mężczyzna 82.4 kg",
+      "args": {
+        "lift_kg": 107.8,
+        "bodyweight_kg": 82.4,
+        "sex": "male"
+      },
+      "expected": 73.07
+    },
+    {
+      "name": "kobieta 60 kg",
+      "args": {
+        "lift_kg": 60,
+        "bodyweight_kg": 60,
+        "sex": "female"
+      },
+      "expected": 66.51
+    },
+    {
+      "name": "masa ponad zakres: 210 kg",
+      "args": {
+        "lift_kg": 100,
+        "bodyweight_kg": 250,
+        "sex": "male"
+      },
+      "expected": 49.56
+    },
+    {
+      "name": "masa poniżej zakresu: 40 kg",
+      "args": {
+        "lift_kg": 50,
+        "bodyweight_kg": 35,
+        "sex": "female"
+      },
+      "expected": 74.24
+    },
+    {
+      "name": "brak płci",
+      "args": {
+        "lift_kg": 100,
+        "bodyweight_kg": 80,
+        "sex": null
+      },
+      "expected": null
+    }
+  ],
+  "rank_positions": [
+    {
+      "name": "remis dzieli miejsce, brak wyniku pominięty",
+      "args": {
+        "entries": [
+          {
+            "id": "ala",
+            "value": 100,
+            "achieved_at": "2026-02-01T00:00:00Z"
+          },
+          {
+            "id": "bob",
+            "value": 110,
+            "achieved_at": "2026-03-01T00:00:00Z"
+          },
+          {
+            "id": "cyc",
+            "value": 100,
+            "achieved_at": "2026-01-01T00:00:00Z"
+          },
+          {
+            "id": "dan",
+            "value": null,
+            "achieved_at": "2026-01-01T00:00:00Z"
+          },
+          {
+            "id": "ewa",
+            "value": 90,
+            "achieved_at": "2026-01-01T00:00:00Z"
+          }
+        ]
+      },
+      "expected": [
+        {
+          "id": "bob",
+          "value": 110,
+          "achieved_at": "2026-03-01T00:00:00Z",
+          "position": 1
+        },
+        {
+          "id": "cyc",
+          "value": 100,
+          "achieved_at": "2026-01-01T00:00:00Z",
+          "position": 2
+        },
+        {
+          "id": "ala",
+          "value": 100,
+          "achieved_at": "2026-02-01T00:00:00Z",
+          "position": 2
+        },
+        {
+          "id": "ewa",
+          "value": 90,
+          "achieved_at": "2026-01-01T00:00:00Z",
+          "position": 4
+        }
+      ]
+    }
   ]
 }

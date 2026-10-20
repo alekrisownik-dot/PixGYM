@@ -36,6 +36,27 @@ Liczona w dwóch miejscach: w telefonie (offline, od razu po zapisaniu serii) i 
   rozgrzewka gryf × 10, 40/60/80%, od 100 kg dodatkowo 90% × 1.
 - **Podpowiedzi ciężaru:** podwójna progresja, liniowa z deloadem, RPE, 5/3/1, nSuns, GZCLP.
 
+### Rangi i ranking
+
+Cztery boje rankingowe: wyciskanie leżąc, podciąganie, pompki na poręczach, uginanie
+w koncentracji (`pixgym.domain.ranks.RANKED_LIFTS`, lustro w `ranks.ts`). Ranga zależy od
+szacowanego 1RM względem masy ciała (dla kobiet niższe progi):
+
+Script Kiddie → Packet Sniffer → Firewall Breaker → Exploit Dev → Black Hat →
+Root Access → Zero-Day → Kernel Panic
+
+Ranking znajomych ma dwie zakładki: kg i DOTS. Widzi go i jest w nim tylko ten, kto włączy
+`user_settings.leaderboard_opt_in`. Jedynym wyjątkiem od RLS jest funkcja
+`leaderboard_entries` (SECURITY DEFINER), która zwraca tylko najlepszy szacowany 1RM.
+Masy ciała API nie pokazuje innym, choć da się ją w przybliżeniu wyliczyć z DOTS.
+
+### Zdjęcia postępu
+
+`pixgym.services.photos`: przy zapisie usuwane są wszystkie metadane (także GPS z telefonu),
+zdjęcie jest obracane według EXIF, zmniejszane do 2048 px, a pliki szyfrowane AES-256-GCM
+(`PIXGYM_PHOTO_KEY`, wolumen `photos`). Dostęp ma tylko właściciel. Wymaga zgody na moduł
+sylwetki. **Utrata klucza oznacza utratę zdjęć**, więc klucz trzeba trzymać w backupie osobno.
+
 Po zapisie serii serwer woła `pixgym.services.strength.refresh_exercise`, które uzupełnia
 `effective_kg`, `e1rm_kg` i historię rekordów. Zapisuje tylko zmiany, więc nie podbija
 `server_version` bez potrzeby.
@@ -62,14 +83,15 @@ docker-compose run --rm api alembic revision --autogenerate -m "opis"
 
 ```
 apps/api/
-  migrations/           0001 tabele, 0002 triggery i RLS, 0003 miękkie usuwanie rekordów
+  migrations/           0001 tabele, 0002 triggery i RLS, 0003 miękkie usuwanie rekordów,
+                        0004 ranking i zdjęcia postępu
   src/pixgym/
     core/               konfiguracja, UUIDv7
     db/                 baza modeli, sesja z kontekstem użytkownika, upsert
     domain/             logika siłowa (bez bazy)
     models/             SQLAlchemy
     seed/               katalog ćwiczeń i szablony planów (*_data.py)
-    services/           przeliczanie serii i rekordów w bazie
+    services/           przeliczanie serii i rekordów, ranking, zdjęcia
   tests/
 apps/web/src/domain/    ta sama logika w TypeScript
 packages/test-vectors/  wspólne przypadki testowe

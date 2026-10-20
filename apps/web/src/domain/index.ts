@@ -5,6 +5,7 @@
 export * from "./e1rm";
 export * from "./plates";
 export * from "./progression";
+export * from "./ranks";
 export * from "./records";
 export * from "./rounding";
 export * from "./volume";

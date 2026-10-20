@@ -30,9 +30,12 @@ services:
       PIXGYM_MIGRATIONS_DATABASE_URL: postgresql+psycopg://pixgym:${POSTGRES_PASSWORD}@db:5432/pixgym
       PIXGYM_APP_DB_PASSWORD: ${PIXGYM_APP_DB_PASSWORD}
       PIXGYM_REDIS_URL: redis://redis:6379/0
+      PIXGYM_PHOTO_KEY: ${PIXGYM_PHOTO_KEY:?ustaw w .env}
+      PIXGYM_PHOTO_DIR: /data/photos
     volumes:
       - ./apps/api:/app
       - ./packages:/packages:ro
+      - photos:/data/photos
     ports:
       - "127.0.0.1:8000:8000"
     depends_on:
@@ -45,3 +48,4 @@ services:
 volumes:
   pgdata:
   redisdata:
+  photos:

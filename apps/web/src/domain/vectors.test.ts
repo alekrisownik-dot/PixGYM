@@ -27,6 +27,10 @@ const dispatch: Record<string, (a: Args) => unknown> = {
   scheme_sets: (a) => d.schemeSets(a.scheme, a.tm_kg),
   gzclp_next: (a) => d.gzclpNext(R(a), a.state, a.is_lower, a.success, a.amrap_reps),
   gzclp_sets: (a) => d.gzclpSets(R(a), a.state),
+  rank_table: () => d.rankTable(),
+  rank_for: (a) => d.rankFor(a.lift, a.e1rm_kg, a.bodyweight_kg, a.sex),
+  dots: (a) => d.dots(a.lift_kg, a.bodyweight_kg, a.sex),
+  rank_positions: (a) => d.rankPositions(a.entries),
 };
 
 const groups = Object.entries(vectors).filter(([fn]) => fn !== "rules") as [
