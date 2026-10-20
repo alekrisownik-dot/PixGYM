@@ -11,6 +11,7 @@ import { PixelIcon, hasPixelIcon } from "../ui/pixel-icons";
 import { Sheet } from "../ui/sheet";
 import { GEAR, toggleGear, useGear } from "../ui/gear";
 import { setTheme, useTheme } from "../ui/theme";
+import { APP_BUILD, APP_VERSION } from "../ui/update";
 
 // Krótkie nazwy, żeby cztery boje zmieściły się w jednym rzędzie; pełna nazwa pod przełącznikiem.
 const LIFTS = [
@@ -384,6 +385,9 @@ export function MeScreen({ me, onChange, onLogout }: { me: Me; onChange: (m: Me)
           <Button variant="danger" onClick={logout}>
             Wyloguj
           </Button>
+          <p className="text-center font-mono text-[12px] text-muted">
+            PixGYM v{APP_VERSION} · build {APP_BUILD}
+          </p>
         </>
       )}
     </Screen>

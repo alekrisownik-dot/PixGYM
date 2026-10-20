@@ -18,6 +18,7 @@ import { IconCloudOff, IconRefresh } from "../ui/icons";
 import { PixelIcon, type PixelIconName } from "../ui/pixel-icons";
 import { Button, Loading, changes } from "../ui/kit";
 import { Celebrations } from "../ui/celebrate";
+import { UpdateBar } from "../ui/update";
 import { Toasts } from "../ui/toast";
 import { href, useRoute, type Route } from "./router";
 
@@ -128,6 +129,7 @@ export function App() {
       <Toasts />
       <Celebrations />
       <SyncBar />
+      <UpdateBar />
       {/* Klucz „fresh”: nowy dzień albo powrót po przerwie wczytuje ekran od nowa (trening zostaje). */}
       {route.name === "today" && <Today key={fresh} me={me} />}
       {route.name === "history" && <History key={fresh} />}

@@ -75,7 +75,7 @@ def _mount_web(web_dir: Path) -> None:
         file = (web_dir / path).resolve()
         if path and file.is_file() and file.is_relative_to(web_dir.resolve()):
             # Service worker i manifest muszą być zawsze świeże, inaczej aktualizacja nie dojdzie.
-            no_cache = file.name in {"sw.js", "manifest.webmanifest", "index.html"}
+            no_cache = file.name in {"sw.js", "manifest.webmanifest", "index.html", "version.json"}
             return FileResponse(file, headers={"cache-control": "no-cache"} if no_cache else None)
         if not index.is_file():
             raise HTTPException(404, "Front nie jest zbudowany: cd apps/web && npm run build")

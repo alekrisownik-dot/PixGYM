@@ -1,6 +1,6 @@
 // Service worker: aplikacja otwiera się bez sieci (powłoka z pamięci). Dane i kolejkę
 // zmian offline trzyma sama strona (IndexedDB, src/offline); tu tylko pliki i zdjęcia maszyn.
-const CACHE = "pixgym-shell-v2";
+const CACHE = "pixgym-shell-v3";
 const PHOTOS = "pixgym-photos-v1";
 const SHELL = ["/", "/manifest.webmanifest", "/icon.svg", "/icon-192.png"];
 
