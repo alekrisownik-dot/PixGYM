@@ -103,6 +103,9 @@ class ProgramDay(UUIDPk, Versioned, Base):
     __table_args__ = (
         UniqueConstraint("program_version_id", "day_index"),
         CheckConstraint("weekdays <@ ARRAY[0, 1, 2, 3, 4, 5, 6]::smallint[]", name="weekdays"),
+        CheckConstraint(
+            "icon IN ('chest', 'back', 'shoulders', 'arms', 'legs', 'core', 'full')", name="icon"
+        ),
     )
 
     program_version_id: Mapped[uuid.UUID] = mapped_column(
@@ -115,6 +118,8 @@ class ProgramDay(UUIDPk, Versioned, Base):
     weekdays: Mapped[list[int]] = mapped_column(
         ARRAY(SmallInteger), server_default=text("'{}'::smallint[]")
     )
+    # Ikonka partii na kole planu. Pusto = aplikacja dobiera ją z ćwiczeń.
+    icon: Mapped[str | None] = mapped_column(String(12))
 
 
 class ProgramExercise(UUIDPk, Versioned, Base):

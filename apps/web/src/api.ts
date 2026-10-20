@@ -4,6 +4,8 @@
  * Po 401 próbujemy raz odświeżyć sesję; jeśli się nie da, aplikacja wraca do logowania.
  */
 
+import type { DayIcon } from "./ui/muscles";
+
 export interface Me {
   id: string;
   email: string;
@@ -130,6 +132,8 @@ export interface PlanDay {
   day_index?: number;
   name: string;
   weekdays: number[];
+  /** Ikonka na kole planu; null = dobierana z ćwiczeń. */
+  icon?: DayIcon | null;
   blocks: PlanBlock[];
 }
 

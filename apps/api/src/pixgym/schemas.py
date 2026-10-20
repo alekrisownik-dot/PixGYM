@@ -272,9 +272,13 @@ class PlanBlockOut(BlockOut):
     tracking: str
 
 
+DayIcon = Literal["chest", "back", "shoulders", "arms", "legs", "core", "full"]
+
+
 class PlanDayIn(BaseModel):
     name: str = Field(min_length=1, max_length=60)
     weekdays: list[int] = Field(default_factory=list, max_length=7)
+    icon: DayIcon | None = None
     blocks: list[BlockIn] = Field(default_factory=list, max_length=30)
 
     @model_validator(mode="after")
@@ -289,6 +293,7 @@ class PlanDayOut(BaseModel):
     day_index: int
     name: str
     weekdays: list[int]
+    icon: DayIcon | None
     blocks: list[PlanBlockOut]
 
 

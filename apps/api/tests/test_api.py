@@ -595,6 +595,24 @@ def test_plans_are_private(new_client, owner_engine, admin):
     assert bob.delete(f"/api/v1/programs/{plan['id']}").status_code == 404
 
 
+def test_plan_day_icon_saved_and_copied(new_client, admin):
+    api = new_client()
+    login(api, admin)
+    days = [{"name": "A", "icon": "chest", "blocks": []}, {"name": "B", "blocks": []}]
+    plan = api.post("/api/v1/programs", json={"name": "Ikonki", "days": days}).json()
+    assert [d["icon"] for d in plan["days"]] == ["chest", None]
+
+    days[1]["icon"] = "arms"
+    plan = api.put(f"/api/v1/programs/{plan['id']}", json={"name": "Ikonki", "days": days}).json()
+    assert [d["icon"] for d in plan["days"]] == ["chest", "arms"]
+    copy = api.post(f"/api/v1/programs/{plan['id']}/copy").json()
+    assert [d["icon"] for d in copy["days"]] == ["chest", "arms"]
+
+    days[0]["icon"] = "biceps"
+    bad = api.post("/api/v1/programs", json={"name": "x", "days": days})
+    assert bad.status_code == 422
+
+
 def test_flexible_plan_counts_days_done_this_week(new_client, admin):
     api = new_client()
     login(api, admin)

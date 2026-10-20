@@ -126,6 +126,7 @@ def _days(conn: Connection, version_id: uuid.UUID) -> list[dict[str, Any]]:
             "day_index": d.day_index,
             "name": d.name,
             "weekdays": sorted(d.weekdays or []),
+            "icon": d.icon,
             "blocks": by_day[d.id],
         }
         for d in days
@@ -184,6 +185,7 @@ def _write_version(
                 day_index=day_index,
                 name=day["name"].strip(),
                 weekdays=sorted(set(day.get("weekdays") or [])),
+                icon=day.get("icon"),
             )
         )
         if day["blocks"]:

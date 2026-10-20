@@ -6,6 +6,8 @@ import { useLoad } from "../app/useLoad";
 import { cachedGet } from "../offline/sessions";
 import { Button, Card, ErrorText, Loading, Screen, Segmented, clock, SectionTitle } from "../ui/kit";
 import { ExerciseArt } from "../ui/exercise-art";
+import { DAY_ICONS, autoDayIcon, dayIconInfo, type DayIcon } from "../ui/muscles";
+import { PixelIcon } from "../ui/pixel-icons";
 import { ExercisePicker } from "./ExercisePicker";
 import { WEEKDAYS_LONG, WEEKDAYS_SHORT, blockText, schemeText } from "./plan-format";
 
@@ -139,6 +141,39 @@ const newBlock = (e: Exercise): PlanBlock => ({
   notes: null,
 });
 
+/** Ikonka dnia (na kole planu): „auto” dobiera ją z ćwiczeń. */
+function DayIconPicker({ value, auto, onChange }: { value: DayIcon | null; auto: DayIcon | null; onChange: (v: DayIcon | null) => void }) {
+  const shown = value ?? auto;
+  return (
+    <div className="grid gap-1.5">
+      <span className="font-mono text-xs font-semibold text-muted">ikonka na kole</span>
+      <div className="grid grid-cols-4 gap-1.5">
+        <button
+          onClick={() => onChange(null)}
+          className={`grid min-h-16 place-items-center content-center gap-1 rounded-xl border text-[11px] font-semibold ${value == null ? "border-accent bg-accent/15 text-accent" : "border-line text-muted"}`}
+          aria-pressed={value == null}
+        >
+          {auto ? <PixelIcon name={`m_${auto}`} size={26} accent={dayIconInfo(auto).color} className="text-fg" /> : <span className="font-mono text-lg">?</span>}
+          auto
+        </button>
+        {DAY_ICONS.map((d) => (
+          <button
+            key={d.key}
+            onClick={() => onChange(d.key)}
+            className={`grid min-h-16 place-items-center content-center gap-1 rounded-xl border text-[11px] font-semibold ${value === d.key ? "bg-surface-2" : "border-line text-muted"}`}
+            style={value === d.key ? { borderColor: d.color, color: d.color } : undefined}
+            aria-pressed={value === d.key}
+            aria-label={`Ikonka: ${d.name}${shown === d.key && value == null ? " (dobrana automatycznie)" : ""}`}
+          >
+            <PixelIcon name={`m_${d.key}`} size={26} accent={d.color} className="text-fg" />
+            {d.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const SCHEDULES = [
   ["weekdays", "Stałe dni"],
   ["flexible", "Elastycznie"],
@@ -151,6 +186,7 @@ const toPayload = (plan: Plan) => ({
   days: plan.days.map((d) => ({
     name: d.name,
     weekdays: d.weekdays,
+    icon: d.icon ?? null,
     blocks: d.blocks.map(({ id: _id, name: _n, tracking: _t, ...b }) => b),
   })),
 });
@@ -367,6 +403,11 @@ export function PlanEditor({ id }: { id: string }) {
                 maxLength={60}
                 aria-label="Nazwa treningu"
                 className="min-h-12 rounded-xl border border-line bg-bg px-3 text-lg font-semibold outline-none focus:border-accent"
+              />
+              <DayIconPicker
+                value={day.icon ?? null}
+                auto={autoDayIcon(day.blocks.map((b) => catalog.data?.find((e) => e.id === b.exercise_id)?.muscle))}
+                onChange={(icon) => updateDay({ icon })}
               />
               {flexible && plan.days.length > 1 && (
                 <div className="grid grid-cols-2 gap-2">

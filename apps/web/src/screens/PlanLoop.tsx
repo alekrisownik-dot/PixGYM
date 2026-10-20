@@ -5,12 +5,13 @@ import { href } from "../app/router";
 import { useLoad } from "../app/useLoad";
 import { assignDay, cachedGet, completeDay, deleteSession, loadSession } from "../offline/sessions";
 import { ExerciseArt } from "../ui/exercise-art";
+import { PixelIcon } from "../ui/pixel-icons";
 import { IconCheck, IconPlay } from "../ui/icons";
 import { Button, ErrorText } from "../ui/kit";
 import { Bit } from "../ui/mascot";
 import { quipOfDay } from "../ui/quips";
 import { getTheme } from "../ui/theme";
-import { muscleGroup } from "../ui/muscles";
+import { autoDayIcon, dayIconInfo, muscleGroup } from "../ui/muscles";
 import { Sheet } from "../ui/sheet";
 import { toast } from "../ui/toast";
 import { WEEKDAYS_SHORT, blockText, weekdayOf } from "./plan-format";
@@ -197,15 +198,8 @@ export function PlanLoop({
     const [x2, y2] = point(to);
     return `M ${x1.toFixed(1)} ${y1.toFixed(1)} A ${R} ${R} 0 ${to - from > 180 ? 1 : 0} 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`;
   };
-  // Kolor dnia: partia, która ma w nim najwięcej ćwiczeń.
-  const dayColor = (d: PlanDay) => {
-    const count = new Map<string, number>();
-    for (const b of d.blocks) {
-      const g = muscleGroup(byId.get(b.exercise_id)?.muscle);
-      if (g) count.set(g.color, (count.get(g.color) ?? 0) + 1);
-    }
-    return [...count.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "var(--color-line)";
-  };
+  // Ikonka dnia: wybrana w edytorze albo partia, która ma w nim najwięcej ćwiczeń.
+  const iconOf = (d: PlanDay) => d.icon ?? autoDayIcon(d.blocks.map((b) => byId.get(b.exercise_id)?.muscle));
   const groupsOf = (d: PlanDay) =>
     [...new Map(d.blocks.map((b) => muscleGroup(byId.get(b.exercise_id)?.muscle)).filter((g) => g != null).map((g) => [g!.name, g!])).values()];
   const ease = "duration-[900ms] ease-[cubic-bezier(.3,1.25,.4,1)]";
@@ -288,8 +282,8 @@ export function PlanLoop({
             const isDone = shown.includes(i);
             const isTop = i === anchor && !weekDone;
             const doneOn = when.get(i) ?? local.get(i)?.wd;
-            const first = d.blocks[0];
-            const color = dayColor(d);
+            const icon = iconOf(d);
+            const color = icon ? dayIconInfo(icon).color : "var(--color-line)";
             return (
               <button
                 key={i}
@@ -307,12 +301,16 @@ export function PlanLoop({
                     }`}
                     style={isDone ? undefined : { borderColor: isTop ? "var(--color-accent)" : color }}
                   >
-                    {isDone ? (
-                      <IconCheck size={node * 0.42} strokeWidth={3.5} />
+                    {icon ? (
+                      <PixelIcon name={`m_${icon}`} size={node * 0.58} accent={isDone ? "currentColor" : color} className={isDone ? "opacity-80" : "text-fg"} />
                     ) : (
-                      first && <ExerciseArt exercise={byId.get(first.exercise_id) ?? first} size={node * 0.5} className="!bg-transparent" />
+                      <PixelIcon name="dumbbell" size={node * 0.5} />
                     )}
-                    <span className={`max-w-full truncate px-1 font-mono font-bold leading-none ${node < 64 ? "text-[9.5px]" : "text-[11.5px]"}`}>{d.name}</span>
+                    {isDone && (
+                      <span className="absolute -top-1 -right-1 grid size-6 place-items-center rounded-full bg-bg text-accent ring-2 ring-accent">
+                        <IconCheck size={14} strokeWidth={4} />
+                      </span>
+                    )}
                     {isTop && <span className="absolute -top-3 rounded-full bg-accent px-2 py-0.5 font-mono text-[9.5px] font-bold text-accent-ink shadow">TERAZ</span>}
                     {isDone && doneOn != null && <span className="absolute -bottom-2.5 rounded-full bg-bg px-1.5 font-mono text-[10px] font-semibold text-accent ring-1 ring-accent/60">{WEEKDAYS_SHORT[doneOn]!.toLowerCase()}</span>}
                   </span>
@@ -333,7 +331,12 @@ export function PlanLoop({
         current && (
           <div className="card glow grid gap-3 p-4">
             <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
+              {iconOf(current) && (
+                <span className="grid size-14 shrink-0 place-items-center rounded-2xl border-2 bg-surface-2" style={{ borderColor: dayIconInfo(iconOf(current)!).color }}>
+                  <PixelIcon name={`m_${iconOf(current)!}`} size={36} accent={dayIconInfo(iconOf(current)!).color} className="text-fg" />
+                </span>
+              )}
+              <div className="min-w-0 flex-1">
                 <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-accent">
                   {stamping != null ? "zaliczone!" : picked != null ? "wybrany" : "teraz"}
                   {stamping == null && !currentDone && ` · ${todoCount > 1 ? `potem jeszcze ${todoCount - 1}` : "ostatni w tym tygodniu"}`}
