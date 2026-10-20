@@ -1,0 +1,2893 @@
+{
+  "rules": {
+    "double_progression": {
+      "increment_upper_kg": 2.5,
+      "increment_lower_kg": 5
+    },
+    "linear_progression": {
+      "increment_upper_kg": 2.5,
+      "increment_lower_kg": 5,
+      "fails_before_deload": 3,
+      "deload_pct": 0.1
+    },
+    "rpe_autoregulation": {
+      "round_to_kg": 2.5
+    },
+    "wendler_531": {
+      "tm_pct": 0.9,
+      "weeks": [
+        [
+          [
+            0.65,
+            5,
+            false
+          ],
+          [
+            0.75,
+            5,
+            false
+          ],
+          [
+            0.85,
+            5,
+            true
+          ]
+        ],
+        [
+          [
+            0.7,
+            3,
+            false
+          ],
+          [
+            0.8,
+            3,
+            false
+          ],
+          [
+            0.9,
+            3,
+            true
+          ]
+        ],
+        [
+          [
+            0.75,
+            5,
+            false
+          ],
+          [
+            0.85,
+            3,
+            false
+          ],
+          [
+            0.95,
+            1,
+            true
+          ]
+        ],
+        [
+          [
+            0.4,
+            5,
+            false
+          ],
+          [
+            0.5,
+            5,
+            false
+          ],
+          [
+            0.6,
+            5,
+            false
+          ]
+        ]
+      ],
+      "increment_upper_kg": 2.5,
+      "increment_lower_kg": 5
+    },
+    "gzclp_t1": {
+      "tier": 1,
+      "stages": [
+        [
+          5,
+          3
+        ],
+        [
+          6,
+          2
+        ],
+        [
+          10,
+          1
+        ]
+      ],
+      "increment_upper_kg": 2.5,
+      "increment_lower_kg": 5,
+      "reset_pct": 0.85
+    },
+    "gzclp_t2": {
+      "tier": 2,
+      "stages": [
+        [
+          3,
+          10
+        ],
+        [
+          3,
+          8
+        ],
+        [
+          3,
+          6
+        ]
+      ],
+      "increment_upper_kg": 2.5,
+      "increment_lower_kg": 5,
+      "reset_pct": 0.85
+    },
+    "gzclp_t3": {
+      "tier": 3,
+      "amrap_target": 25,
+      "increment_kg": 2.5
+    },
+    "nsuns": {
+      "tm_pct": 0.9,
+      "amrap_increments": [
+        {
+          "min_reps": 0,
+          "upper_kg": 0,
+          "lower_kg": 0
+        },
+        {
+          "min_reps": 2,
+          "upper_kg": 2.5,
+          "lower_kg": 5
+        },
+        {
+          "min_reps": 4,
+          "upper_kg": 2.5,
+          "lower_kg": 5
+        },
+        {
+          "min_reps": 6,
+          "upper_kg": 5,
+          "lower_kg": 7.5
+        }
+      ]
+    }
+  },
+  "estimate_1rm": [
+    {
+      "name": "epley 100x5",
+      "args": {
+        "weight": 100,
+        "reps": 5
+      },
+      "expected": 116.67
+    },
+    {
+      "name": "epley 1 powt. = ciężar",
+      "args": {
+        "weight": 142.5,
+        "reps": 1
+      },
+      "expected": 142.5
+    },
+    {
+      "name": "epley 82.5x8",
+      "args": {
+        "weight": 82.5,
+        "reps": 8
+      },
+      "expected": 104.5
+    },
+    {
+      "name": "epley 12 powt. (granica)",
+      "args": {
+        "weight": 60,
+        "reps": 12
+      },
+      "expected": 84.0
+    },
+    {
+      "name": "ponad 12 powt. = brak",
+      "args": {
+        "weight": 60,
+        "reps": 13
+      },
+      "expected": null
+    },
+    {
+      "name": "0 powt. = brak",
+      "args": {
+        "weight": 60,
+        "reps": 0
+      },
+      "expected": null
+    },
+    {
+      "name": "brak ciężaru",
+      "args": {
+        "weight": null,
+        "reps": 5
+      },
+      "expected": null
+    },
+    {
+      "name": "ciężar 0",
+      "args": {
+        "weight": 0,
+        "reps": 5
+      },
+      "expected": null
+    },
+    {
+      "name": "własny limit powt. 20",
+      "args": {
+        "weight": 40,
+        "reps": 15,
+        "max_reps": 20
+      },
+      "expected": 60.0
+    },
+    {
+      "name": "brzycki 100x5",
+      "args": {
+        "weight": 100,
+        "reps": 5,
+        "method": "brzycki"
+      },
+      "expected": 112.5
+    },
+    {
+      "name": "brzycki 10 powt.",
+      "args": {
+        "weight": 70,
+        "reps": 10,
+        "method": "brzycki"
+      },
+      "expected": 93.33
+    },
+    {
+      "name": "brzycki ponad 10 = brak",
+      "args": {
+        "weight": 70,
+        "reps": 11,
+        "method": "brzycki"
+      },
+      "expected": null
+    },
+    {
+      "name": "rpe 100x5@8 (7 RM)",
+      "args": {
+        "weight": 100,
+        "reps": 5,
+        "rpe": 8,
+        "method": "rpe"
+      },
+      "expected": 123.3
+    },
+    {
+      "name": "rpe połówka 100x5@8.5",
+      "args": {
+        "weight": 100,
+        "reps": 5,
+        "rpe": 8.5,
+        "method": "rpe"
+      },
+      "expected": 121.36
+    },
+    {
+      "name": "rpe z RIR 2",
+      "args": {
+        "weight": 100,
+        "reps": 5,
+        "rir": 2,
+        "method": "rpe"
+      },
+      "expected": 123.3
+    },
+    {
+      "name": "rpe 10 = tabela",
+      "args": {
+        "weight": 100,
+        "reps": 3,
+        "rpe": 10,
+        "method": "rpe"
+      },
+      "expected": 108.46
+    },
+    {
+      "name": "rpe bez wysiłku -> epley",
+      "args": {
+        "weight": 100,
+        "reps": 5,
+        "method": "rpe"
+      },
+      "expected": 116.67
+    },
+    {
+      "name": "rpe poniżej 6 -> epley",
+      "args": {
+        "weight": 100,
+        "reps": 5,
+        "rpe": 5,
+        "method": "rpe"
+      },
+      "expected": 116.67
+    },
+    {
+      "name": "rpe poza tabelą -> epley",
+      "args": {
+        "weight": 50,
+        "reps": 11,
+        "rpe": 7,
+        "method": "rpe"
+      },
+      "expected": 68.33
+    },
+    {
+      "name": "rpe przy epley ignorowane",
+      "args": {
+        "weight": 100,
+        "reps": 5,
+        "rpe": 8,
+        "method": "epley"
+      },
+      "expected": 116.67
+    }
+  ],
+  "effective_weight": [
+    {
+      "name": "sztanga",
+      "args": {
+        "tracking": "weight_reps",
+        "weight_kg": 82.5
+      },
+      "expected": 82.5
+    },
+    {
+      "name": "sztanga bez ciężaru",
+      "args": {
+        "tracking": "weight_reps",
+        "weight_kg": null
+      },
+      "expected": null
+    },
+    {
+      "name": "podciąganie z obciążeniem",
+      "args": {
+        "tracking": "bodyweight_reps",
+        "weight_kg": null,
+        "added_kg": 20,
+        "bodyweight_kg": 82.4,
+        "bw_factor": 1.0
+      },
+      "expected": 102.4
+    },
+    {
+      "name": "pompki",
+      "args": {
+        "tracking": "bodyweight_reps",
+        "weight_kg": null,
+        "bodyweight_kg": 82.4,
+        "bw_factor": 0.65
+      },
+      "expected": 53.56
+    },
+    {
+      "name": "podciąganie z asystą",
+      "args": {
+        "tracking": "bodyweight_reps",
+        "weight_kg": null,
+        "added_kg": -25,
+        "bodyweight_kg": 80,
+        "bw_factor": 1.0
+      },
+      "expected": 55.0
+    },
+    {
+      "name": "masa ciała nieznana",
+      "args": {
+        "tracking": "bodyweight_reps",
+        "weight_kg": null,
+        "added_kg": 10
+      },
+      "expected": null
+    },
+    {
+      "name": "brak bw_factor = 1",
+      "args": {
+        "tracking": "bodyweight_reps",
+        "weight_kg": null,
+        "bodyweight_kg": 70
+      },
+      "expected": 70.0
+    },
+    {
+      "name": "na czas",
+      "args": {
+        "tracking": "duration",
+        "weight_kg": null
+      },
+      "expected": null
+    }
+  ],
+  "record_history": [
+    {
+      "name": "wyciskanie: rozgrzewka, remis, kolejne rekordy",
+      "args": {
+        "sets": [
+          {
+            "id": "s1",
+            "achieved_at": "2026-07-01T10:00:00Z",
+            "tracking": "weight_reps",
+            "set_type": "warmup",
+            "reps": 5,
+            "effective_kg": 60,
+            "e1rm_kg": null,
+            "added_kg": null
+          },
+          {
+            "id": "s2",
+            "achieved_at": "2026-07-01T10:05:00Z",
+            "tracking": "weight_reps",
+            "set_type": "working",
+            "reps": 8,
+            "effective_kg": 80,
+            "e1rm_kg": 101.33,
+            "added_kg": null
+          },
+          {
+            "id": "s3",
+            "achieved_at": "2026-07-01T10:10:00Z",
+            "tracking": "weight_reps",
+            "set_type": "working",
+            "reps": 8,
+            "effective_kg": 80,
+            "e1rm_kg": 101.33,
+            "added_kg": null
+          },
+          {
+            "id": "s4",
+            "achieved_at": "2026-07-08T10:05:00Z",
+            "tracking": "weight_reps",
+            "set_type": "working",
+            "reps": 5,
+            "effective_kg": 90,
+            "e1rm_kg": 105,
+            "added_kg": null
+          },
+          {
+            "id": "s5",
+            "achieved_at": "2026-07-15T10:05:00Z",
+            "tracking": "weight_reps",
+            "set_type": "working",
+            "reps": 1,
+            "effective_kg": 102.5,
+            "e1rm_kg": 102.5,
+            "added_kg": null
+          },
+          {
+            "id": "s6",
+            "achieved_at": "2026-07-22T10:05:00Z",
+            "tracking": "weight_reps",
+            "set_type": "working",
+            "reps": 8,
+            "effective_kg": 82.5,
+            "e1rm_kg": 104.5,
+            "added_kg": null
+          }
+        ]
+      },
+      "expected": [
+        {
+          "record_type": "e1rm",
+          "reps": null,
+          "value": 101.33,
+          "set_id": "s2",
+          "achieved_at": "2026-07-01T10:05:00Z",
+          "superseded_at": "2026-07-08T10:05:00Z"
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 2,
+          "value": 80,
+          "set_id": "s2",
+          "achieved_at": "2026-07-01T10:05:00Z",
+          "superseded_at": "2026-07-08T10:05:00Z"
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 3,
+          "value": 80,
+          "set_id": "s2",
+          "achieved_at": "2026-07-01T10:05:00Z",
+          "superseded_at": "2026-07-08T10:05:00Z"
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 5,
+          "value": 80,
+          "set_id": "s2",
+          "achieved_at": "2026-07-01T10:05:00Z",
+          "superseded_at": "2026-07-08T10:05:00Z"
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 8,
+          "value": 80,
+          "set_id": "s2",
+          "achieved_at": "2026-07-01T10:05:00Z",
+          "superseded_at": "2026-07-22T10:05:00Z"
+        },
+        {
+          "record_type": "set_volume",
+          "reps": null,
+          "value": 640.0,
+          "set_id": "s2",
+          "achieved_at": "2026-07-01T10:05:00Z",
+          "superseded_at": "2026-07-22T10:05:00Z"
+        },
+        {
+          "record_type": "e1rm",
+          "reps": null,
+          "value": 105,
+          "set_id": "s4",
+          "achieved_at": "2026-07-08T10:05:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 2,
+          "value": 90,
+          "set_id": "s4",
+          "achieved_at": "2026-07-08T10:05:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 3,
+          "value": 90,
+          "set_id": "s4",
+          "achieved_at": "2026-07-08T10:05:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 5,
+          "value": 90,
+          "set_id": "s4",
+          "achieved_at": "2026-07-08T10:05:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "one_rm",
+          "reps": null,
+          "value": 102.5,
+          "set_id": "s5",
+          "achieved_at": "2026-07-15T10:05:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 8,
+          "value": 82.5,
+          "set_id": "s6",
+          "achieved_at": "2026-07-22T10:05:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "set_volume",
+          "reps": null,
+          "value": 660.0,
+          "set_id": "s6",
+          "achieved_at": "2026-07-22T10:05:00Z",
+          "superseded_at": null
+        }
+      ]
+    },
+    {
+      "name": "podciąganie: powtórzenia tylko bez obciążenia",
+      "args": {
+        "sets": [
+          {
+            "id": "p1",
+            "achieved_at": "2026-07-01T10:00:00Z",
+            "tracking": "bodyweight_reps",
+            "set_type": "working",
+            "reps": 10,
+            "effective_kg": 80,
+            "e1rm_kg": 106.67,
+            "added_kg": null
+          },
+          {
+            "id": "p2",
+            "achieved_at": "2026-07-08T10:00:00Z",
+            "tracking": "bodyweight_reps",
+            "set_type": "working",
+            "reps": 6,
+            "effective_kg": 100,
+            "e1rm_kg": 120,
+            "added_kg": 20
+          },
+          {
+            "id": "p3",
+            "achieved_at": "2026-07-15T10:00:00Z",
+            "tracking": "bodyweight_reps",
+            "set_type": "working",
+            "reps": 12,
+            "effective_kg": 80,
+            "e1rm_kg": 112,
+            "added_kg": null
+          }
+        ]
+      },
+      "expected": [
+        {
+          "record_type": "e1rm",
+          "reps": null,
+          "value": 106.67,
+          "set_id": "p1",
+          "achieved_at": "2026-07-01T10:00:00Z",
+          "superseded_at": "2026-07-08T10:00:00Z"
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 2,
+          "value": 80,
+          "set_id": "p1",
+          "achieved_at": "2026-07-01T10:00:00Z",
+          "superseded_at": "2026-07-08T10:00:00Z"
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 3,
+          "value": 80,
+          "set_id": "p1",
+          "achieved_at": "2026-07-01T10:00:00Z",
+          "superseded_at": "2026-07-08T10:00:00Z"
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 5,
+          "value": 80,
+          "set_id": "p1",
+          "achieved_at": "2026-07-01T10:00:00Z",
+          "superseded_at": "2026-07-08T10:00:00Z"
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 8,
+          "value": 80,
+          "set_id": "p1",
+          "achieved_at": "2026-07-01T10:00:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 10,
+          "value": 80,
+          "set_id": "p1",
+          "achieved_at": "2026-07-01T10:00:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "set_volume",
+          "reps": null,
+          "value": 800.0,
+          "set_id": "p1",
+          "achieved_at": "2026-07-01T10:00:00Z",
+          "superseded_at": "2026-07-15T10:00:00Z"
+        },
+        {
+          "record_type": "bodyweight_reps",
+          "reps": null,
+          "value": 10.0,
+          "set_id": "p1",
+          "achieved_at": "2026-07-01T10:00:00Z",
+          "superseded_at": "2026-07-15T10:00:00Z"
+        },
+        {
+          "record_type": "e1rm",
+          "reps": null,
+          "value": 120,
+          "set_id": "p2",
+          "achieved_at": "2026-07-08T10:00:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 2,
+          "value": 100,
+          "set_id": "p2",
+          "achieved_at": "2026-07-08T10:00:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 3,
+          "value": 100,
+          "set_id": "p2",
+          "achieved_at": "2026-07-08T10:00:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 5,
+          "value": 100,
+          "set_id": "p2",
+          "achieved_at": "2026-07-08T10:00:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 12,
+          "value": 80,
+          "set_id": "p3",
+          "achieved_at": "2026-07-15T10:00:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "set_volume",
+          "reps": null,
+          "value": 960.0,
+          "set_id": "p3",
+          "achieved_at": "2026-07-15T10:00:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "bodyweight_reps",
+          "reps": null,
+          "value": 12.0,
+          "set_id": "p3",
+          "achieved_at": "2026-07-15T10:00:00Z",
+          "superseded_at": null
+        }
+      ]
+    },
+    {
+      "name": "kolejność wejścia nie ma znaczenia",
+      "args": {
+        "sets": [
+          {
+            "id": "s6",
+            "achieved_at": "2026-07-22T10:05:00Z",
+            "tracking": "weight_reps",
+            "set_type": "working",
+            "reps": 8,
+            "effective_kg": 82.5,
+            "e1rm_kg": 104.5,
+            "added_kg": null
+          },
+          {
+            "id": "s4",
+            "achieved_at": "2026-07-08T10:05:00Z",
+            "tracking": "weight_reps",
+            "set_type": "working",
+            "reps": 5,
+            "effective_kg": 90,
+            "e1rm_kg": 105,
+            "added_kg": null
+          },
+          {
+            "id": "s2",
+            "achieved_at": "2026-07-01T10:05:00Z",
+            "tracking": "weight_reps",
+            "set_type": "working",
+            "reps": 8,
+            "effective_kg": 80,
+            "e1rm_kg": 101.33,
+            "added_kg": null
+          }
+        ]
+      },
+      "expected": [
+        {
+          "record_type": "e1rm",
+          "reps": null,
+          "value": 101.33,
+          "set_id": "s2",
+          "achieved_at": "2026-07-01T10:05:00Z",
+          "superseded_at": "2026-07-08T10:05:00Z"
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 2,
+          "value": 80,
+          "set_id": "s2",
+          "achieved_at": "2026-07-01T10:05:00Z",
+          "superseded_at": "2026-07-08T10:05:00Z"
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 3,
+          "value": 80,
+          "set_id": "s2",
+          "achieved_at": "2026-07-01T10:05:00Z",
+          "superseded_at": "2026-07-08T10:05:00Z"
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 5,
+          "value": 80,
+          "set_id": "s2",
+          "achieved_at": "2026-07-01T10:05:00Z",
+          "superseded_at": "2026-07-08T10:05:00Z"
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 8,
+          "value": 80,
+          "set_id": "s2",
+          "achieved_at": "2026-07-01T10:05:00Z",
+          "superseded_at": "2026-07-22T10:05:00Z"
+        },
+        {
+          "record_type": "set_volume",
+          "reps": null,
+          "value": 640.0,
+          "set_id": "s2",
+          "achieved_at": "2026-07-01T10:05:00Z",
+          "superseded_at": "2026-07-22T10:05:00Z"
+        },
+        {
+          "record_type": "e1rm",
+          "reps": null,
+          "value": 105,
+          "set_id": "s4",
+          "achieved_at": "2026-07-08T10:05:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 2,
+          "value": 90,
+          "set_id": "s4",
+          "achieved_at": "2026-07-08T10:05:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 3,
+          "value": 90,
+          "set_id": "s4",
+          "achieved_at": "2026-07-08T10:05:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 5,
+          "value": 90,
+          "set_id": "s4",
+          "achieved_at": "2026-07-08T10:05:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 8,
+          "value": 82.5,
+          "set_id": "s6",
+          "achieved_at": "2026-07-22T10:05:00Z",
+          "superseded_at": null
+        },
+        {
+          "record_type": "set_volume",
+          "reps": null,
+          "value": 660.0,
+          "set_id": "s6",
+          "achieved_at": "2026-07-22T10:05:00Z",
+          "superseded_at": null
+        }
+      ]
+    }
+  ],
+  "new_records": [
+    {
+      "name": "82.5x8: e1rm, 8RM i niższe",
+      "args": {
+        "best": [
+          {
+            "record_type": "e1rm",
+            "reps": null,
+            "value": 105
+          },
+          {
+            "record_type": "rep_max",
+            "reps": 8,
+            "value": 80
+          },
+          {
+            "record_type": "rep_max",
+            "reps": 5,
+            "value": 90
+          },
+          {
+            "record_type": "set_volume",
+            "reps": null,
+            "value": 660
+          }
+        ],
+        "set": {
+          "id": "x",
+          "achieved_at": "2026-08-01T00:00:00Z",
+          "tracking": "weight_reps",
+          "set_type": "working",
+          "reps": 8,
+          "effective_kg": 82.5,
+          "e1rm_kg": 107.8,
+          "added_kg": null
+        }
+      },
+      "expected": [
+        {
+          "record_type": "e1rm",
+          "reps": null,
+          "value": 107.8
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 2,
+          "value": 82.5
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 3,
+          "value": 82.5
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 8,
+          "value": 82.5
+        }
+      ]
+    },
+    {
+      "name": "80x8 remis: tylko brak historii 2/3RM",
+      "args": {
+        "best": [
+          {
+            "record_type": "e1rm",
+            "reps": null,
+            "value": 105
+          },
+          {
+            "record_type": "rep_max",
+            "reps": 8,
+            "value": 80
+          },
+          {
+            "record_type": "rep_max",
+            "reps": 5,
+            "value": 90
+          },
+          {
+            "record_type": "set_volume",
+            "reps": null,
+            "value": 660
+          }
+        ],
+        "set": {
+          "id": "x",
+          "achieved_at": "2026-08-01T00:00:00Z",
+          "tracking": "weight_reps",
+          "set_type": "working",
+          "reps": 8,
+          "effective_kg": 80,
+          "e1rm_kg": 101.33,
+          "added_kg": null
+        }
+      },
+      "expected": [
+        {
+          "record_type": "rep_max",
+          "reps": 2,
+          "value": 80
+        },
+        {
+          "record_type": "rep_max",
+          "reps": 3,
+          "value": 80
+        }
+      ]
+    },
+    {
+      "name": "rozgrzewka nic nie bije",
+      "args": {
+        "best": [
+          {
+            "record_type": "e1rm",
+            "reps": null,
+            "value": 105
+          },
+          {
+            "record_type": "rep_max",
+            "reps": 8,
+            "value": 80
+          },
+          {
+            "record_type": "rep_max",
+            "reps": 5,
+            "value": 90
+          },
+          {
+            "record_type": "set_volume",
+            "reps": null,
+            "value": 660
+          }
+        ],
+        "set": {
+          "id": "x",
+          "achieved_at": "2026-08-01T00:00:00Z",
+          "tracking": "weight_reps",
+          "set_type": "warmup",
+          "reps": 8,
+          "effective_kg": 200,
+          "e1rm_kg": 250,
+          "added_kg": null
+        }
+      },
+      "expected": []
+    }
+  ],
+  "is_hard_set": [
+    {
+      "name": "robocza bez RPE",
+      "args": {
+        "set_type": "working"
+      },
+      "expected": true
+    },
+    {
+      "name": "RPE 6 (4 w zapasie)",
+      "args": {
+        "set_type": "working",
+        "rpe": 6
+      },
+      "expected": true
+    },
+    {
+      "name": "RPE 5.5",
+      "args": {
+        "set_type": "working",
+        "rpe": 5.5
+      },
+      "expected": false
+    },
+    {
+      "name": "RIR 5",
+      "args": {
+        "set_type": "working",
+        "rir": 5
+      },
+      "expected": false
+    },
+    {
+      "name": "rozgrzewka",
+      "args": {
+        "set_type": "warmup",
+        "rpe": 9
+      },
+      "expected": false
+    },
+    {
+      "name": "drop set",
+      "args": {
+        "set_type": "drop"
+      },
+      "expected": true
+    }
+  ],
+  "muscle_volume": [
+    {
+      "name": "wyciskanie + wiosłowanie + deska",
+      "args": {
+        "sets": [
+          {
+            "set_type": "warmup",
+            "reps": 5,
+            "effective_kg": 60,
+            "muscles": [
+              [
+                "chest",
+                1.0
+              ],
+              [
+                "front_delts",
+                0.5
+              ],
+              [
+                "triceps",
+                0.5
+              ]
+            ]
+          },
+          {
+            "set_type": "working",
+            "reps": 8,
+            "effective_kg": 82.5,
+            "rpe": 8,
+            "muscles": [
+              [
+                "chest",
+                1.0
+              ],
+              [
+                "front_delts",
+                0.5
+              ],
+              [
+                "triceps",
+                0.5
+              ]
+            ]
+          },
+          {
+            "set_type": "working",
+            "reps": 7,
+            "effective_kg": 82.5,
+            "rpe": 9,
+            "muscles": [
+              [
+                "chest",
+                1.0
+              ],
+              [
+                "front_delts",
+                0.5
+              ],
+              [
+                "triceps",
+                0.5
+              ]
+            ]
+          },
+          {
+            "set_type": "working",
+            "reps": 10,
+            "effective_kg": 60,
+            "rpe": 5,
+            "muscles": [
+              [
+                "chest",
+                1.0
+              ],
+              [
+                "front_delts",
+                0.5
+              ],
+              [
+                "triceps",
+                0.5
+              ]
+            ]
+          },
+          {
+            "set_type": "working",
+            "reps": 10,
+            "effective_kg": 70,
+            "rir": 2,
+            "muscles": [
+              [
+                "upper_back",
+                1.0
+              ],
+              [
+                "lats",
+                1.0
+              ],
+              [
+                "rear_delts",
+                0.5
+              ],
+              [
+                "biceps",
+                0.5
+              ]
+            ]
+          },
+          {
+            "set_type": "working",
+            "reps": null,
+            "effective_kg": null,
+            "muscles": [
+              [
+                "abs",
+                1.0
+              ]
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "chest": {
+          "hard_sets": 2.0,
+          "tonnage_kg": 1837.5
+        },
+        "front_delts": {
+          "hard_sets": 1.0,
+          "tonnage_kg": 0.0
+        },
+        "triceps": {
+          "hard_sets": 1.0,
+          "tonnage_kg": 0.0
+        },
+        "upper_back": {
+          "hard_sets": 1.0,
+          "tonnage_kg": 700.0
+        },
+        "lats": {
+          "hard_sets": 1.0,
+          "tonnage_kg": 700.0
+        },
+        "rear_delts": {
+          "hard_sets": 0.5,
+          "tonnage_kg": 0.0
+        },
+        "biceps": {
+          "hard_sets": 0.5,
+          "tonnage_kg": 0.0
+        },
+        "abs": {
+          "hard_sets": 1.0,
+          "tonnage_kg": 0.0
+        }
+      }
+    }
+  ],
+  "plates_for": [
+    {
+      "name": "100 kg",
+      "args": {
+        "target_kg": 100,
+        "bar_kg": 20,
+        "inventory": {
+          "25": 4,
+          "20": 2,
+          "15": 2,
+          "10": 2,
+          "5": 2,
+          "2.5": 2,
+          "1.25": 2
+        }
+      },
+      "expected": {
+        "per_side": [
+          25.0,
+          15.0
+        ],
+        "total_kg": 100.0,
+        "exact": true
+      }
+    },
+    {
+      "name": "142.5 kg",
+      "args": {
+        "target_kg": 142.5,
+        "bar_kg": 20,
+        "inventory": {
+          "25": 4,
+          "20": 2,
+          "15": 2,
+          "10": 2,
+          "5": 2,
+          "2.5": 2,
+          "1.25": 2
+        }
+      },
+      "expected": {
+        "per_side": [
+          25.0,
+          25.0,
+          10.0,
+          1.25
+        ],
+        "total_kg": 142.5,
+        "exact": true
+      }
+    },
+    {
+      "name": "62.5 kg",
+      "args": {
+        "target_kg": 62.5,
+        "bar_kg": 20,
+        "inventory": {
+          "25": 4,
+          "20": 2,
+          "15": 2,
+          "10": 2,
+          "5": 2,
+          "2.5": 2,
+          "1.25": 2
+        }
+      },
+      "expected": {
+        "per_side": [
+          20.0,
+          1.25
+        ],
+        "total_kg": 62.5,
+        "exact": true
+      }
+    },
+    {
+      "name": "sam gryf",
+      "args": {
+        "target_kg": 20,
+        "bar_kg": 20,
+        "inventory": {
+          "25": 4,
+          "20": 2,
+          "15": 2,
+          "10": 2,
+          "5": 2,
+          "2.5": 2,
+          "1.25": 2
+        }
+      },
+      "expected": {
+        "per_side": [],
+        "total_kg": 20.0,
+        "exact": true
+      }
+    },
+    {
+      "name": "poniżej gryfu",
+      "args": {
+        "target_kg": 15,
+        "bar_kg": 20,
+        "inventory": {
+          "25": 4,
+          "20": 2,
+          "15": 2,
+          "10": 2,
+          "5": 2,
+          "2.5": 2,
+          "1.25": 2
+        }
+      },
+      "expected": {
+        "per_side": [],
+        "total_kg": 20.0,
+        "exact": false
+      }
+    },
+    {
+      "name": "nieosiągalne 101 kg -> 100",
+      "args": {
+        "target_kg": 101,
+        "bar_kg": 20,
+        "inventory": {
+          "25": 4,
+          "20": 2,
+          "15": 2,
+          "10": 2,
+          "5": 2,
+          "2.5": 2,
+          "1.25": 2
+        }
+      },
+      "expected": {
+        "per_side": [
+          25.0,
+          15.0
+        ],
+        "total_kg": 100.0,
+        "exact": false
+      }
+    },
+    {
+      "name": "za mało talerzy: 500 kg",
+      "args": {
+        "target_kg": 500,
+        "bar_kg": 20,
+        "inventory": {
+          "25": 4,
+          "20": 2,
+          "15": 2,
+          "10": 2,
+          "5": 2,
+          "2.5": 2,
+          "1.25": 2
+        }
+      },
+      "expected": {
+        "per_side": [
+          25.0,
+          25.0,
+          25.0,
+          25.0,
+          20.0,
+          20.0,
+          15.0,
+          15.0,
+          10.0,
+          10.0,
+          5.0,
+          5.0,
+          2.5,
+          2.5,
+          1.25,
+          1.25
+        ],
+        "total_kg": 435.0,
+        "exact": false
+      }
+    },
+    {
+      "name": "zachłanny by nie trafił: 60 z 25,20,20",
+      "args": {
+        "target_kg": 100,
+        "bar_kg": 20,
+        "inventory": {
+          "25": 1,
+          "20": 2,
+          "15": 0
+        }
+      },
+      "expected": {
+        "per_side": [
+          20.0,
+          20.0
+        ],
+        "total_kg": 100.0,
+        "exact": true
+      }
+    },
+    {
+      "name": "gryf 15 kg i talerz 0.5",
+      "args": {
+        "target_kg": 41,
+        "bar_kg": 15,
+        "inventory": {
+          "10": 1,
+          "2.5": 1,
+          "0.5": 1
+        }
+      },
+      "expected": {
+        "per_side": [
+          10.0,
+          2.5,
+          0.5
+        ],
+        "total_kg": 41.0,
+        "exact": true
+      }
+    }
+  ],
+  "warmup_sets": [
+    {
+      "name": "wyciskanie 82.5",
+      "args": {
+        "working_kg": 82.5
+      },
+      "expected": [
+        {
+          "weight_kg": 20.0,
+          "reps": 10
+        },
+        {
+          "weight_kg": 32.5,
+          "reps": 5
+        },
+        {
+          "weight_kg": 50.0,
+          "reps": 3
+        },
+        {
+          "weight_kg": 65.0,
+          "reps": 2
+        }
+      ]
+    },
+    {
+      "name": "przysiad 140 (+90%)",
+      "args": {
+        "working_kg": 140
+      },
+      "expected": [
+        {
+          "weight_kg": 20.0,
+          "reps": 10
+        },
+        {
+          "weight_kg": 55.0,
+          "reps": 5
+        },
+        {
+          "weight_kg": 85.0,
+          "reps": 3
+        },
+        {
+          "weight_kg": 112.5,
+          "reps": 2
+        },
+        {
+          "weight_kg": 125.0,
+          "reps": 1
+        }
+      ]
+    },
+    {
+      "name": "lekko 30 kg",
+      "args": {
+        "working_kg": 30
+      },
+      "expected": [
+        {
+          "weight_kg": 20.0,
+          "reps": 10
+        },
+        {
+          "weight_kg": 25.0,
+          "reps": 2
+        }
+      ]
+    },
+    {
+      "name": "sam gryf",
+      "args": {
+        "working_kg": 20
+      },
+      "expected": []
+    },
+    {
+      "name": "hantle 32 kg, krok 2",
+      "args": {
+        "working_kg": 32,
+        "bar_kg": 0,
+        "step_kg": 2
+      },
+      "expected": [
+        {
+          "weight_kg": 12.0,
+          "reps": 5
+        },
+        {
+          "weight_kg": 20.0,
+          "reps": 3
+        },
+        {
+          "weight_kg": 26.0,
+          "reps": 2
+        }
+      ]
+    },
+    {
+      "name": "martwy 100 (granica +90%)",
+      "args": {
+        "working_kg": 100
+      },
+      "expected": [
+        {
+          "weight_kg": 20.0,
+          "reps": 10
+        },
+        {
+          "weight_kg": 40.0,
+          "reps": 5
+        },
+        {
+          "weight_kg": 60.0,
+          "reps": 3
+        },
+        {
+          "weight_kg": 80.0,
+          "reps": 2
+        },
+        {
+          "weight_kg": 90.0,
+          "reps": 1
+        }
+      ]
+    }
+  ],
+  "double_progression": [
+    {
+      "name": "double: górna granica we wszystkich -> +2.5",
+      "args": {
+        "rule": "double_progression",
+        "last": {
+          "weight_kg": 80,
+          "reps": [
+            8,
+            8,
+            8
+          ]
+        },
+        "target_sets": 3,
+        "rep_min": 6,
+        "rep_max": 8,
+        "is_lower": false
+      },
+      "expected": [
+        {
+          "weight_kg": 82.5,
+          "reps": 6,
+          "amrap": false
+        },
+        {
+          "weight_kg": 82.5,
+          "reps": 6,
+          "amrap": false
+        },
+        {
+          "weight_kg": 82.5,
+          "reps": 6,
+          "amrap": false
+        }
+      ]
+    },
+    {
+      "name": "double: nogi -> +5",
+      "args": {
+        "rule": "double_progression",
+        "last": {
+          "weight_kg": 100,
+          "reps": [
+            8,
+            8,
+            8
+          ]
+        },
+        "target_sets": 3,
+        "rep_min": 6,
+        "rep_max": 8,
+        "is_lower": true
+      },
+      "expected": [
+        {
+          "weight_kg": 105.0,
+          "reps": 6,
+          "amrap": false
+        },
+        {
+          "weight_kg": 105.0,
+          "reps": 6,
+          "amrap": false
+        },
+        {
+          "weight_kg": 105.0,
+          "reps": 6,
+          "amrap": false
+        }
+      ]
+    },
+    {
+      "name": "double: brakuje -> +1 powt.",
+      "args": {
+        "rule": "double_progression",
+        "last": {
+          "weight_kg": 80,
+          "reps": [
+            8,
+            7,
+            6
+          ]
+        },
+        "target_sets": 3,
+        "rep_min": 6,
+        "rep_max": 8,
+        "is_lower": false
+      },
+      "expected": [
+        {
+          "weight_kg": 80,
+          "reps": 8,
+          "amrap": false
+        },
+        {
+          "weight_kg": 80,
+          "reps": 8,
+          "amrap": false
+        },
+        {
+          "weight_kg": 80,
+          "reps": 7,
+          "amrap": false
+        }
+      ]
+    },
+    {
+      "name": "double: mniej serii niż w planie",
+      "args": {
+        "rule": "double_progression",
+        "last": {
+          "weight_kg": 80,
+          "reps": [
+            7
+          ]
+        },
+        "target_sets": 3,
+        "rep_min": 6,
+        "rep_max": 8,
+        "is_lower": false
+      },
+      "expected": [
+        {
+          "weight_kg": 80,
+          "reps": 8,
+          "amrap": false
+        },
+        {
+          "weight_kg": 80,
+          "reps": 6,
+          "amrap": false
+        },
+        {
+          "weight_kg": 80,
+          "reps": 6,
+          "amrap": false
+        }
+      ]
+    },
+    {
+      "name": "double: AMRAP",
+      "args": {
+        "rule": "double_progression",
+        "last": {
+          "weight_kg": 0,
+          "reps": [
+            12,
+            9
+          ]
+        },
+        "target_sets": 2,
+        "rep_min": 6,
+        "rep_max": null,
+        "is_lower": false
+      },
+      "expected": [
+        {
+          "weight_kg": 0,
+          "reps": 6,
+          "amrap": true
+        },
+        {
+          "weight_kg": 0,
+          "reps": 6,
+          "amrap": true
+        }
+      ]
+    }
+  ],
+  "linear_progression": [
+    {
+      "name": "udany -> +2.5",
+      "args": {
+        "rule": "linear_progression",
+        "history": [
+          {
+            "weight_kg": 60,
+            "reps": [
+              5,
+              5,
+              5
+            ]
+          }
+        ],
+        "target_sets": 3,
+        "reps": 5,
+        "is_lower": false
+      },
+      "expected": [
+        {
+          "weight_kg": 62.5,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 62.5,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 62.5,
+          "reps": 5,
+          "amrap": false
+        }
+      ]
+    },
+    {
+      "name": "udany nogi -> +5",
+      "args": {
+        "rule": "linear_progression",
+        "history": [
+          {
+            "weight_kg": 100,
+            "reps": [
+              5,
+              5,
+              5
+            ]
+          }
+        ],
+        "target_sets": 3,
+        "reps": 5,
+        "is_lower": true
+      },
+      "expected": [
+        {
+          "weight_kg": 105.0,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 105.0,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 105.0,
+          "reps": 5,
+          "amrap": false
+        }
+      ]
+    },
+    {
+      "name": "1. porażka -> bez zmian",
+      "args": {
+        "rule": "linear_progression",
+        "history": [
+          {
+            "weight_kg": 60,
+            "reps": [
+              5,
+              5,
+              5
+            ]
+          },
+          {
+            "weight_kg": 62.5,
+            "reps": [
+              5,
+              5,
+              4
+            ]
+          }
+        ],
+        "target_sets": 3,
+        "reps": 5,
+        "is_lower": false
+      },
+      "expected": [
+        {
+          "weight_kg": 62.5,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 62.5,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 62.5,
+          "reps": 5,
+          "amrap": false
+        }
+      ]
+    },
+    {
+      "name": "3. porażka z rzędu -> deload 10%",
+      "args": {
+        "rule": "linear_progression",
+        "history": [
+          {
+            "weight_kg": 62.5,
+            "reps": [
+              5,
+              4,
+              4
+            ]
+          },
+          {
+            "weight_kg": 62.5,
+            "reps": [
+              5,
+              5,
+              4
+            ]
+          },
+          {
+            "weight_kg": 62.5,
+            "reps": [
+              5,
+              4,
+              3
+            ]
+          }
+        ],
+        "target_sets": 3,
+        "reps": 5,
+        "is_lower": false
+      },
+      "expected": [
+        {
+          "weight_kg": 57.5,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 57.5,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 57.5,
+          "reps": 5,
+          "amrap": false
+        }
+      ]
+    },
+    {
+      "name": "porażki na różnych ciężarach się nie sumują",
+      "args": {
+        "rule": "linear_progression",
+        "history": [
+          {
+            "weight_kg": 60,
+            "reps": [
+              5,
+              4,
+              4
+            ]
+          },
+          {
+            "weight_kg": 62.5,
+            "reps": [
+              5,
+              5,
+              4
+            ]
+          },
+          {
+            "weight_kg": 62.5,
+            "reps": [
+              5,
+              4,
+              3
+            ]
+          }
+        ],
+        "target_sets": 3,
+        "reps": 5,
+        "is_lower": false
+      },
+      "expected": [
+        {
+          "weight_kg": 62.5,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 62.5,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 62.5,
+          "reps": 5,
+          "amrap": false
+        }
+      ]
+    }
+  ],
+  "rpe_target": [
+    {
+      "name": "e1RM 107.8, 6-8 @ RPE 8",
+      "args": {
+        "rule": "rpe_autoregulation",
+        "e1rm_kg": 107.8,
+        "target_sets": 3,
+        "rep_min": 6,
+        "rep_max": 8,
+        "target_rpe": 8
+      },
+      "expected": [
+        {
+          "weight_kg": 82.5,
+          "reps": 7,
+          "amrap": false
+        },
+        {
+          "weight_kg": 82.5,
+          "reps": 7,
+          "amrap": false
+        },
+        {
+          "weight_kg": 82.5,
+          "reps": 7,
+          "amrap": false
+        }
+      ]
+    },
+    {
+      "name": "e1RM 180, 3 @ RPE 9",
+      "args": {
+        "rule": "rpe_autoregulation",
+        "e1rm_kg": 180,
+        "target_sets": 4,
+        "rep_min": 3,
+        "rep_max": null,
+        "target_rpe": 9
+      },
+      "expected": [
+        {
+          "weight_kg": 160.0,
+          "reps": 3,
+          "amrap": false
+        },
+        {
+          "weight_kg": 160.0,
+          "reps": 3,
+          "amrap": false
+        },
+        {
+          "weight_kg": 160.0,
+          "reps": 3,
+          "amrap": false
+        },
+        {
+          "weight_kg": 160.0,
+          "reps": 3,
+          "amrap": false
+        }
+      ]
+    },
+    {
+      "name": "poza tabelą -> brak ciężaru",
+      "args": {
+        "rule": "rpe_autoregulation",
+        "e1rm_kg": 100,
+        "target_sets": 2,
+        "rep_min": 12,
+        "rep_max": 12,
+        "target_rpe": 7
+      },
+      "expected": [
+        {
+          "weight_kg": null,
+          "reps": 12,
+          "amrap": false
+        },
+        {
+          "weight_kg": null,
+          "reps": 12,
+          "amrap": false
+        }
+      ]
+    }
+  ],
+  "training_max": [
+    {
+      "name": "e1RM 120",
+      "args": {
+        "rule": "wendler_531",
+        "e1rm_kg": 120
+      },
+      "expected": 107.5
+    },
+    {
+      "name": "e1RM 107.8",
+      "args": {
+        "rule": "wendler_531",
+        "e1rm_kg": 107.8
+      },
+      "expected": 97.5
+    }
+  ],
+  "wendler_sets": [
+    {
+      "name": "TM 100, tydzień 1",
+      "args": {
+        "rule": "wendler_531",
+        "tm_kg": 100,
+        "week": 0
+      },
+      "expected": [
+        {
+          "weight_kg": 65.0,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 75.0,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 85.0,
+          "reps": 5,
+          "amrap": true
+        }
+      ]
+    },
+    {
+      "name": "TM 100, tydzień 2",
+      "args": {
+        "rule": "wendler_531",
+        "tm_kg": 100,
+        "week": 1
+      },
+      "expected": [
+        {
+          "weight_kg": 70.0,
+          "reps": 3,
+          "amrap": false
+        },
+        {
+          "weight_kg": 80.0,
+          "reps": 3,
+          "amrap": false
+        },
+        {
+          "weight_kg": 90.0,
+          "reps": 3,
+          "amrap": true
+        }
+      ]
+    },
+    {
+      "name": "TM 100, tydzień 3",
+      "args": {
+        "rule": "wendler_531",
+        "tm_kg": 100,
+        "week": 2
+      },
+      "expected": [
+        {
+          "weight_kg": 75.0,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 85.0,
+          "reps": 3,
+          "amrap": false
+        },
+        {
+          "weight_kg": 95.0,
+          "reps": 1,
+          "amrap": true
+        }
+      ]
+    },
+    {
+      "name": "TM 100, tydzień 4",
+      "args": {
+        "rule": "wendler_531",
+        "tm_kg": 100,
+        "week": 3
+      },
+      "expected": [
+        {
+          "weight_kg": 40.0,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 50.0,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 60.0,
+          "reps": 5,
+          "amrap": false
+        }
+      ]
+    },
+    {
+      "name": "TM 137.5, tydzień 3",
+      "args": {
+        "rule": "wendler_531",
+        "tm_kg": 137.5,
+        "week": 2
+      },
+      "expected": [
+        {
+          "weight_kg": 102.5,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 117.5,
+          "reps": 3,
+          "amrap": false
+        },
+        {
+          "weight_kg": 130.0,
+          "reps": 1,
+          "amrap": true
+        }
+      ]
+    }
+  ],
+  "wendler_next_tm": [
+    {
+      "name": "góra",
+      "args": {
+        "rule": "wendler_531",
+        "tm_kg": 60,
+        "is_lower": false
+      },
+      "expected": 62.5
+    },
+    {
+      "name": "dół",
+      "args": {
+        "rule": "wendler_531",
+        "tm_kg": 140,
+        "is_lower": true
+      },
+      "expected": 145.0
+    }
+  ],
+  "nsuns_next_tm": [
+    {
+      "name": "0-1 powt. bez zmian",
+      "args": {
+        "rule": "nsuns",
+        "tm_kg": 100,
+        "amrap_reps": 1,
+        "is_lower": false
+      },
+      "expected": 100.0
+    },
+    {
+      "name": "2 powt. góra",
+      "args": {
+        "rule": "nsuns",
+        "tm_kg": 100,
+        "amrap_reps": 2,
+        "is_lower": false
+      },
+      "expected": 102.5
+    },
+    {
+      "name": "3 powt. dół",
+      "args": {
+        "rule": "nsuns",
+        "tm_kg": 100,
+        "amrap_reps": 3,
+        "is_lower": true
+      },
+      "expected": 105.0
+    },
+    {
+      "name": "5 powt. góra",
+      "args": {
+        "rule": "nsuns",
+        "tm_kg": 100,
+        "amrap_reps": 5,
+        "is_lower": false
+      },
+      "expected": 102.5
+    },
+    {
+      "name": "7 powt. dół",
+      "args": {
+        "rule": "nsuns",
+        "tm_kg": 100,
+        "amrap_reps": 7,
+        "is_lower": true
+      },
+      "expected": 107.5
+    }
+  ],
+  "scheme_sets": [
+    {
+      "name": "BBB 5x10 @ 50%, TM 100",
+      "args": {
+        "scheme": [
+          {
+            "pct": 0.5,
+            "reps": 10,
+            "amrap": false
+          },
+          {
+            "pct": 0.5,
+            "reps": 10,
+            "amrap": false
+          },
+          {
+            "pct": 0.5,
+            "reps": 10,
+            "amrap": false
+          },
+          {
+            "pct": 0.5,
+            "reps": 10,
+            "amrap": false
+          },
+          {
+            "pct": 0.5,
+            "reps": 10,
+            "amrap": false
+          }
+        ],
+        "tm_kg": 100
+      },
+      "expected": [
+        {
+          "weight_kg": 50.0,
+          "reps": 10,
+          "amrap": false
+        },
+        {
+          "weight_kg": 50.0,
+          "reps": 10,
+          "amrap": false
+        },
+        {
+          "weight_kg": 50.0,
+          "reps": 10,
+          "amrap": false
+        },
+        {
+          "weight_kg": 50.0,
+          "reps": 10,
+          "amrap": false
+        },
+        {
+          "weight_kg": 50.0,
+          "reps": 10,
+          "amrap": false
+        }
+      ]
+    },
+    {
+      "name": "nSuns T1 wyciskanie, TM 92.5",
+      "args": {
+        "scheme": [
+          {
+            "pct": 0.65,
+            "reps": 8,
+            "amrap": false
+          },
+          {
+            "pct": 0.75,
+            "reps": 6,
+            "amrap": false
+          },
+          {
+            "pct": 0.85,
+            "reps": 4,
+            "amrap": false
+          },
+          {
+            "pct": 0.85,
+            "reps": 4,
+            "amrap": false
+          },
+          {
+            "pct": 0.85,
+            "reps": 4,
+            "amrap": false
+          },
+          {
+            "pct": 0.8,
+            "reps": 5,
+            "amrap": false
+          },
+          {
+            "pct": 0.75,
+            "reps": 6,
+            "amrap": false
+          },
+          {
+            "pct": 0.7,
+            "reps": 7,
+            "amrap": false
+          },
+          {
+            "pct": 0.65,
+            "reps": 8,
+            "amrap": true
+          }
+        ],
+        "tm_kg": 92.5
+      },
+      "expected": [
+        {
+          "weight_kg": 60.0,
+          "reps": 8,
+          "amrap": false
+        },
+        {
+          "weight_kg": 70.0,
+          "reps": 6,
+          "amrap": false
+        },
+        {
+          "weight_kg": 77.5,
+          "reps": 4,
+          "amrap": false
+        },
+        {
+          "weight_kg": 77.5,
+          "reps": 4,
+          "amrap": false
+        },
+        {
+          "weight_kg": 77.5,
+          "reps": 4,
+          "amrap": false
+        },
+        {
+          "weight_kg": 75.0,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 70.0,
+          "reps": 6,
+          "amrap": false
+        },
+        {
+          "weight_kg": 65.0,
+          "reps": 7,
+          "amrap": false
+        },
+        {
+          "weight_kg": 60.0,
+          "reps": 8,
+          "amrap": true
+        }
+      ]
+    },
+    {
+      "name": "nSuns T2 OHP, TM 60",
+      "args": {
+        "scheme": [
+          {
+            "pct": 0.5,
+            "reps": 5,
+            "amrap": false,
+            "tm_of": "overhead_press"
+          },
+          {
+            "pct": 0.6,
+            "reps": 5,
+            "amrap": false,
+            "tm_of": "overhead_press"
+          },
+          {
+            "pct": 0.7,
+            "reps": 3,
+            "amrap": false,
+            "tm_of": "overhead_press"
+          },
+          {
+            "pct": 0.7,
+            "reps": 5,
+            "amrap": false,
+            "tm_of": "overhead_press"
+          },
+          {
+            "pct": 0.7,
+            "reps": 7,
+            "amrap": false,
+            "tm_of": "overhead_press"
+          },
+          {
+            "pct": 0.7,
+            "reps": 4,
+            "amrap": false,
+            "tm_of": "overhead_press"
+          },
+          {
+            "pct": 0.7,
+            "reps": 6,
+            "amrap": false,
+            "tm_of": "overhead_press"
+          },
+          {
+            "pct": 0.7,
+            "reps": 8,
+            "amrap": false,
+            "tm_of": "overhead_press"
+          }
+        ],
+        "tm_kg": 60
+      },
+      "expected": [
+        {
+          "weight_kg": 30.0,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 35.0,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 42.5,
+          "reps": 3,
+          "amrap": false
+        },
+        {
+          "weight_kg": 42.5,
+          "reps": 5,
+          "amrap": false
+        },
+        {
+          "weight_kg": 42.5,
+          "reps": 7,
+          "amrap": false
+        },
+        {
+          "weight_kg": 42.5,
+          "reps": 4,
+          "amrap": false
+        },
+        {
+          "weight_kg": 42.5,
+          "reps": 6,
+          "amrap": false
+        },
+        {
+          "weight_kg": 42.5,
+          "reps": 8,
+          "amrap": false
+        }
+      ]
+    },
+    {
+      "name": "GZCLP bez procentów",
+      "args": {
+        "scheme": [
+          {
+            "reps": 3,
+            "amrap": false
+          },
+          {
+            "reps": 3,
+            "amrap": false
+          },
+          {
+            "reps": 3,
+            "amrap": false
+          },
+          {
+            "reps": 3,
+            "amrap": false
+          },
+          {
+            "reps": 3,
+            "amrap": true
+          }
+        ],
+        "tm_kg": 100
+      },
+      "expected": [
+        {
+          "weight_kg": null,
+          "reps": 3,
+          "amrap": false
+        },
+        {
+          "weight_kg": null,
+          "reps": 3,
+          "amrap": false
+        },
+        {
+          "weight_kg": null,
+          "reps": 3,
+          "amrap": false
+        },
+        {
+          "weight_kg": null,
+          "reps": 3,
+          "amrap": false
+        },
+        {
+          "weight_kg": null,
+          "reps": 3,
+          "amrap": true
+        }
+      ]
+    },
+    {
+      "name": "brak TM",
+      "args": {
+        "scheme": [
+          {
+            "pct": 0.5,
+            "reps": 10,
+            "amrap": false
+          },
+          {
+            "pct": 0.5,
+            "reps": 10,
+            "amrap": false
+          }
+        ],
+        "tm_kg": null
+      },
+      "expected": [
+        {
+          "weight_kg": null,
+          "reps": 10,
+          "amrap": false
+        },
+        {
+          "weight_kg": null,
+          "reps": 10,
+          "amrap": false
+        }
+      ]
+    }
+  ],
+  "gzclp_next": [
+    {
+      "name": "T1 udany -> +5 (dół)",
+      "args": {
+        "rule": "gzclp_t1",
+        "state": {
+          "stage": 0,
+          "weight_kg": 100
+        },
+        "is_lower": true,
+        "success": true
+      },
+      "expected": {
+        "stage": 0,
+        "weight_kg": 105.0
+      }
+    },
+    {
+      "name": "T1 udany -> +2.5 (góra)",
+      "args": {
+        "rule": "gzclp_t1",
+        "state": {
+          "stage": 0,
+          "weight_kg": 60
+        },
+        "is_lower": false,
+        "success": true
+      },
+      "expected": {
+        "stage": 0,
+        "weight_kg": 62.5
+      }
+    },
+    {
+      "name": "T1 porażka -> 6x2",
+      "args": {
+        "rule": "gzclp_t1",
+        "state": {
+          "stage": 0,
+          "weight_kg": 100
+        },
+        "is_lower": true,
+        "success": false
+      },
+      "expected": {
+        "stage": 1,
+        "weight_kg": 100
+      }
+    },
+    {
+      "name": "T1 porażka na 10x1 -> reset 85%",
+      "args": {
+        "rule": "gzclp_t1",
+        "state": {
+          "stage": 2,
+          "weight_kg": 100
+        },
+        "is_lower": true,
+        "success": false
+      },
+      "expected": {
+        "stage": 0,
+        "weight_kg": 85.0
+      }
+    },
+    {
+      "name": "T2 porażka -> 3x8",
+      "args": {
+        "rule": "gzclp_t2",
+        "state": {
+          "stage": 0,
+          "weight_kg": 60
+        },
+        "is_lower": false,
+        "success": false
+      },
+      "expected": {
+        "stage": 1,
+        "weight_kg": 60
+      }
+    },
+    {
+      "name": "T2 porażka na 3x6 -> reset 85%",
+      "args": {
+        "rule": "gzclp_t2",
+        "state": {
+          "stage": 2,
+          "weight_kg": 62.5
+        },
+        "is_lower": false,
+        "success": false
+      },
+      "expected": {
+        "stage": 0,
+        "weight_kg": 52.5
+      }
+    },
+    {
+      "name": "T3 25+ powt. -> +2.5",
+      "args": {
+        "rule": "gzclp_t3",
+        "state": {
+          "stage": 0,
+          "weight_kg": 40
+        },
+        "is_lower": false,
+        "amrap_reps": 27
+      },
+      "expected": {
+        "stage": 0,
+        "weight_kg": 42.5
+      }
+    },
+    {
+      "name": "T3 mniej -> bez zmian",
+      "args": {
+        "rule": "gzclp_t3",
+        "state": {
+          "stage": 0,
+          "weight_kg": 40
+        },
+        "is_lower": false,
+        "amrap_reps": 21
+      },
+      "expected": {
+        "stage": 0,
+        "weight_kg": 40
+      }
+    }
+  ],
+  "gzclp_sets": [
+    {
+      "name": "T1 etap 1",
+      "args": {
+        "rule": "gzclp_t1",
+        "state": {
+          "stage": 0,
+          "weight_kg": 100
+        }
+      },
+      "expected": [
+        {
+          "weight_kg": 100,
+          "reps": 3,
+          "amrap": false
+        },
+        {
+          "weight_kg": 100,
+          "reps": 3,
+          "amrap": false
+        },
+        {
+          "weight_kg": 100,
+          "reps": 3,
+          "amrap": false
+        },
+        {
+          "weight_kg": 100,
+          "reps": 3,
+          "amrap": false
+        },
+        {
+          "weight_kg": 100,
+          "reps": 3,
+          "amrap": true
+        }
+      ]
+    },
+    {
+      "name": "T1 etap 2",
+      "args": {
+        "rule": "gzclp_t1",
+        "state": {
+          "stage": 1,
+          "weight_kg": 100
+        }
+      },
+      "expected": [
+        {
+          "weight_kg": 100,
+          "reps": 2,
+          "amrap": false
+        },
+        {
+          "weight_kg": 100,
+          "reps": 2,
+          "amrap": false
+        },
+        {
+          "weight_kg": 100,
+          "reps": 2,
+          "amrap": false
+        },
+        {
+          "weight_kg": 100,
+          "reps": 2,
+          "amrap": false
+        },
+        {
+          "weight_kg": 100,
+          "reps": 2,
+          "amrap": false
+        },
+        {
+          "weight_kg": 100,
+          "reps": 2,
+          "amrap": true
+        }
+      ]
+    },
+    {
+      "name": "T2 etap 3",
+      "args": {
+        "rule": "gzclp_t2",
+        "state": {
+          "stage": 2,
+          "weight_kg": 60
+        }
+      },
+      "expected": [
+        {
+          "weight_kg": 60,
+          "reps": 6,
+          "amrap": false
+        },
+        {
+          "weight_kg": 60,
+          "reps": 6,
+          "amrap": false
+        },
+        {
+          "weight_kg": 60,
+          "reps": 6,
+          "amrap": false
+        }
+      ]
+    },
+    {
+      "name": "T3",
+      "args": {
+        "rule": "gzclp_t3",
+        "state": {
+          "stage": 0,
+          "weight_kg": 40
+        }
+      },
+      "expected": [
+        {
+          "weight_kg": 40,
+          "reps": 15,
+          "amrap": false
+        },
+        {
+          "weight_kg": 40,
+          "reps": 15,
+          "amrap": false
+        },
+        {
+          "weight_kg": 40,
+          "reps": 15,
+          "amrap": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,12 +1,11 @@
 """Ładuje wbudowany katalog ćwiczeń i szablony planów. Można uruchamiać wielokrotnie."""
 
 import uuid
-from collections.abc import Iterable, Sequence
-from typing import Any
 
-from sqlalchemy import Connection, delete, or_
+from sqlalchemy import Connection, delete
 from sqlalchemy.dialects.postgresql import insert
 
+from pixgym.db.upsert import upsert
 from pixgym.models import (
     Equipment,
     Exercise,
@@ -30,40 +29,19 @@ def builtin_id(kind: str, key: str) -> uuid.UUID:
     return uuid.uuid5(_NAMESPACE, f"{kind}:{key}")
 
 
-def _upsert(conn: Connection, model: Any, rows: Sequence[dict[str, Any]], key: Iterable[str]):
-    """INSERT ... ON CONFLICT DO UPDATE, ale tylko gdy coś się zmieniło.
-
-    Bez warunku każdy start kontenera podbijałby server_version i telefony
-    pobierałyby cały katalog od nowa.
-    """
-    if not rows:
-        return
-    table = model.__table__
-    key = list(key)
-    stmt = insert(table).values(list(rows))
-    cols = [c for c in rows[0] if c not in key]
-    conn.execute(
-        stmt.on_conflict_do_update(
-            index_elements=key,
-            set_={c: stmt.excluded[c] for c in cols},
-            where=or_(*(table.c[c].is_distinct_from(stmt.excluded[c]) for c in cols)),
-        )
-    )
-
-
 def _seed_catalog(conn: Connection) -> None:
     muscles = {slug: mid for mid, slug, _, _ in MUSCLE_GROUPS}
     equipment = {slug: eid for eid, slug, _ in EQUIPMENT}
     patterns = {slug: pid for pid, slug, _ in MOVEMENT_PATTERNS}
 
-    _upsert(
+    upsert(
         conn,
         MuscleGroup,
         [dict(id=i, slug=s, name=n, region=r) for i, s, n, r in MUSCLE_GROUPS],
         ["id"],
     )
-    _upsert(conn, Equipment, [dict(id=i, slug=s, name=n) for i, s, n in EQUIPMENT], ["id"])
-    _upsert(
+    upsert(conn, Equipment, [dict(id=i, slug=s, name=n) for i, s, n in EQUIPMENT], ["id"])
+    upsert(
         conn, MovementPattern, [dict(id=i, slug=s, name=n) for i, s, n in MOVEMENT_PATTERNS], ["id"]
     )
 
@@ -97,7 +75,7 @@ def _seed_catalog(conn: Connection) -> None:
                 )
                 for m in slugs.split()
             ]
-    _upsert(conn, Exercise, exercise_rows, ["id"])
+    upsert(conn, Exercise, exercise_rows, ["id"])
 
     # Mięśnie nie mają wersji, więc wystarczy podmienić je w całości.
     em = ExerciseMuscle.__table__
@@ -107,7 +85,7 @@ def _seed_catalog(conn: Connection) -> None:
 
 def _seed_programs(conn: Connection) -> None:
     rule_ids = {r["slug"]: builtin_id("rule", r["slug"]) for r in PROGRESSION_RULES}
-    _upsert(
+    upsert(
         conn,
         ProgressionRule,
         [dict(id=rule_ids[r["slug"]], owner_user_id=None, **r) for r in PROGRESSION_RULES],
@@ -117,7 +95,7 @@ def _seed_programs(conn: Connection) -> None:
     for tpl in TEMPLATES:
         program_id = builtin_id("program", tpl.slug)
         version_id = builtin_id("program_version", f"{tpl.slug}:1")
-        _upsert(
+        upsert(
             conn,
             Program,
             [
@@ -134,7 +112,7 @@ def _seed_programs(conn: Connection) -> None:
             ],
             ["id"],
         )
-        _upsert(
+        upsert(
             conn,
             ProgramVersion,
             [dict(id=version_id, program_id=program_id, version_no=1, is_current=True)],
@@ -176,8 +154,8 @@ def _seed_programs(conn: Connection) -> None:
                 pe.c.program_day_id.in_(day_ids), pe.c.id.notin_([e["id"] for e in ex_rows])
             )
         )
-        _upsert(conn, ProgramDay, day_rows, ["id"])
-        _upsert(conn, ProgramExercise, ex_rows, ["id"])
+        upsert(conn, ProgramDay, day_rows, ["id"])
+        upsert(conn, ProgramExercise, ex_rows, ["id"])
 
 
 def seed(conn: Connection) -> None:

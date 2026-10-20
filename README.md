@@ -17,10 +17,28 @@ Przy starcie API wykonuje migracje (`alembic upgrade head`) i seed
 ## Testy
 
 ```bash
-docker-compose run --rm api pytest
+docker-compose run --rm api pytest      # backend, osobna baza pixgym_test
+cd apps/web && npm install && npm test  # logika siłowa w TypeScript
 ```
 
-Testy tworzą osobną bazę `pixgym_test` na tym samym Postgresie.
+## Logika siłowa
+
+Liczona w dwóch miejscach: w telefonie (offline, od razu po zapisaniu serii) i na serwerze
+(źródło prawdy). Obie wersje przechodzą te same przypadki z `packages/test-vectors`.
+
+- **1RM:** Epley (domyślnie), Brzycki (do 10 powt.), tabela RTS przy metodzie `rpe` i podanym RPE/RIR.
+  Powyżej 12 powtórzeń (`e1rm_max_reps`) brak wyniku. Rozgrzewki się nie liczą.
+- **Rekordy:** prawdziwy 1RM, szacowany 1RM, nRM dla 2/3/5/8/10/12 (największy ciężar na co
+  najmniej n powtórzeń), największa seria, powtórzenia bez obciążenia. Remis nie jest rekordem.
+- **Objętość:** ciężka seria to robocza z RIR ≤ 4 (bez RPE/RIR też się liczy). Mięsień główny 1,
+  pomocniczy 0,5. Tonaż tylko dla mięśni głównych.
+- **Talerze i rozgrzewka:** dokładne dopasowanie z dostępnych talerzy (nie zachłanne);
+  rozgrzewka gryf × 10, 40/60/80%, od 100 kg dodatkowo 90% × 1.
+- **Podpowiedzi ciężaru:** podwójna progresja, liniowa z deloadem, RPE, 5/3/1, nSuns, GZCLP.
+
+Po zapisie serii serwer woła `pixgym.services.strength.refresh_exercise`, które uzupełnia
+`effective_kg`, `e1rm_kg` i historię rekordów. Zapisuje tylko zmiany, więc nie podbija
+`server_version` bez potrzeby.
 
 ## Baza danych
 
@@ -44,12 +62,16 @@ docker-compose run --rm api alembic revision --autogenerate -m "opis"
 
 ```
 apps/api/
-  migrations/           0001 tabele, 0002 triggery, uprawnienia, RLS
+  migrations/           0001 tabele, 0002 triggery i RLS, 0003 miękkie usuwanie rekordów
   src/pixgym/
     core/               konfiguracja, UUIDv7
-    db/                 baza modeli, sesja z kontekstem użytkownika
+    db/                 baza modeli, sesja z kontekstem użytkownika, upsert
+    domain/             logika siłowa (bez bazy)
     models/             SQLAlchemy
     seed/               katalog ćwiczeń i szablony planów (*_data.py)
+    services/           przeliczanie serii i rekordów w bazie
   tests/
+apps/web/src/domain/    ta sama logika w TypeScript
+packages/test-vectors/  wspólne przypadki testowe
 infra/postgres/initdb/  tworzy rolę pixgym_app przy pierwszym starcie bazy
 ```

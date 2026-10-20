@@ -70,7 +70,7 @@ PROGRESSION_RULES: list[dict[str, Any]] = [
             "stages": [[3, 10], [3, 8], [3, 6]],
             "increment_upper_kg": 2.5,
             "increment_lower_kg": 5,
-            "reset_add_kg": 7.5,
+            "reset_pct": 0.85,
         },
     },
     {

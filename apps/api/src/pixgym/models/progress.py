@@ -26,7 +26,9 @@ class RecordType(enum.StrEnum):
     bodyweight_reps = "bodyweight_reps"  # najwięcej powtórzeń bez obciążenia
 
 
-class PersonalRecord(UUIDPk, Versioned, Base):
+class PersonalRecord(UUIDPk, Versioned, SoftDelete, Base):
+    """Wiersze liczy serwer z serii (services/strength.py); ID wynika z serii i typu rekordu."""
+
     __tablename__ = "personal_records"
     __table_args__ = (
         ForeignKeyConstraint(
@@ -46,7 +48,7 @@ class PersonalRecord(UUIDPk, Versioned, Base):
             "record_type",
             "reps",
             unique=True,
-            postgresql_where=text("superseded_at IS NULL"),
+            postgresql_where=text("superseded_at IS NULL AND deleted_at IS NULL"),
             postgresql_nulls_not_distinct=True,
         ),
         Index(None, "user_id", "server_version"),
