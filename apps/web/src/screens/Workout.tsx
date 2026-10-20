@@ -10,6 +10,7 @@ import { SET_SYNCED } from "../offline/sync";
 import { Button, Card, ErrorText, Loading, Screen, clock, kg, longDate, sets } from "../ui/kit";
 import { ExerciseInfo } from "./ExerciseInfo";
 import { ExercisePicker } from "./ExercisePicker";
+import { blockText, schemeText } from "./plan-format";
 import { RestBar, restFor, setRestFor, useRestTimer } from "./rest";
 
 const DEFAULT_PLATES = { "25": 4, "20": 2, "15": 2, "10": 2, "5": 2, "2.5": 2, "1.25": 2 };
@@ -126,6 +127,7 @@ export function Workout({ id }: { id: string }) {
       sub={
         running ? (
           <span className="num">
+            {session.day_name ? `${session.day_name} · ` : ""}
             {clock(elapsed)} · {session.exercises.length} ćw.
           </span>
         ) : (
@@ -150,13 +152,13 @@ export function Workout({ id }: { id: string }) {
           exercise={byId.get(se.exercise_id)}
           barKg={settings?.bar_weight_kg ?? 20}
           plates={settings?.plate_inventory ?? DEFAULT_PLATES}
-          restS={restFor(se.exercise_id, defaultRest)}
+          restS={se.target?.rest_s ?? restFor(se.exercise_id, defaultRest)}
           open={openId === se.id}
           onOpen={() => setOpenId(openId === se.id ? "" : se.id)}
           onSession={setSession}
           onCatalogChange={() => void catalogLoad.reload()}
-          onSetSaved={(s) => {
-            if (running && s.set_type !== "warmup") rest.start(restFor(se.exercise_id, defaultRest));
+          onSetSaved={(s, restS) => {
+            if (running && s.set_type !== "warmup") rest.start(restS);
           }}
         />
       ))}
@@ -297,7 +299,7 @@ function ExerciseCard({
   open: boolean;
   onOpen: () => void;
   onSession: (s: Session) => void;
-  onSetSaved: (s: WorkoutSet) => void;
+  onSetSaved: (s: WorkoutSet, restS: number) => void;
   onCatalogChange: () => void;
 }) {
   const { data: last } = useLoad(
@@ -361,7 +363,7 @@ function ExerciseCard({
         editing?.id,
       );
       onSession(next);
-      if (!editing) onSetSaved(set);
+      if (!editing) onSetSaved(set, rest);
       // Po rozgrzewce następna zwykle robocza; typy specjalne też nie przechodzą dalej same.
       setDraft({ ...d, editing: null, rpe: null, set_type: "working" });
     } catch (e) {
@@ -393,6 +395,8 @@ function ExerciseCard({
       : null;
   const best = se.sets.reduce<number | null>((m, s) => (s.e1rm_kg != null && (m == null || s.e1rm_kg > m) ? s.e1rm_kg : m), null);
   let workingNo = 0;
+  const planned = se.target ? (se.target.set_scheme?.length || se.target.target_sets) : 0;
+  const done = se.sets.filter((s) => s.set_type !== "warmup").length;
 
   return (
     <Card className={`grid gap-3 ${open ? "border-accent/60" : ""}`}>
@@ -405,10 +409,17 @@ function ExerciseCard({
               {lastWorking.rpe ? ` @ RPE ${lastWorking.rpe}` : ""}
             </p>
           )}
+          {se.target && (
+            <p className="font-mono text-sm text-accent">
+              cel: {blockText(se.target)}
+              {schemeText(se.target) ? ` (${schemeText(se.target)})` : ""}
+            </p>
+          )}
           {exercise?.notes && <p className="text-sm text-muted">📝 {exercise.notes}</p>}
         </div>
-        <span className="num shrink-0 text-sm text-muted">
-          {sets(se.sets.length)}{best ? ` · 1RM ${kg(best)}` : ""}
+        <span className={`num shrink-0 text-sm ${planned && done >= planned ? "text-accent" : "text-muted"}`}>
+          {planned ? `${done}/${planned} serii` : sets(se.sets.length)}
+          {best ? ` · 1RM ${kg(best)}` : ""}
         </span>
       </button>
 

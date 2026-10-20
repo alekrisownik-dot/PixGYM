@@ -483,3 +483,104 @@ def test_settings(new_client, admin):
     assert r.json()["default_rest_s"] == 90 and r.json()["bar_weight_kg"] == 15
     bad = api.patch("/api/v1/me/settings", json={"plate_inventory": {"abc": 2}})
     assert bad.status_code == 422
+
+
+# --- plany ---
+
+
+def test_copy_template_edit_blocks_and_activate(new_client, admin):
+    api = new_client()
+    login(api, admin)
+    plans = api.get("/api/v1/programs").json()
+    ppl = next(p for p in plans if p["builtin"] and p["name"] == "Push / Pull / Legs")
+    assert ppl["days"] == 3
+
+    tpl = api.get(f"/api/v1/programs/{ppl['id']}").json()
+    assert [d["weekdays"] for d in tpl["days"]] == [[0], [2], [4]]
+    # Szablonu nie da się zmienić ani ustawić jako aktywny.
+    assert (
+        api.put(
+            f"/api/v1/programs/{ppl['id']}", json={"name": "x", "days": [{"name": "a"}]}
+        ).status_code
+        == 404
+    )
+    assert api.put("/api/v1/me/active-program", json={"program_id": ppl["id"]}).status_code == 400
+
+    mine = api.post(f"/api/v1/programs/{ppl['id']}/copy").json()
+    assert not mine["builtin"] and len(mine["days"]) == 3
+    assert api.put("/api/v1/me/active-program", json={"program_id": mine["id"]}).status_code == 204
+
+    # Poniedziałek: dwa bloczki; wtorek: nowy dzień.
+    days = [
+        {
+            "name": "Push",
+            "weekdays": [0],
+            "blocks": [
+                {
+                    "exercise_id": str(BENCH),
+                    "target_sets": 4,
+                    "rep_min": 6,
+                    "rep_max": 8,
+                    "rest_s": 180,
+                },
+                {
+                    "exercise_id": str(builtin_id("exercise", "lateral_raise")),
+                    "target_sets": 3,
+                    "rep_min": 12,
+                    "rep_max": 15,
+                },
+            ],
+        },
+        {"name": "Nogi", "weekdays": [1, 4], "blocks": []},
+    ]
+    r = api.put(f"/api/v1/programs/{mine['id']}", json={"name": "Mój PPL", "days": days})
+    assert r.status_code == 200, r.text
+    plan = r.json()
+    assert plan["version_no"] == 2 and plan["active"]
+    assert [b["name"] for b in plan["days"][0]["blocks"]] == [
+        "Wyciskanie sztangi leżąc",
+        "Wznosy hantli bokiem",
+    ]
+    assert plan["days"][1]["weekdays"] == [1, 4]
+
+    bad = dict(days[0], blocks=[{"exercise_id": str(BENCH), "rep_min": 10, "rep_max": 5}])
+    assert (
+        api.put(f"/api/v1/programs/{mine['id']}", json={"name": "x", "days": [bad]}).status_code
+        == 422
+    )
+
+    listed = {p["id"]: p for p in api.get("/api/v1/programs").json()}
+    assert listed[mine["id"]]["active"] and listed[mine["id"]]["name"] == "Mój PPL"
+
+    # Trening z dnia planu: cele przy ćwiczeniach.
+    day_id = plan["days"][0]["id"]
+    sid = str(uuid7())
+    s = api.post("/api/v1/sessions", json={"id": sid, "program_day_id": day_id}).json()
+    assert s["day_name"] == "Push"
+    s = api.post(f"/api/v1/sessions/{sid}/exercises", json={"exercise_id": str(BENCH)}).json()
+    assert s["exercises"][0]["target"]["target_sets"] == 4
+    assert s["exercises"][0]["target"]["rest_s"] == 180
+
+    # Zmiana planu nie zmienia starego treningu (wskazuje na starą wersję dnia).
+    api.put(
+        f"/api/v1/programs/{mine['id']}",
+        json={"name": "Mój PPL", "days": [dict(days[0], blocks=[])]},
+    )
+    assert api.get(f"/api/v1/sessions/{sid}").json()["exercises"][0]["target"]["target_sets"] == 4
+
+    assert api.delete(f"/api/v1/programs/{mine['id']}").status_code == 204
+    assert all(p["id"] != mine["id"] for p in api.get("/api/v1/programs").json())
+
+
+def test_plans_are_private(new_client, owner_engine, admin):
+    alice = new_client()
+    login(alice, admin)
+    plan = alice.post(
+        "/api/v1/programs", json={"name": "Tajny", "days": [{"name": "Pn", "weekdays": [0]}]}
+    ).json()
+    bob = new_client()
+    register(bob, invite(owner_engine, admin), "bob")
+    assert bob.get(f"/api/v1/programs/{plan['id']}").status_code == 404
+    assert all(p["id"] != plan["id"] for p in bob.get("/api/v1/programs").json())
+    assert bob.put("/api/v1/me/active-program", json={"program_id": plan["id"]}).status_code == 404
+    assert bob.delete(f"/api/v1/programs/{plan['id']}").status_code == 404

@@ -9,6 +9,7 @@ import {
   api,
   uuid7,
   type Exercise,
+  type PlanDay,
   type Session,
   type SessionListItem,
   type SetType,
@@ -57,7 +58,8 @@ function localDate(d: Date): string {
   return new Date(d.getTime() - off).toISOString().slice(0, 10);
 }
 
-export async function startSession(): Promise<Session> {
+/** Nowy trening: pusty albo z dnia planu (ćwiczenia z bloczków od razu na liście). */
+export async function startSession(day?: PlanDay): Promise<Session> {
   const now = new Date();
   const s: Session = {
     id: uuid7(),
@@ -66,10 +68,28 @@ export async function startSession(): Promise<Session> {
     local_date: localDate(now),
     bodyweight_kg: null,
     notes: null,
-    exercises: [],
+    program_day_id: day?.id ?? null,
+    day_name: day?.name ?? null,
+    exercises: (day?.blocks ?? []).map((b, position) => ({
+      id: uuid7(),
+      exercise_id: b.exercise_id,
+      position,
+      notes: null,
+      name: b.name,
+      tracking: b.tracking,
+      sets: [],
+      target: b,
+    })),
   };
   await save(s);
-  await enqueue({ method: "POST", path: "/sessions", body: { id: s.id, started_at: s.started_at }, sessionId: s.id });
+  await enqueue({
+    method: "POST",
+    path: "/sessions",
+    body: { id: s.id, started_at: s.started_at, program_day_id: s.program_day_id },
+    sessionId: s.id,
+  });
+  for (const e of s.exercises)
+    await enqueue({ method: "POST", path: `/sessions/${s.id}/exercises`, body: { id: e.id, exercise_id: e.exercise_id }, sessionId: s.id });
   return s;
 }
 

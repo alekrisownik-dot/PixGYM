@@ -410,3 +410,15 @@ TEMPLATES = [
         ],
     ),
 ]
+
+
+# Proponowane dni tygodnia (0 = pn) dla dni szablonu, w kolejności dni. Po skopiowaniu
+# planu można je zmienić.
+TEMPLATE_WEEKDAYS: dict[str, list[list[int]]] = {
+    "fbw_ab": [[0, 4], [2]],
+    "upper_lower": [[0], [1], [3], [4]],
+    "ppl": [[0], [2], [4]],
+    "wendler_531_bbb": [[0], [1], [3], [4]],
+    "gzclp": [[0], [1], [3], [4]],
+    "nsuns_5day": [[0], [1], [2], [3], [4]],
+}

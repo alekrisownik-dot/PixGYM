@@ -19,7 +19,7 @@ from pixgym.models import (
     ProgressionRule,
 )
 from pixgym.seed.catalog_data import EQUIPMENT, EXERCISES, MOVEMENT_PATTERNS, MUSCLE_GROUPS
-from pixgym.seed.programs_data import PROGRESSION_RULES, TEMPLATES
+from pixgym.seed.programs_data import PROGRESSION_RULES, TEMPLATE_WEEKDAYS, TEMPLATES
 
 _NAMESPACE = uuid.UUID("6f1d3c2e-8b4a-4f7e-9c1d-2a5b7e9f0c31")
 
@@ -120,10 +120,17 @@ def _seed_programs(conn: Connection) -> None:
         )
 
         day_rows, ex_rows = [], []
+        week = TEMPLATE_WEEKDAYS.get(tpl.slug, [])
         for day_index, day in enumerate(tpl.days):
             day_id = builtin_id("program_day", f"{tpl.slug}:{day_index}")
             day_rows.append(
-                dict(id=day_id, program_version_id=version_id, day_index=day_index, name=day.name)
+                dict(
+                    id=day_id,
+                    program_version_id=version_id,
+                    day_index=day_index,
+                    name=day.name,
+                    weekdays=week[day_index] if day_index < len(week) else [],
+                )
             )
             for position, p in enumerate(day.exercises):
                 ex_rows.append(

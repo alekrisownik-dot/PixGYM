@@ -8,6 +8,8 @@ import { Auth } from "../screens/Auth";
 import { ExerciseProgress } from "../screens/ExerciseProgress";
 import { History } from "../screens/History";
 import { MeScreen } from "../screens/Me";
+import { PlanEditor } from "../screens/PlanEditor";
+import { Plans } from "../screens/Plans";
 import { Progress } from "../screens/Progress";
 import { Summary } from "../screens/Summary";
 import { Today } from "../screens/Today";
@@ -18,6 +20,7 @@ import { href, useRoute, type Route } from "./router";
 const TABS: ReadonlyArray<{ route: Route; label: string; icon: string; match: Route["name"][] }> = [
   { route: { name: "today" }, label: "Dziś", icon: "◉", match: ["today"] },
   { route: { name: "history" }, label: "Trening", icon: "▤", match: ["history", "workout", "summary"] },
+  { route: { name: "plans" }, label: "Plany", icon: "▦", match: ["plans", "plan"] },
   { route: { name: "progress" }, label: "Postęp", icon: "↗", match: ["progress", "exercise"] },
   { route: { name: "me" }, label: "Ja", icon: "☰", match: ["me"] },
 ];
@@ -91,6 +94,8 @@ export function App() {
       {route.name === "history" && <History />}
       {route.name === "workout" && <Workout key={route.id} id={route.id} />}
       {route.name === "summary" && <Summary key={route.id} id={route.id} />}
+      {route.name === "plans" && <Plans />}
+      {route.name === "plan" && <PlanEditor key={route.id} id={route.id} />}
       {route.name === "progress" && <Progress />}
       {route.name === "exercise" && <ExerciseProgress key={route.id} id={route.id} />}
       {route.name === "me" && (
@@ -104,7 +109,7 @@ export function App() {
         />
       )}
       <nav className="safe-bottom fixed inset-x-0 bottom-0 z-10 border-t border-line bg-bg/95 backdrop-blur">
-        <div className="mx-auto grid max-w-xl grid-cols-4">
+        <div className="mx-auto grid max-w-xl grid-cols-5">
           {TABS.map((t) => {
             const on = t.match.includes(route.name);
             return (

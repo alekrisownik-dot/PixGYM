@@ -6,14 +6,14 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 
 from pixgym.api.deps import csrf_middleware
-from pixgym.api.v1 import analytics, auth, catalog, progress, training
+from pixgym.api.v1 import analytics, auth, catalog, programs, progress, training
 from pixgym.core.config import get_settings
 from pixgym.db.session import get_engine
 
 app = FastAPI(title="PixGYM", docs_url="/api/docs", openapi_url="/api/openapi.json")
 app.middleware("http")(csrf_middleware)
 
-for module in (auth, training, catalog, progress, analytics):
+for module in (auth, training, catalog, programs, progress, analytics):
     app.include_router(module.router, prefix="/api/v1")
 
 # Front sam w sobie nie ładuje nic z zewnątrz, więc CSP może być ścisła.

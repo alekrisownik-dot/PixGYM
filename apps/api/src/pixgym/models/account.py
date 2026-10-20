@@ -90,6 +90,10 @@ class UserSettings(Versioned, Base):
     body_consent_at: Mapped[datetime | None]
     # Ranking znajomych jest domyślnie włączony. Kto się ukryje, nie widzi też innych.
     leaderboard_visible: Mapped[bool] = mapped_column(Boolean, server_default=true())
+    # Plan, z którego ekran „Dziś” podpowiada trening. Zawsze własny (kopia szablonu).
+    active_program_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("programs.id", ondelete="SET NULL")
+    )
 
 
 class RefreshToken(UUIDPk, CreatedAt, Base):

@@ -17,7 +17,7 @@ from sqlalchemy import (
     false,
     text,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from pixgym.db.base import Base, SoftDelete, UUIDPk, Versioned, str_enum
@@ -96,7 +96,10 @@ class ProgramVersion(UUIDPk, Versioned, Base):
 
 class ProgramDay(UUIDPk, Versioned, Base):
     __tablename__ = "program_days"
-    __table_args__ = (UniqueConstraint("program_version_id", "day_index"),)
+    __table_args__ = (
+        UniqueConstraint("program_version_id", "day_index"),
+        CheckConstraint("weekdays <@ ARRAY[0, 1, 2, 3, 4, 5, 6]::smallint[]", name="weekdays"),
+    )
 
     program_version_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("program_versions.id", ondelete="CASCADE")
@@ -104,6 +107,10 @@ class ProgramDay(UUIDPk, Versioned, Base):
     day_index: Mapped[int] = mapped_column(SmallInteger)
     name: Mapped[str] = mapped_column(String(60))
     is_deload: Mapped[bool] = mapped_column(Boolean, server_default=false())
+    # Dni tygodnia tego treningu: 0 = poniedziałek … 6 = niedziela. Pusto = bez stałego dnia.
+    weekdays: Mapped[list[int]] = mapped_column(
+        ARRAY(SmallInteger), server_default=text("'{}'::smallint[]")
+    )
 
 
 class ProgramExercise(UUIDPk, Versioned, Base):

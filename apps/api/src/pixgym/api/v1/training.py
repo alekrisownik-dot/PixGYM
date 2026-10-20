@@ -55,7 +55,9 @@ async def sessions(user_id: UserId, limit: int = Query(30, ge=1, le=200)) -> lis
 @router.post("/sessions", response_model=SessionOut, status_code=status.HTTP_201_CREATED)
 async def start_session(body: SessionIn, user_id: UserId) -> dict:
     def go(conn):
-        sid = training.start_session(conn, user_id, body.id, body.started_at, body.bodyweight_kg)
+        sid = training.start_session(
+            conn, user_id, body.id, body.started_at, body.bodyweight_kg, body.program_day_id
+        )
         return training.get_session(conn, sid)
 
     return await _run(user_id, go)

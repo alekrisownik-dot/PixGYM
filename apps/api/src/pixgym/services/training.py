@@ -18,6 +18,7 @@ from pixgym.models import (
     Equipment,
     Exercise,
     PersonalRecord,
+    ProgramDay,
     SessionExercise,
     User,
     WorkoutSession,
@@ -25,6 +26,7 @@ from pixgym.models import (
 )
 from pixgym.services.catalog import photos_by_exercise
 from pixgym.services.errors import NotFound
+from pixgym.services.programs import day_targets, day_version
 from pixgym.services.strength import refresh_exercise
 
 SET_FIELDS = (
@@ -73,8 +75,10 @@ def start_session(
     session_id: uuid.UUID | None = None,
     started_at: datetime | None = None,
     bodyweight_kg: Decimal | None = None,
+    program_day_id: uuid.UUID | None = None,
 ) -> uuid.UUID:
-    """Nowy trening. Ponowne wysłanie z tym samym ID (kolejka offline) nic nie robi."""
+    """Nowy trening (wolny albo z dnia planu). Ponowne wysłanie z tym samym ID
+    (kolejka offline) nic nie robi."""
     session_id = session_id or uuid7()
     if conn.execute(select(WorkoutSession.id).where(WorkoutSession.id == session_id)).first():
         return session_id
@@ -86,6 +90,8 @@ def start_session(
             started_at=started_at,
             local_date=_local_date(conn, user_id, started_at),
             bodyweight_kg=bodyweight_kg,
+            program_day_id=program_day_id,
+            program_version_id=day_version(conn, program_day_id) if program_day_id else None,
         )
     )
     return session_id
@@ -165,6 +171,15 @@ def get_session(conn: Connection, session_id: uuid.UUID) -> dict[str, Any]:
     by_exercise: dict[uuid.UUID, list[dict[str, Any]]] = {e.id: [] for e in exercises}
     for row in sets:
         by_exercise[row.session_exercise_id].append(_set_dict(row))
+    # Cele z planu: kolejne wystąpienia ćwiczenia w treningu dostają kolejne bloczki dnia.
+    targets: dict[uuid.UUID, list[dict[str, Any]]] = {}
+    day_name = None
+    if s.program_day_id:
+        day_name = conn.execute(
+            select(ProgramDay.name).where(ProgramDay.id == s.program_day_id)
+        ).scalar()
+        for block in day_targets(conn, s.program_day_id):
+            targets.setdefault(block["exercise_id"], []).append(block)
     return {
         "id": s.id,
         "started_at": s.started_at,
@@ -172,7 +187,16 @@ def get_session(conn: Connection, session_id: uuid.UUID) -> dict[str, Any]:
         "local_date": s.local_date,
         "bodyweight_kg": s.bodyweight_kg,
         "notes": s.notes,
-        "exercises": [{**e._asdict(), "sets": by_exercise[e.id]} for e in exercises],
+        "program_day_id": s.program_day_id,
+        "day_name": day_name,
+        "exercises": [
+            {
+                **e._asdict(),
+                "sets": by_exercise[e.id],
+                "target": (targets.get(e.exercise_id) or [None]).pop(0),
+            }
+            for e in exercises
+        ],
     }
 
 

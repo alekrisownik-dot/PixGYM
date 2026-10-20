@@ -2,9 +2,9 @@
 
 import uuid
 from datetime import date, datetime
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 # Liczby z bazy (Decimal) wychodzą jako zwykłe liczby JSON, nie napisy.
 Num = float
@@ -122,6 +122,7 @@ class SessionIn(BaseModel):
     id: uuid.UUID | None = None
     started_at: datetime | None = None
     bodyweight_kg: float | None = Field(None, ge=20, le=400)
+    program_day_id: uuid.UUID | None = None
 
 
 class SessionPatch(BaseModel):
@@ -195,6 +196,101 @@ class SessionExerciseIn(BaseModel):
     exercise_id: uuid.UUID
 
 
+class BlockIn(BaseModel):
+    """Bloczek dnia planu: ćwiczenie z celem serii i powtórzeń."""
+
+    exercise_id: uuid.UUID
+    target_sets: int = Field(3, ge=1, le=20)
+    rep_min: int | None = Field(8, ge=1, le=100)
+    # None przy rep_min = AMRAP (co najmniej rep_min).
+    rep_max: int | None = Field(12, ge=1, le=100)
+    target_rpe: float | None = Field(None, ge=1, le=10, multiple_of=0.5)
+    rest_s: int | None = Field(None, ge=0, le=1800)
+    superset_group: int | None = Field(None, ge=0, le=100)
+    # Serie procentowe z szablonów (5/3/1, nSuns); przy kopiowaniu przechodzą bez zmian.
+    set_scheme: list[dict[str, Any]] | None = Field(None, max_length=20)
+    progression_rule_id: uuid.UUID | None = None
+    notes: str | None = Field(None, max_length=500)
+
+    @model_validator(mode="after")
+    def _reps(self):
+        if self.rep_min is not None and self.rep_max is not None and self.rep_max < self.rep_min:
+            raise ValueError("rep_max < rep_min")
+        return self
+
+
+class BlockOut(Out):
+    exercise_id: uuid.UUID
+    target_sets: int
+    rep_min: int | None
+    rep_max: int | None
+    target_rpe: Num | None
+    rest_s: int | None
+    superset_group: int | None
+    set_scheme: list[dict[str, Any]] | None
+    progression_rule_id: uuid.UUID | None
+    notes: str | None
+
+
+class PlanBlockOut(BlockOut):
+    id: uuid.UUID
+    name: str
+    tracking: str
+
+
+class PlanDayIn(BaseModel):
+    name: str = Field(min_length=1, max_length=60)
+    weekdays: list[int] = Field(default_factory=list, max_length=7)
+    blocks: list[BlockIn] = Field(default_factory=list, max_length=30)
+
+    @model_validator(mode="after")
+    def _weekdays(self):
+        if any(not 0 <= d <= 6 for d in self.weekdays):
+            raise ValueError("weekday 0..6")
+        return self
+
+
+class PlanDayOut(BaseModel):
+    id: uuid.UUID
+    day_index: int
+    name: str
+    weekdays: list[int]
+    blocks: list[PlanBlockOut]
+
+
+class PlanIn(BaseModel):
+    id: uuid.UUID | None = None
+    name: str = Field(min_length=1, max_length=100)
+    description: str | None = Field(None, max_length=2000)
+    days: list[PlanDayIn] = Field(min_length=1, max_length=14)
+
+
+class PlanOut(BaseModel):
+    id: uuid.UUID
+    name: str
+    description: str | None
+    split: str
+    builtin: bool
+    version_id: uuid.UUID
+    version_no: int
+    active: bool
+    days: list[PlanDayOut]
+
+
+class PlanListItem(Out):
+    id: uuid.UUID
+    name: str
+    description: str | None
+    split: str
+    builtin: bool
+    days: int
+    active: bool
+
+
+class ActivePlanIn(BaseModel):
+    program_id: uuid.UUID | None
+
+
 class SessionExerciseOut(Out):
     id: uuid.UUID
     exercise_id: uuid.UUID
@@ -203,6 +299,7 @@ class SessionExerciseOut(Out):
     name: str
     tracking: str
     sets: list[SetOut]
+    target: BlockOut | None = None
 
 
 class SessionOut(Out):
@@ -212,6 +309,8 @@ class SessionOut(Out):
     local_date: date
     bodyweight_kg: Num | None
     notes: str | None
+    program_day_id: uuid.UUID | None = None
+    day_name: str | None = None
     exercises: list[SessionExerciseOut]
 
 

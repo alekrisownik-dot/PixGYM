@@ -11,6 +11,8 @@ export type Route =
   | { name: "history" }
   | { name: "progress" }
   | { name: "exercise"; id: string }
+  | { name: "plans" }
+  | { name: "plan"; id: string }
   | { name: "me" };
 
 export function parse(hash: string): Route {
@@ -22,6 +24,8 @@ export function parse(hash: string): Route {
       return b ? { name: "exercise", id: b } : { name: "progress" };
     case "podsumowanie":
       return b ? { name: "summary", id: b } : { name: "history" };
+    case "plany":
+      return b ? { name: "plan", id: b } : { name: "plans" };
     case "ja":
       return { name: "me" };
     default:
@@ -41,6 +45,10 @@ export function href(route: Route): string {
       return `#/postep/${route.id}`;
     case "progress":
       return "#/postep";
+    case "plans":
+      return "#/plany";
+    case "plan":
+      return `#/plany/${route.id}`;
     case "me":
       return "#/ja";
     default:

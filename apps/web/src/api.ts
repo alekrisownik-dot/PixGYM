@@ -102,6 +102,55 @@ export interface SavedSet extends WorkoutSet {
   records: SetRecord[];
 }
 
+export interface Block {
+  exercise_id: string;
+  target_sets: number;
+  rep_min: number | null;
+  rep_max: number | null; // null przy rep_min = AMRAP
+  target_rpe: number | null;
+  rest_s: number | null;
+  superset_group: number | null;
+  set_scheme: { pct?: number; reps: number; amrap?: boolean; tm_of?: string }[] | null;
+  progression_rule_id: string | null;
+  notes: string | null;
+}
+
+export interface PlanBlock extends Block {
+  id?: string;
+  name: string;
+  tracking: Tracking;
+}
+
+export interface PlanDay {
+  id?: string;
+  day_index?: number;
+  name: string;
+  weekdays: number[];
+  blocks: PlanBlock[];
+}
+
+export interface Plan {
+  id: string;
+  name: string;
+  description: string | null;
+  split: string;
+  builtin: boolean;
+  version_id: string;
+  version_no: number;
+  active: boolean;
+  days: PlanDay[];
+}
+
+export interface PlanListItem {
+  id: string;
+  name: string;
+  description: string | null;
+  split: string;
+  builtin: boolean;
+  days: number;
+  active: boolean;
+}
+
 export interface SessionExercise {
   id: string;
   exercise_id: string;
@@ -110,6 +159,7 @@ export interface SessionExercise {
   name: string;
   tracking: Tracking;
   sets: WorkoutSet[];
+  target?: Block | null;
 }
 
 export interface Session {
@@ -119,6 +169,8 @@ export interface Session {
   local_date: string;
   bodyweight_kg: number | null;
   notes: string | null;
+  program_day_id?: string | null;
+  day_name?: string | null;
   exercises: SessionExercise[];
 }
 
