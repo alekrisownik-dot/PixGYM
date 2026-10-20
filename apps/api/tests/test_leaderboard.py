@@ -1,4 +1,4 @@
-"""Ranking znajomych: widoczność tylko za zgodą, kolejność, rangi."""
+"""Ranking znajomych: widoczny domyślnie, można się ukryć; kolejność i rangi."""
 
 from datetime import UTC, date, datetime
 from decimal import Decimal
@@ -15,10 +15,12 @@ from tests.conftest import make_user
 BENCH = builtin_id("exercise", "bench_press")
 
 
-def lifter(conn, name, e1rm, bodyweight, sex="male", opt_in=True):
+def lifter(conn, name, e1rm, bodyweight, sex="male", visible: bool | None = True):
+    """visible=None: bez wiersza user_settings (świeże konto)."""
     uid = make_user(conn, name)
     conn.execute(update(User).where(User.id == uid).values(display_name=name, sex=sex))
-    conn.execute(insert(UserSettings).values(user_id=uid, leaderboard_opt_in=opt_in))
+    if visible is not None:
+        conn.execute(insert(UserSettings).values(user_id=uid, leaderboard_visible=visible))
     conn.execute(
         insert(WorkoutSession).values(
             id=uuid7(),
@@ -45,12 +47,19 @@ def lifter(conn, name, e1rm, bodyweight, sex="male", opt_in=True):
 @pytest.fixture
 def gym(owner_engine):
     with owner_engine.begin() as conn:
-        conn.execute(text("UPDATE user_settings SET leaderboard_opt_in = false"))
+        # Konta z innych testów ukrywamy, żeby nie mieszały w kolejności.
+        conn.execute(
+            text(
+                "INSERT INTO user_settings (user_id, leaderboard_visible)"
+                " SELECT id, false FROM users"
+                " ON CONFLICT (user_id) DO UPDATE SET leaderboard_visible = false"
+            )
+        )
         people = {
             "ola": lifter(conn, "ola", 70, 58, "female"),
             "kuba": lifter(conn, "kuba", 120, 95),
-            "piotr": lifter(conn, "piotr", 107.8, 82.4),
-            "ukryty": lifter(conn, "ukryty", 200, 100, opt_in=False),
+            "piotr": lifter(conn, "piotr", 107.8, 82.4, visible=None),
+            "ukryty": lifter(conn, "ukryty", 200, 100, visible=False),
             "bez_wyniku": lifter(conn, "bez_wyniku", None, 80),
         }
     yield people
@@ -60,6 +69,14 @@ def gym(owner_engine):
 
 def names(rows):
     return [(r.position, r.display_name) for r in rows]
+
+
+def test_new_account_is_visible_by_default(as_user, gym):
+    # Piotr nie ma jeszcze wiersza ustawień, a i tak jest w rankingu i go widzi.
+    with as_user(gym["kuba"]) as conn:
+        assert "piotr" in [r.display_name for r in leaderboard(conn, gym["kuba"], "bench_press")]
+    with as_user(gym["piotr"]) as conn:
+        assert leaderboard(conn, gym["piotr"], "bench_press") != []
 
 
 def test_ranking_by_kg(as_user, gym):
@@ -78,13 +95,13 @@ def test_ranking_by_dots_favours_lighter_lifter(as_user, gym):
     assert [r.value for r in rows] == [79.3, 75.58, 73.07]
 
 
-def test_people_without_opt_in_are_invisible(as_user, gym):
+def test_hidden_people_are_invisible(as_user, gym):
     with as_user(gym["kuba"]) as conn:
         rows = leaderboard(conn, gym["kuba"], "bench_press")
     assert "ukryty" not in [r.display_name for r in rows]
 
 
-def test_without_opt_in_you_see_nothing(as_user, gym):
+def test_hidden_user_sees_nothing(as_user, gym):
     with as_user(gym["ukryty"]) as conn:
         assert leaderboard(conn, gym["ukryty"], "bench_press") == []
 
@@ -101,7 +118,7 @@ def test_only_ranked_lifts(as_user, gym):
         leaderboard(conn, gym["piotr"], "back_squat")
 
 
-def test_my_ranks_without_opt_in(as_user, gym):
+def test_my_ranks_even_when_hidden(as_user, gym):
     with as_user(gym["ukryty"]) as conn:
         ranks = my_ranks(conn, gym["ukryty"])
     assert ranks["bench_press"].title == "Kernel Panic"  # 200 kg przy 100 kg masy

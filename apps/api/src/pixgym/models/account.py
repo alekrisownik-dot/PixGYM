@@ -14,7 +14,7 @@ from sqlalchemy import (
     SmallInteger,
     String,
     Text,
-    false,
+    true,
 )
 from sqlalchemy.dialects.postgresql import CITEXT, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
@@ -86,8 +86,8 @@ class UserSettings(Versioned, Base):
     default_rest_s: Mapped[int] = mapped_column(SmallInteger, server_default="120")
     # Moduł sylwetki (dane o zdrowiu) działa dopiero po wyrażeniu zgody.
     body_consent_at: Mapped[datetime | None]
-    # Udział w rankingu znajomych. Kto go nie włączy, nie jest widoczny i nie widzi innych.
-    leaderboard_opt_in: Mapped[bool] = mapped_column(Boolean, server_default=false())
+    # Ranking znajomych jest domyślnie włączony. Kto się ukryje, nie widzi też innych.
+    leaderboard_visible: Mapped[bool] = mapped_column(Boolean, server_default=true())
 
 
 class RefreshToken(UUIDPk, CreatedAt, Base):

@@ -45,8 +45,8 @@ szacowanego 1RM względem masy ciała (dla kobiet niższe progi):
 Script Kiddie → Packet Sniffer → Firewall Breaker → Exploit Dev → Black Hat →
 Root Access → Zero-Day → Kernel Panic
 
-Ranking znajomych ma dwie zakładki: kg i DOTS. Widzi go i jest w nim tylko ten, kto włączy
-`user_settings.leaderboard_opt_in`. Jedynym wyjątkiem od RLS jest funkcja
+Ranking znajomych ma dwie zakładki: kg i DOTS. Każdy jest w nim domyślnie; można się ukryć
+(`user_settings.leaderboard_visible = false`), ale wtedy nie widzi się też innych. Jedynym wyjątkiem od RLS jest funkcja
 `leaderboard_entries` (SECURITY DEFINER), która zwraca tylko najlepszy szacowany 1RM.
 Masy ciała API nie pokazuje innym, choć da się ją w przybliżeniu wyliczyć z DOTS.
 
@@ -84,7 +84,7 @@ docker-compose run --rm api alembic revision --autogenerate -m "opis"
 ```
 apps/api/
   migrations/           0001 tabele, 0002 triggery i RLS, 0003 miękkie usuwanie rekordów,
-                        0004 ranking i zdjęcia postępu
+                        0004 ranking i zdjęcia postępu, 0005 ranking domyślnie widoczny
   src/pixgym/
     core/               konfiguracja, UUIDv7
     db/                 baza modeli, sesja z kontekstem użytkownika, upsert
