@@ -17,3 +17,5 @@ export async function shrinkImage(file: File, maxSide = 1600): Promise<Blob> {
 
 export const photoUrl = (id: string, variant: "thumb" | "full" = "thumb") =>
   `/api/v1/exercise-photos/${id}?variant=${variant}`;
+
+export const bodyPhotoUrl = (id: string, variant: "thumb" | "full" = "thumb") => `/api/v1/body/photos/${id}?variant=${variant}`;

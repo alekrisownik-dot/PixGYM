@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import type { CalendarData, CalendarEvent, EventKind, SessionListItem } from "../api";
 import { href } from "../app/router";
 import { useLoad } from "../app/useLoad";
+import { listEvents } from "../offline/events";
 import { cachedGet, listSessions } from "../offline/sessions";
 import { IconCheck, IconChevronLeft, IconChevronRight, IconPlus } from "../ui/icons";
 import { Card, Empty, ErrorText, Loading, Screen, SectionTitle, Tile, longDate, plural, tonnage, sets } from "../ui/kit";
@@ -105,7 +106,7 @@ export function History() {
   const end = iso(new Date(month.getFullYear(), month.getMonth() + 1, 0));
   const cal = useLoad(() => cachedGet<CalendarData>(`/calendar?start=${start}&end=${end}`), [start]);
   const list = useLoad(() => listSessions(200), []);
-  const ev = useLoad(() => cachedGet<CalendarEvent[]>(`/events?start=${start}&end=${end}`), [start]);
+  const ev = useLoad(() => listEvents(start, end), [start]);
   const [editing, setEditing] = useState<{ event?: CalendarEvent; date: string; kind?: EventKind } | null>(null);
   const events = useMemo(() => {
     const m = new Map<string, CalendarEvent[]>();

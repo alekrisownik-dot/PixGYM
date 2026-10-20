@@ -1,6 +1,7 @@
 import { useState } from "react";
 
-import { api, errorText, uuid7, type CalendarEvent, type EventKind } from "../api";
+import { errorText, type CalendarEvent, type EventKind } from "../api";
+import { deleteEvent, saveEvent } from "../offline/events";
 import { IconTrash } from "../ui/icons";
 import { Button, ErrorText, Field, shortDate } from "../ui/kit";
 import { Sheet } from "../ui/sheet";
@@ -73,8 +74,9 @@ export function EventSheet({
   }
 
   const body = { date: day, title: title.trim(), kind, note: note.trim() || null };
-  const save = () => run(() => (initial ? api.patch(`/events/${initial.id}`, body) : api.post("/events", { id: uuid7(), ...body })));
-  const remove = () => confirm(`Usunąć „${initial!.title}”?`) && run(() => api.del(`/events/${initial!.id}`));
+  // Przez kolejkę: działa też bez sieci, wyśle się samo.
+  const save = () => run(() => saveEvent(body, initial?.id));
+  const remove = () => confirm(`Usunąć „${initial!.title}”?`) && run(() => deleteEvent(initial!.id));
 
   return (
     <Sheet title={initial ? "Wydarzenie" : "Nowe wydarzenie"} onClose={onClose}>

@@ -158,6 +158,8 @@ class SessionIn(BaseModel):
 
 class SessionPatch(BaseModel):
     ended_at: datetime | None = None
+    # Przypięcie treningu do dnia planu (zaliczenie) albo odpięcie (null).
+    program_day_id: uuid.UUID | None = None
     bodyweight_kg: float | None = Field(None, ge=20, le=400)
     notes: str | None = Field(None, max_length=2000)
 
@@ -334,6 +336,14 @@ class PlanProgressOut(BaseModel):
     done: list[PlanDayDone]
 
 
+class ProgressionRuleOut(Out):
+    id: uuid.UUID
+    slug: str | None
+    name: str
+    type: str
+    params: dict[str, Any]
+
+
 class ActivePlanIn(BaseModel):
     program_id: uuid.UUID | None
 
@@ -461,3 +471,60 @@ class SessionSummaryOut(BaseModel):
     records: list[SummaryRecord]
     previous_date: date | None
     previous_tonnage_kg: float | None
+
+
+class BodyConsentIn(BaseModel):
+    consent: bool
+
+
+class MeasurementIn(BaseModel):
+    id: uuid.UUID | None = None
+    measured_at: datetime | None = None
+    weight_kg: float | None = Field(None, ge=20, le=400)
+    body_fat_pct: float | None = Field(None, ge=2, le=70)
+    waist_cm: float | None = Field(None, ge=30, le=250)
+    chest_cm: float | None = Field(None, ge=30, le=250)
+    arm_cm: float | None = Field(None, ge=10, le=100)
+    thigh_cm: float | None = Field(None, ge=20, le=150)
+    hip_cm: float | None = Field(None, ge=30, le=250)
+    notes: str | None = Field(None, max_length=500)
+
+
+class MeasurementOut(Out):
+    id: uuid.UUID
+    measured_at: datetime
+    weight_kg: float | None
+    body_fat_pct: float | None
+    waist_cm: float | None
+    chest_cm: float | None
+    arm_cm: float | None
+    thigh_cm: float | None
+    hip_cm: float | None
+    notes: str | None
+
+
+class ProgressPhotoOut(Out):
+    id: uuid.UUID
+    pose: str
+    taken_at: datetime
+    notes: str | None
+
+
+class PhotoReminderOut(BaseModel):
+    pose: str
+    last_taken: str | None
+    days_since: int | None
+    due: bool
+
+
+class BodyOut(BaseModel):
+    consent: bool
+    measurements: list[MeasurementOut]
+    photos: list[ProgressPhotoOut]
+    reminders: list[PhotoReminderOut]
+
+
+class PhotoPairOut(BaseModel):
+    before_id: uuid.UUID
+    after_id: uuid.UUID
+    days_between: int

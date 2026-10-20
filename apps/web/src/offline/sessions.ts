@@ -113,6 +113,14 @@ export async function completeDay(day: PlanDay): Promise<Session> {
   return s;
 }
 
+/** Przypięcie treningu do dnia planu (zalicza go) albo odpięcie (day = null). */
+export async function assignDay(s: Session, day: PlanDay | null): Promise<Session> {
+  const next: Session = { ...s, program_day_id: day?.id ?? null, day_name: day?.name ?? null };
+  await save(next);
+  await enqueue({ method: "PATCH", path: `/sessions/${s.id}`, body: { program_day_id: next.program_day_id }, sessionId: s.id });
+  return next;
+}
+
 export const DAY_DONE_NOTE = "Dzień planu zaliczony bez zapisu serii.";
 
 /** Treningi, które jeszcze czekają na wysłanie (np. zaliczone bez sieci). */

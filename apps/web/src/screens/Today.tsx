@@ -3,6 +3,7 @@ import { useState, type ReactNode } from "react";
 import { errorText, type CalendarEvent, type Exercise, type Me, type MuscleVolume, type Plan, type PlanDay, type PlanListItem, type PlanProgress } from "../api";
 import { go, href } from "../app/router";
 import { useLoad } from "../app/useLoad";
+import { listEvents } from "../offline/events";
 import { cachedGet, listSessions, pendingSessions, startSession } from "../offline/sessions";
 import { IconChevronRight, IconDumbbell, IconFlame, IconGrid, IconPlay, IconPlus } from "../ui/icons";
 import { Button, Card, Empty, ErrorText, Loading, Screen, SectionTitle, longDate, sets } from "../ui/kit";
@@ -264,7 +265,7 @@ export function Today({ me }: { me: Me }) {
   const cal = useLoad(() => cachedGet<{ week_streak: number }>(`/calendar?start=${iso(monday)}&end=${iso(today)}`), []);
   const plan = useLoad(() => loadActivePlan().catch(() => null), []);
   const in14 = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 14);
-  const upcoming = useLoad(() => cachedGet<CalendarEvent[]>(`/events?start=${iso(today)}&end=${iso(in14)}`).catch(() => []), []);
+  const upcoming = useLoad(() => listEvents(iso(today), iso(in14)).catch(() => [] as CalendarEvent[]), []);
   const nextEvent = upcoming.data?.[0];
   const [busy, setBusy] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);

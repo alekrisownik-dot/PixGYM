@@ -386,3 +386,39 @@ export interface CalendarEvent {
   kind: EventKind;
   note: string | null;
 }
+
+export type Pose = "front" | "side" | "back" | "other";
+
+export interface Measurement {
+  id: string;
+  measured_at: string;
+  weight_kg: number | null;
+  body_fat_pct: number | null;
+  waist_cm: number | null;
+  chest_cm: number | null;
+  arm_cm: number | null;
+  thigh_cm: number | null;
+  hip_cm: number | null;
+  notes: string | null;
+}
+
+export interface ProgressPhoto {
+  id: string;
+  pose: Pose;
+  taken_at: string;
+  notes: string | null;
+}
+
+/** Moduł sylwetki: zgoda, pomiary, zdjęcia i przypomnienia (co 4 tygodnie na pozę). */
+export interface BodyData {
+  consent: boolean;
+  measurements: Measurement[];
+  photos: ProgressPhoto[];
+  reminders: { pose: Pose; last_taken: string | null; days_since: number | null; due: boolean }[];
+}
+
+export interface PhotoPair {
+  before_id: string;
+  after_id: string;
+  days_between: number;
+}

@@ -13,11 +13,13 @@ import { Bit } from "../ui/mascot";
 import { Sheet } from "../ui/sheet";
 import { getTheme } from "../ui/theme";
 import { toast } from "../ui/toast";
-import { ExerciseArt } from "../ui/exercise-art";
+import { ExerciseArt, sceneFor } from "../ui/exercise-art";
 import { ExerciseInfo } from "./ExerciseInfo";
 import { ExercisePicker } from "./ExercisePicker";
 import { blockText, schemeText } from "./plan-format";
 import { RestBar, restFor, setRestFor, useRestTimer } from "./rest";
+import { suggest, type Rule } from "./suggest";
+import { loadActivePlan } from "./Today";
 
 const DEFAULT_PLATES = { "25": 4, "20": 2, "15": 2, "10": 2, "5": 2, "2.5": 2, "1.25": 2 };
 
@@ -59,6 +61,8 @@ export function Workout({ id }: { id: string }) {
   const catalogLoad = useLoad(() => cachedGet<Exercise[]>("/exercises"), []);
   const { data: recent } = useLoad(() => cachedGet<{ id: string }[]>("/progress/exercises"), []);
   const { data: settings } = useLoad(() => cachedGet<Settings>("/me/settings"), []);
+  const { data: active } = useLoad(() => loadActivePlan().catch(() => null), []);
+  const { data: rules } = useLoad(() => cachedGet<Rule[]>("/progression-rules").catch(() => [] as Rule[]), []);
   const [picking, setPicking] = useState(false);
   const [menu, setMenu] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -206,6 +210,7 @@ export function Workout({ id }: { id: string }) {
           barKg={settings?.bar_weight_kg ?? 20}
           plates={settings?.plate_inventory ?? DEFAULT_PLATES}
           restS={se.target?.rest_s ?? restFor(se.exercise_id, defaultRest)}
+          rule={rules?.find((r) => r.id === se.target?.progression_rule_id)}
           open={openId === se.id}
           onToggle={() => setOpenId(openId === se.id ? "" : se.id)}
           onSession={setSession}
@@ -234,6 +239,27 @@ export function Workout({ id }: { id: string }) {
         <Sheet title="Trening" onClose={() => setMenu(false)}>
           <div className="grid gap-3">
             <BodyweightRow session={session} highlight={needsBodyweight} onSaved={setSession} />
+            {active && active.plan.days.length > 0 && (
+              <div className="grid gap-2">
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted">Zalicz jako dzień planu · {active.plan.name}</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {active.plan.days.map((d) => {
+                    const on = session.program_day_id === d.id;
+                    return (
+                      <button
+                        key={d.id}
+                        onClick={() => void act(async () => setSession(await local.assignDay(session, on ? null : d)))}
+                        className={`min-h-10 rounded-full border px-3.5 font-mono text-[14px] font-semibold ${on ? "border-accent bg-accent text-accent-ink" : "border-line text-muted"}`}
+                      >
+                        {on && "✓ "}
+                        {d.name}
+                      </button>
+                    );
+                  })}
+                </div>
+                <span className="text-sm text-muted">Trening zrobiony „bez planu” też może zaliczyć dzień. Dotknij zaznaczonego, żeby odpiąć.</span>
+              </div>
+            )}
             <Button variant="danger" onClick={() => void remove()}>
               <IconTrash size={18} /> Usuń cały trening
             </Button>
@@ -346,6 +372,7 @@ function ExerciseCard({
   barKg,
   plates: inventory,
   restS,
+  rule,
   open,
   onToggle,
   onSession,
@@ -358,6 +385,7 @@ function ExerciseCard({
   barKg: number;
   plates: Record<string, number>;
   restS: number;
+  rule?: Rule;
   open: boolean;
   onToggle: () => void;
   onSession: (s: Session) => void;
@@ -404,12 +432,20 @@ function ExerciseCard({
   const pendingCount = Math.max(0, base - se.sets.length) + extra;
   const pendingKeys = Array.from({ length: pendingCount }, (_, i) => `new-${se.sets.length + i}`);
   const lastSaved = [...se.sets].reverse().find((s) => s.set_type !== "warmup") ?? se.sets.at(-1);
+  const isLower = ["squat", "deadlift", "legmachine", "lunge", "hipthrust"].includes(sceneFor(exercise ?? { name: se.name }));
+  const sugg = se.tracking === "weight_reps" ? suggest(se.target, last, rule, isLower) : null;
 
   /** Podpowiedź (szary tekst) dla wiersza na pozycji idx. */
   function hint(idx: number): { a: string; b: string } {
     const prev = prevSets[idx];
     const from = lastSaved ?? prev ?? lastWorking;
-    const scheme = se.target?.set_scheme?.[idx - (se.sets.length - done)];
+    const pos = idx - (se.sets.length - done);
+    // Podpowiedź z progresji ma pierwszeństwo, dopóki nie zapiszesz serii z innym ciężarem.
+    const s = sugg?.sets[Math.min(pos, sugg.sets.length - 1)];
+    if (s && (!lastSaved || lastSaved.weight_kg === s.weight_kg)) {
+      return { a: s.weight_kg != null ? kg(perSide ? s.weight_kg / 2 : s.weight_kg, 2) : "", b: String(s.reps) };
+    }
+    const scheme = se.target?.set_scheme?.[pos];
     const reps = scheme?.reps ?? se.target?.rep_max ?? se.target?.rep_min ?? prev?.reps ?? from?.reps;
     return { a: from ? valueA(from, se.tracking, perSide) : "", b: reps != null ? String(reps) : "" };
   }
@@ -522,7 +558,7 @@ function ExerciseCard({
   const sheetDraft = sheet?.kind === "set" ? (drafts[sheet.key] ?? {}) : {};
 
   return (
-    <section id={`ex-${se.id}`} className={`card scroll-mt-28 grid gap-2.5 p-3 transition ${open ? "glow" : ""}`}>
+    <section id={`ex-${se.id}`} className={`card scroll-mt-28 grid grid-cols-[minmax(0,1fr)] gap-2.5 p-3 transition ${open ? "glow" : ""}`}>
       <div className="flex items-start gap-2">
         <button onClick={onToggle} className="shrink-0" aria-hidden tabIndex={-1}>
           <ExerciseArt exercise={exercise ?? { name: se.name, tracking: se.tracking }} size={58} />
@@ -535,6 +571,12 @@ function ExerciseCard({
             {lastWorking && <span className="text-cyan">ost. {setLabel(lastWorking, se.tracking, perSide)}</span>}
             {!se.target && !lastWorking && <span className="text-muted">pierwszy raz · powodzenia</span>}
           </p>
+          {sugg && sugg.change !== 0 && open && (
+            <p className={`mt-1 inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 font-mono text-[12px] font-semibold ${sugg.change > 0 ? "bg-amber/15 text-amber" : "bg-cyan/15 text-cyan"}`}>
+              {sugg.change > 0 ? "↑" : "↓"} dziś {kg(perSide ? sugg.sets[0]!.weight_kg! / 2 : sugg.sets[0]!.weight_kg!)} kg{perSide ? "/str." : ""}
+            </p>
+          )}
+          {sugg && sugg.change !== 0 && open && <p className="mt-0.5 text-[13px] leading-snug text-muted">{sugg.reason}</p>}
         </button>
         <span className={`num mt-0.5 shrink-0 rounded-full px-2.5 py-0.5 text-sm font-bold ${allDone ? "bg-accent text-accent-ink" : "bg-surface-2 text-fg"}`}>
           {planned ? `${done}/${planned}` : done}

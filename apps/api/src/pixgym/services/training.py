@@ -228,6 +228,12 @@ def update_session(
     _session_row(conn, session_id)
     if not changes:
         return
+    day_id = changes.get("program_day_id")
+    if (
+        day_id is not None
+        and not conn.execute(select(ProgramDay.id).where(ProgramDay.id == day_id)).first()
+    ):
+        raise NotFound
     conn.execute(update(WorkoutSession).where(WorkoutSession.id == session_id).values(**changes))
     # Masa ciała zmienia ciężar ćwiczeń z masą ciała, a więc i rekordy.
     if "bodyweight_kg" in changes:

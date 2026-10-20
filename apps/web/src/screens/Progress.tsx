@@ -7,6 +7,7 @@ import { cachedGet, listSessions } from "../offline/sessions";
 import { IconArrowDown, IconArrowUp, IconChevronRight } from "../ui/icons";
 import { ErrorText, Loading, ProgressBar, Screen, SectionTitle, Segmented, Tile, kg, plural, shortDate, tonnage } from "../ui/kit";
 import { BitSays } from "../ui/mascot";
+import { Body } from "./Body";
 import { ExerciseArt } from "../ui/exercise-art";
 
 const TIERS = 8;
@@ -198,9 +199,10 @@ function Stats() {
 }
 
 const TABS = [
-  ["stats", "Statystyki"],
+  ["stats", "Średnie"],
   ["ranks", "Rangi"],
   ["exercises", "Ćwiczenia"],
+  ["body", "Sylwetka"],
 ] as const;
 type Tab = (typeof TABS)[number][0];
 
@@ -216,6 +218,7 @@ export function Progress() {
       <Segmented value={tab} options={TABS} onChange={setTab} full />
 
       {tab === "stats" && <Stats />}
+      {tab === "body" && <Body />}
 
       {tab === "ranks" && (
         <>

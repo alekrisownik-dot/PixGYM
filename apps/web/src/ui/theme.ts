@@ -24,6 +24,11 @@ let current: Theme = read();
 function apply(t: Theme) {
   document.documentElement.dataset.theme = t;
   document.querySelector('meta[name="theme-color"]')?.setAttribute("content", META[t]);
+  // Ikona w karcie i na ekranie głównym (manifest czyta to ciasteczko po stronie serwera).
+  const red = t === "red";
+  document.querySelector('link[rel="icon"]')?.setAttribute("href", red ? "/icon-red.svg" : "/icon.svg");
+  document.querySelector('link[rel="apple-touch-icon"]')?.setAttribute("href", red ? "/icon-red-192.png" : "/icon-192.png");
+  document.cookie = `pixgym_theme=${t}; path=/; max-age=31536000; samesite=lax`;
 }
 
 apply(current);

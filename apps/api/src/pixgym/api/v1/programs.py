@@ -7,7 +7,14 @@ from fastapi import APIRouter, HTTPException, status
 
 from pixgym.api.deps import UserId
 from pixgym.api.v1.training import _run
-from pixgym.schemas import ActivePlanIn, PlanIn, PlanListItem, PlanOut, PlanProgressOut
+from pixgym.schemas import (
+    ActivePlanIn,
+    PlanIn,
+    PlanListItem,
+    PlanOut,
+    PlanProgressOut,
+    ProgressionRuleOut,
+)
 from pixgym.services import programs
 from pixgym.services.programs import PlanError
 
@@ -19,6 +26,11 @@ async def _plans(user_id: uuid.UUID, fn, *args):
         return await _run(user_id, fn, *args)
     except PlanError as e:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(e)) from None
+
+
+@router.get("/progression-rules", response_model=list[ProgressionRuleOut])
+async def list_rules(user_id: UserId) -> list:
+    return await _plans(user_id, programs.list_rules)
 
 
 @router.get("/programs", response_model=list[PlanListItem])

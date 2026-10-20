@@ -1,19 +1,20 @@
+import json
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 
 from pixgym.api.deps import csrf_middleware
-from pixgym.api.v1 import analytics, auth, catalog, events, programs, progress, training
+from pixgym.api.v1 import analytics, auth, body, catalog, events, programs, progress, training
 from pixgym.core.config import get_settings
 from pixgym.db.session import get_engine
 
 app = FastAPI(title="PixGYM", docs_url="/api/docs", openapi_url="/api/openapi.json")
 app.middleware("http")(csrf_middleware)
 
-for module in (auth, training, catalog, programs, progress, analytics, events):
+for module in (auth, training, catalog, programs, progress, analytics, events, body):
     app.include_router(module.router, prefix="/api/v1")
 
 # Front sam w sobie nie ładuje nic z zewnątrz, więc CSP może być ścisła.
@@ -46,6 +47,19 @@ async def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
+def _red_manifest(file: Path) -> Response:
+    """Motyw Red Team (ciasteczko ustawia front): czerwone ikony i kolory aplikacji na telefonie."""
+    manifest = json.loads(file.read_text())
+    manifest["background_color"] = manifest["theme_color"] = "#0e0909"
+    for icon in manifest["icons"]:
+        icon["src"] = icon["src"].replace("/icon", "/icon-red", 1)
+    return Response(
+        json.dumps(manifest, ensure_ascii=False),
+        media_type="application/manifest+json",
+        headers={"cache-control": "no-cache"},
+    )
+
+
 def _mount_web(web_dir: Path) -> None:
     """Zbudowany front (PWA). Nieznane ścieżki poza /api dostają index.html (routing w JS)."""
     index = web_dir / "index.html"
@@ -53,9 +67,11 @@ def _mount_web(web_dir: Path) -> None:
     app.mount("/assets", StaticFiles(directory=web_dir / "assets", check_dir=False), name="assets")
 
     @app.get("/{path:path}", include_in_schema=False)
-    async def spa(path: str) -> FileResponse:
+    async def spa(path: str, request: Request) -> Response:
         if path.startswith("api/"):
             raise HTTPException(404)
+        if path == "manifest.webmanifest" and request.cookies.get("pixgym_theme") == "red":
+            return _red_manifest(web_dir / path)
         file = (web_dir / path).resolve()
         if path and file.is_file() and file.is_relative_to(web_dir.resolve()):
             # Service worker i manifest muszą być zawsze świeże, inaczej aktualizacja nie dojdzie.

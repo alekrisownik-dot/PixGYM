@@ -19,6 +19,7 @@ from pixgym.models import (
     ProgramDay,
     ProgramExercise,
     ProgramVersion,
+    ProgressionRule,
     UserSettings,
     WorkoutSession,
 )
@@ -46,6 +47,20 @@ def _active_id(conn: Connection, user_id: uuid.UUID) -> uuid.UUID | None:
     return conn.execute(
         select(UserSettings.active_program_id).where(UserSettings.user_id == user_id)
     ).scalar()
+
+
+def list_rules(conn: Connection) -> list[dict[str, Any]]:
+    """Reguły progresji (wbudowane i własne): front liczy z nich podpowiedź ciężaru."""
+    rows = conn.execute(
+        select(
+            ProgressionRule.id,
+            ProgressionRule.slug,
+            ProgressionRule.name,
+            ProgressionRule.type,
+            ProgressionRule.params,
+        )
+    ).all()
+    return [r._asdict() for r in rows]
 
 
 def list_programs(conn: Connection, user_id: uuid.UUID) -> list[dict[str, Any]]:

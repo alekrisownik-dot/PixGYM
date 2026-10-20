@@ -3,13 +3,14 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { errorText, type Exercise, type Plan, type PlanDay, type PlanProgress } from "../api";
 import { href } from "../app/router";
 import { useLoad } from "../app/useLoad";
-import { cachedGet, completeDay } from "../offline/sessions";
+import { assignDay, cachedGet, completeDay, deleteSession, loadSession } from "../offline/sessions";
 import { ExerciseArt } from "../ui/exercise-art";
 import { IconCheck, IconPlay } from "../ui/icons";
 import { Button, ErrorText } from "../ui/kit";
 import { Bit } from "../ui/mascot";
 import { quipOfDay } from "../ui/quips";
 import { getTheme } from "../ui/theme";
+import { Sheet } from "../ui/sheet";
 import { toast } from "../ui/toast";
 import { WEEKDAYS_SHORT, weekdayOf } from "./plan-format";
 
@@ -66,7 +67,8 @@ export function PlanLoop({
   const storeKey = `${plan.id}:${weekKey}`;
 
   // Zaliczone według serwera (i treningów czekających na wysłanie), w kolejności zaliczenia.
-  const serverDone = [...new Set((progress?.done ?? []).map((d) => d.day_index))];
+  const [undone, setUndone] = useState<Set<number>>(new Set());
+  const serverDone = [...new Set((progress?.done ?? []).map((d) => d.day_index))].filter((i) => !undone.has(i));
   const when = new Map((progress?.done ?? []).map((d) => [d.day_index, weekdayOf(new Date(`${d.local_date}T12:00:00`))]));
 
   // Pokazane już jako zaliczone. Nowe zaliczenia (np. po powrocie z treningu) dostają animację.
@@ -74,7 +76,9 @@ export function PlanLoop({
     const seen = readSeen(storeKey);
     return seen ? serverDone.filter((i) => seen.includes(i)) : serverDone;
   });
-  const [local, setLocal] = useState<Map<number, number>>(new Map());
+  // Zaliczone przyciskiem na tym ekranie: dzień planu → dzień tygodnia i ID treningu.
+  const [local, setLocal] = useState<Map<number, { wd: number; id: string }>>(new Map());
+  const [undoing, setUndoing] = useState<number | null>(null);
   const [stamping, setStamping] = useState<number | null>(null);
   const [picked, setPicked] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -116,8 +120,13 @@ export function PlanLoop({
   async function markDone(i: number) {
     setError(null);
     try {
-      await completeDay(plan.days[i]!);
-      setLocal((m) => new Map(m).set(i, weekdayOf(new Date())));
+      const s = await completeDay(plan.days[i]!);
+      setUndone((u) => {
+        const next = new Set(u);
+        next.delete(i);
+        return next;
+      });
+      setLocal((m) => new Map(m).set(i, { wd: weekdayOf(new Date()), id: s.id }));
       const count = doneAll.length + 1;
       if (count >= n)
         toast({
@@ -126,6 +135,36 @@ export function PlanLoop({
           body: getTheme() === "red" ? quipOfDay(count) : `Wszystkie ${n} treningi z planu. Pętla rusza od poniedziałku.`,
         });
       else toast({ tone: "info", title: `Zaliczone: ${plan.days[i]!.name}`, body: `${count}/${n} w tym tygodniu` });
+    } catch (e) {
+      setError(errorText(e));
+    }
+  }
+
+  /** Cofnięcie: puste zaliczenie znika, zapisany trening zostaje w historii, tylko bez dnia planu. */
+  async function undo(i: number) {
+    setError(null);
+    setUndoing(null);
+    const ids = [...(progress?.done ?? []).filter((d) => d.day_index === i).map((d) => d.session_id), ...(local.get(i) ? [local.get(i)!.id] : [])];
+    try {
+      for (const id of new Set(ids)) {
+        const s = await loadSession(id).catch(() => null);
+        if (!s) continue;
+        if (s.exercises.every((e) => e.sets.length === 0)) await deleteSession(s);
+        else await assignDay(s, null);
+      }
+      setUndone((u) => new Set(u).add(i));
+      setLocal((m) => {
+        const next = new Map(m);
+        next.delete(i);
+        return next;
+      });
+      setShown((s) => {
+        const next = s.filter((x) => x !== i);
+        writeSeen(storeKey, next);
+        return next;
+      });
+      setPicked(i);
+      toast({ tone: "info", title: `Cofnięto: ${plan.days[i]!.name}`, body: "Dzień wrócił do koła." });
     } catch (e) {
       setError(errorText(e));
     }
@@ -162,7 +201,7 @@ export function PlanLoop({
       </div>
 
       {/* Koło treningów: „teraz” zawsze na górze; po zaliczeniu całość obraca się do następnego. */}
-      <div className="relative mx-auto aspect-square w-full max-w-[340px]" aria-label={`Zaliczone ${shown.length} z ${n} w tym tygodniu`}>
+      <div className="relative mx-auto aspect-square w-full max-w-[340px] overflow-hidden" aria-label={`Zaliczone ${shown.length} z ${n} w tym tygodniu`}>
         <svg viewBox="-170 -170 340 340" className="absolute inset-0 h-full w-full" aria-hidden>
           <circle r={R} fill="none" stroke="var(--color-line)" strokeWidth="2" strokeDasharray="3 7" />
           <circle r="54" fill="none" stroke="var(--color-surface-2)" strokeWidth="10" />
@@ -211,15 +250,15 @@ export function PlanLoop({
           {plan.days.map((d, i) => {
             const isDone = shown.includes(i);
             const isTop = i === anchor;
-            const doneOn = when.get(i) ?? local.get(i);
+            const doneOn = when.get(i) ?? local.get(i)?.wd;
             return (
               <button
                 key={i}
-                onClick={() => !isDone && setPicked(i === baseAnchor ? null : i)}
-                disabled={isDone || stamping != null}
+                onClick={() => (isDone ? setUndoing(i) : setPicked(i === baseAnchor ? null : i))}
+                disabled={stamping != null}
                 className="absolute top-1/2 left-1/2"
                 style={{ width: node, height: node, margin: -node / 2, transform: `rotate(${i * step}deg) translateY(${-R}px)` }}
-                aria-label={`${d.name}${isDone ? ", zaliczone" : ""}`}
+                aria-label={`${d.name}${isDone ? ", zaliczone (dotknij, żeby cofnąć)" : ""}`}
               >
                 {/* Napis zawsze prosto: przeciwny obrót, z tym samym czasem przejścia co koło. */}
                 <span
@@ -295,6 +334,17 @@ export function PlanLoop({
         )
       )}
       <ErrorText>{error}</ErrorText>
+      {undoing != null && (
+        <Sheet title={`Cofnąć zaliczenie: ${plan.days[undoing]!.name}?`} onClose={() => setUndoing(null)}>
+          <div className="grid gap-3">
+            <p className="text-[15px] text-muted">Dzień wróci do koła. Puste zaliczenie zniknie, a zapisany trening zostanie w historii, tylko bez przypięcia do planu.</p>
+            <Button onClick={() => void undo(undoing)}>Cofnij zaliczenie</Button>
+            <Button variant="ghost" onClick={() => setUndoing(null)}>
+              Zostaw
+            </Button>
+          </div>
+        </Sheet>
+      )}
     </section>
   );
 }

@@ -573,6 +573,14 @@ def test_copy_template_edit_blocks_and_activate(new_client, admin):
     assert all(p["id"] != mine["id"] for p in api.get("/api/v1/programs").json())
 
 
+def test_progression_rules_listed(new_client, admin):
+    api = new_client()
+    login(api, admin)
+    rules = {r["slug"]: r for r in api.get("/api/v1/progression-rules").json()}
+    assert rules["double_progression"]["type"] == "double"
+    assert rules["double_progression"]["params"]["increment_upper_kg"] == 2.5
+
+
 def test_plans_are_private(new_client, owner_engine, admin):
     alice = new_client()
     login(alice, admin)
@@ -696,3 +704,76 @@ def test_custom_exercise_per_side(new_client, admin):
     assert r.json()["per_side"] is False
     builtin = next(e for e in api.get("/api/v1/exercises").json() if e["slug"] == "bench_press")
     assert builtin["per_side"] is False
+
+
+def test_body_module(new_client, owner_engine, admin):
+    api = new_client()
+    login(api, admin)
+    start = api.get("/api/v1/body").json()
+    assert start["consent"] is False
+    # Bez zgody (dane o zdrowiu) nic się nie zapisze.
+    assert api.post("/api/v1/body/measurements", json={"weight_kg": 82}).status_code == 400
+    assert api.post("/api/v1/body/photos", content=jpeg_bytes()).status_code == 400
+
+    assert api.put("/api/v1/body/consent", json={"consent": True}).status_code == 204
+    assert api.post("/api/v1/body/measurements", json={"notes": "x"}).status_code == 400
+    m = api.post("/api/v1/body/measurements", json={"weight_kg": 82.4, "waist_cm": 84})
+    assert m.status_code == 201, m.text
+    assert m.json()["weight_kg"] == 82.4
+
+    before = api.post(
+        "/api/v1/body/photos?pose=front&taken_at=2026-07-01T09:00:00Z", content=jpeg_bytes()
+    )
+    assert before.status_code == 201, before.text
+    after = api.post("/api/v1/body/photos?pose=front", content=jpeg_bytes()).json()
+    thumb = api.get(f"/api/v1/body/photos/{after['id']}")
+    assert thumb.status_code == 200 and thumb.headers["content-type"] == "image/jpeg"
+
+    pair = api.get("/api/v1/body/compare?pose=front").json()
+    assert pair["before_id"] == before.json()["id"] and pair["after_id"] == after["id"]
+    assert api.get("/api/v1/body/compare?pose=side").json() is None
+
+    data = api.get("/api/v1/body").json()
+    assert len(data["photos"]) == 2 and len(data["measurements"]) == 1
+    front = next(r for r in data["reminders"] if r["pose"] == "front")
+    assert front["due"] is False
+    badges = {b["slug"]: b for b in api.get("/api/v1/badges").json()}
+    assert badges["snapshot"]["earned_at"] and badges["git_diff"]["earned_at"]
+
+    # Cudze zdjęcia i pomiary wyglądają jak nieistniejące.
+    bob = new_client()
+    register(bob, invite(owner_engine, admin), "bob-body")
+    assert bob.get(f"/api/v1/body/photos/{after['id']}").status_code == 404
+    assert bob.get("/api/v1/body").json()["photos"] == []
+    assert bob.delete(f"/api/v1/body/measurements/{m.json()['id']}").status_code == 404
+
+    assert api.delete(f"/api/v1/body/photos/{after['id']}").status_code == 204
+    assert api.get(f"/api/v1/body/photos/{after['id']}").status_code == 404
+    assert api.delete(f"/api/v1/body/measurements/{m.json()['id']}").status_code == 204
+
+
+def test_attach_and_detach_workout_from_plan_day(new_client, admin):
+    api = new_client()
+    login(api, admin)
+    days = [{"name": n, "blocks": []} for n in ("Klata", "Plecy")]
+    plan = api.post(
+        "/api/v1/programs", json={"name": "Pętla", "schedule": "flexible", "days": days}
+    ).json()
+    today = date.today()
+    monday = today - timedelta(days=today.weekday())
+    progress = f"/api/v1/programs/{plan['id']}/progress?start={monday}"
+
+    # Pusty trening „bez planu”, potem zaliczony jako Plecy.
+    sid = api.post("/api/v1/sessions", json={}).json()["id"]
+    day = plan["days"][1]["id"]
+    r = api.patch(f"/api/v1/sessions/{sid}", json={"program_day_id": day})
+    assert r.status_code == 200, r.text
+    assert r.json()["day_name"] == "Plecy"
+    assert [d["day_index"] for d in api.get(progress).json()["done"]] == [1]
+
+    # Cofnięcie zaliczenia: trening zostaje, dzień znów do zrobienia.
+    api.patch(f"/api/v1/sessions/{sid}", json={"program_day_id": None})
+    assert api.get(progress).json()["done"] == []
+    assert api.get(f"/api/v1/sessions/{sid}").status_code == 200
+    bad = api.patch(f"/api/v1/sessions/{sid}", json={"program_day_id": str(uuid7())})
+    assert bad.status_code == 404
