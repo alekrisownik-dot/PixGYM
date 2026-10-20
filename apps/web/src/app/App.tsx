@@ -51,10 +51,41 @@ function SyncBar() {
   );
 }
 
+const dayKey = () => new Date().toDateString();
+
+/**
+ * Telefon trzyma aplikację w pamięci całymi godzinami. Po północy albo po dłuższej nieobecności
+ * ekran pokazywałby wczorajszy dzień i stare dane, więc wtedy przeładowujemy bieżący ekran.
+ */
+function useFreshness(): number {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    let day = dayKey();
+    let hiddenAt = 0;
+    const bump = () => {
+      day = dayKey();
+      setTick((t) => t + 1);
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") hiddenAt = Date.now();
+      else if (dayKey() !== day || (hiddenAt && Date.now() - hiddenAt > 5 * 60_000)) bump();
+    };
+    // Północ przy otwartej aplikacji (sprawdzamy co minutę, timer usypiany z ekranem i tak nie trafi).
+    const timer = setInterval(() => dayKey() !== day && document.visibilityState === "visible" && bump(), 60_000);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
+  return tick;
+}
+
 export function App() {
   const [me, setMe] = useState<Me | null | undefined>(undefined);
   const [unreachable, setUnreachable] = useState(false);
   const route = useRoute();
+  const fresh = useFreshness();
 
   const loadMe = useCallback(() => {
     setUnreachable(false);
@@ -97,13 +128,14 @@ export function App() {
       <Toasts />
       <Celebrations />
       <SyncBar />
-      {route.name === "today" && <Today me={me} />}
-      {route.name === "history" && <History />}
+      {/* Klucz „fresh”: nowy dzień albo powrót po przerwie wczytuje ekran od nowa (trening zostaje). */}
+      {route.name === "today" && <Today key={fresh} me={me} />}
+      {route.name === "history" && <History key={fresh} />}
       {route.name === "workout" && <Workout key={route.id} id={route.id} />}
       {route.name === "summary" && <Summary key={route.id} id={route.id} />}
-      {route.name === "plans" && <Plans />}
+      {route.name === "plans" && <Plans key={fresh} />}
       {route.name === "plan" && <PlanEditor key={route.id} id={route.id} />}
-      {route.name === "progress" && <Progress />}
+      {route.name === "progress" && <Progress key={fresh} />}
       {route.name === "exercise" && <ExerciseProgress key={route.id} id={route.id} />}
       {route.name === "me" && (
         <MeScreen

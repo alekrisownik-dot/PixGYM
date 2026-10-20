@@ -10,9 +10,10 @@ import { Button, ErrorText } from "../ui/kit";
 import { Bit } from "../ui/mascot";
 import { quipOfDay } from "../ui/quips";
 import { getTheme } from "../ui/theme";
+import { muscleGroup } from "../ui/muscles";
 import { Sheet } from "../ui/sheet";
 import { toast } from "../ui/toast";
-import { WEEKDAYS_SHORT, weekdayOf } from "./plan-format";
+import { WEEKDAYS_SHORT, blockText, weekdayOf } from "./plan-format";
 
 /**
  * Plan elastyczny jako koło: treningi na okręgu, „teraz” zawsze na górze. Zaliczony dzień
@@ -185,9 +186,29 @@ export function PlanLoop({
     if (delta) setTurns((t) => t + delta);
   }, [anchor, n]);
 
-  const R = 116;
-  const node = n <= 4 ? 78 : n <= 6 ? 66 : 54;
+  const R = 118;
+  const node = n <= 4 ? 84 : n <= 6 ? 70 : 56;
   const ringC = 2 * Math.PI * 54;
+  // Przerwa w torze przy każdym węźle (stopnie), żeby łuki nie wchodziły pod kółka.
+  const gapDeg = ((node / 2 + 7) / R) * (180 / Math.PI);
+  const point = (deg: number) => [R * Math.sin((deg * Math.PI) / 180), -R * Math.cos((deg * Math.PI) / 180)] as const;
+  const arc = (from: number, to: number) => {
+    const [x1, y1] = point(from);
+    const [x2, y2] = point(to);
+    return `M ${x1.toFixed(1)} ${y1.toFixed(1)} A ${R} ${R} 0 ${to - from > 180 ? 1 : 0} 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+  };
+  // Kolor dnia: partia, która ma w nim najwięcej ćwiczeń.
+  const dayColor = (d: PlanDay) => {
+    const count = new Map<string, number>();
+    for (const b of d.blocks) {
+      const g = muscleGroup(byId.get(b.exercise_id)?.muscle);
+      if (g) count.set(g.color, (count.get(g.color) ?? 0) + 1);
+    }
+    return [...count.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "var(--color-line)";
+  };
+  const groupsOf = (d: PlanDay) =>
+    [...new Map(d.blocks.map((b) => muscleGroup(byId.get(b.exercise_id)?.muscle)).filter((g) => g != null).map((g) => [g!.name, g!])).values()];
+  const ease = "duration-[900ms] ease-[cubic-bezier(.3,1.25,.4,1)]";
 
   return (
     <section className="grid gap-3">
@@ -201,26 +222,23 @@ export function PlanLoop({
       </div>
 
       {/* Koło treningów: „teraz” zawsze na górze; po zaliczeniu całość obraca się do następnego. */}
-      <div className="relative mx-auto aspect-square w-full max-w-[340px] overflow-hidden" aria-label={`Zaliczone ${shown.length} z ${n} w tym tygodniu`}>
-        <svg viewBox="-170 -170 340 340" className="absolute inset-0 h-full w-full" aria-hidden>
-          <circle r={R} fill="none" stroke="var(--color-line)" strokeWidth="2" strokeDasharray="3 7" />
-          <circle r="54" fill="none" stroke="var(--color-surface-2)" strokeWidth="10" />
+      <div className="relative mx-auto aspect-square w-full max-w-[350px] overflow-hidden" aria-label={`Zaliczone ${shown.length} z ${n} w tym tygodniu`}>
+        {/* Środek: postęp tygodnia (pierścień), Bit i licznik; przy zaliczeniu pieczątka. */}
+        <svg viewBox="-175 -175 350 350" className="absolute inset-0 h-full w-full" aria-hidden>
+          <circle r="54" fill="var(--color-surface)" stroke="var(--color-surface-2)" strokeWidth="9" />
           <circle
             r="54"
             fill="none"
             stroke="var(--color-accent)"
-            strokeWidth="10"
+            strokeWidth="9"
             strokeLinecap="round"
             strokeDasharray={ringC}
             strokeDashoffset={ringC * (1 - shown.length / Math.max(1, n))}
             transform="rotate(-90)"
             className="transition-[stroke-dashoffset] duration-700 ease-out"
+            style={{ filter: "drop-shadow(0 0 6px rgb(var(--accent-rgb) / .5))" }}
           />
-          {/* Wskaźnik „teraz” nad kołem. */}
-          <path d={`M -9 ${-R - node / 2 - 16} L 9 ${-R - node / 2 - 16} L 0 ${-R - node / 2 - 5} Z`} fill="var(--color-accent)" />
         </svg>
-
-        {/* Środek: postęp tygodnia albo pieczątka przy zaliczeniu. */}
         <div className="absolute inset-0 grid place-items-center">
           {stamping != null ? (
             <div className="relative grid place-items-center">
@@ -231,26 +249,47 @@ export function PlanLoop({
                 <IconCheck size={48} strokeWidth={3.5} />
               </span>
             </div>
-          ) : weekDone ? (
-            <div className="pop grid justify-items-center">
-              <Bit mood="flex" size={70} />
-            </div>
           ) : (
             <div className="grid justify-items-center leading-none">
-              <span className="num text-[34px] font-bold">
-                {shown.length}
-                <span className="text-muted">/{n}</span>
-              </span>
-              <span className="mt-1 font-mono text-[11px] text-muted">ten tydzień</span>
+              <Bit mood={weekDone ? "flex" : "idle"} size={weekDone ? 60 : 44} />
+              {!weekDone && (
+                <span className="num mt-1 text-[22px] font-bold">
+                  {shown.length}
+                  <span className="text-muted">/{n}</span>
+                </span>
+              )}
             </div>
           )}
         </div>
 
-        <div className="absolute inset-0 transition-transform duration-[900ms] ease-[cubic-bezier(.3,1.25,.4,1)]" style={{ transform: `rotate(${-turns * step}deg)` }}>
+        <div className={`absolute inset-0 transition-transform ${ease}`} style={{ transform: `rotate(${-turns * step}deg)` }}>
+          {/* Tor: łuk za każdym dniem; zapala się, gdy dzień zaliczony. */}
+          {n > 1 && (
+            <svg viewBox="-175 -175 350 350" className="absolute inset-0 h-full w-full" aria-hidden>
+              {plan.days.map((_, i) => {
+                const done = shown.includes(i);
+                return (
+                  <path
+                    key={i}
+                    d={arc(i * step + gapDeg, (i + 1) * step - gapDeg)}
+                    fill="none"
+                    stroke={done ? "var(--color-accent)" : "var(--color-line)"}
+                    strokeWidth={done ? 5 : 3}
+                    strokeLinecap="round"
+                    strokeDasharray={done ? undefined : "2 7"}
+                    className="transition-[stroke] duration-500"
+                    style={done ? { filter: "drop-shadow(0 0 5px rgb(var(--accent-rgb) / .6))" } : undefined}
+                  />
+                );
+              })}
+            </svg>
+          )}
           {plan.days.map((d, i) => {
             const isDone = shown.includes(i);
-            const isTop = i === anchor;
+            const isTop = i === anchor && !weekDone;
             const doneOn = when.get(i) ?? local.get(i)?.wd;
+            const first = d.blocks[0];
+            const color = dayColor(d);
             return (
               <button
                 key={i}
@@ -260,27 +299,22 @@ export function PlanLoop({
                 style={{ width: node, height: node, margin: -node / 2, transform: `rotate(${i * step}deg) translateY(${-R}px)` }}
                 aria-label={`${d.name}${isDone ? ", zaliczone (dotknij, żeby cofnąć)" : ""}`}
               >
-                {/* Napis zawsze prosto: przeciwny obrót, z tym samym czasem przejścia co koło. */}
-                <span
-                  className="block h-full w-full transition-transform duration-[900ms] ease-[cubic-bezier(.3,1.25,.4,1)]"
-                  style={{ transform: `rotate(${-(i * step) + turns * step}deg)` }}
-                >
+                {/* Zawartość zawsze prosto: przeciwny obrót, z tym samym czasem przejścia co koło. */}
+                <span className={`block h-full w-full transition-transform ${ease}`} style={{ transform: `rotate(${-(i * step) + turns * step}deg)` }}>
                   <span
-                    className={`relative grid h-full w-full place-items-center rounded-full border-2 p-1 text-center transition duration-500 ${
-                      isDone
-                        ? "border-accent bg-accent text-accent-ink"
-                        : isTop
-                          ? `scale-110 border-accent bg-surface text-fg shadow-[0_0_28px_-4px_rgb(var(--accent-rgb)/.7)] ${stamping === i ? "loop-stamped" : ""}`
-                          : "border-line bg-surface text-muted"
+                    className={`relative grid h-full w-full place-items-center content-center gap-0.5 rounded-full border-[3px] p-1 text-center transition duration-500 ${
+                      isDone ? "border-accent bg-accent text-accent-ink" : isTop ? `${stamping === i ? "loop-stamped" : "loop-now"} scale-110 bg-surface text-fg` : "bg-surface text-muted"
                     }`}
+                    style={isDone ? undefined : { borderColor: isTop ? "var(--color-accent)" : color }}
                   >
-                    <span className={`line-clamp-2 font-mono font-bold leading-tight ${node < 60 ? "text-[10px]" : "text-[12.5px]"}`}>{d.name}</span>
-                    {isDone && (
-                      <span className="absolute -top-1 -right-1 grid size-6 place-items-center rounded-full bg-bg text-accent ring-2 ring-accent">
-                        <IconCheck size={14} strokeWidth={3.5} />
-                      </span>
+                    {isDone ? (
+                      <IconCheck size={node * 0.42} strokeWidth={3.5} />
+                    ) : (
+                      first && <ExerciseArt exercise={byId.get(first.exercise_id) ?? first} size={node * 0.5} className="!bg-transparent" />
                     )}
-                    {isDone && doneOn != null && <span className="absolute -bottom-2 rounded-full bg-bg px-1.5 font-mono text-[10px] text-accent">{WEEKDAYS_SHORT[doneOn]!.toLowerCase()}</span>}
+                    <span className={`max-w-full truncate px-1 font-mono font-bold leading-none ${node < 64 ? "text-[9.5px]" : "text-[11.5px]"}`}>{d.name}</span>
+                    {isTop && <span className="absolute -top-3 rounded-full bg-accent px-2 py-0.5 font-mono text-[9.5px] font-bold text-accent-ink shadow">TERAZ</span>}
+                    {isDone && doneOn != null && <span className="absolute -bottom-2.5 rounded-full bg-bg px-1.5 font-mono text-[10px] font-semibold text-accent ring-1 ring-accent/60">{WEEKDAYS_SHORT[doneOn]!.toLowerCase()}</span>}
                   </span>
                 </span>
               </button>
@@ -298,22 +332,45 @@ export function PlanLoop({
       ) : (
         current && (
           <div className="card glow grid gap-3 p-4">
-            <div>
-              <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-accent">
-                {stamping != null ? "zaliczone!" : picked != null ? "wybrany" : "teraz"}
-                {stamping == null && !currentDone && ` · ${todoCount > 1 ? `potem jeszcze ${todoCount - 1}` : "ostatni w tym tygodniu"}`}
-              </p>
-              <p className="font-mono text-[26px] leading-tight font-bold">{current.name}</p>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-mono text-[11px] font-semibold uppercase tracking-wider text-accent">
+                  {stamping != null ? "zaliczone!" : picked != null ? "wybrany" : "teraz"}
+                  {stamping == null && !currentDone && ` · ${todoCount > 1 ? `potem jeszcze ${todoCount - 1}` : "ostatni w tym tygodniu"}`}
+                </p>
+                <p className="truncate font-mono text-[26px] leading-tight font-bold">{current.name}</p>
+              </div>
+              <span className="num shrink-0 rounded-full bg-surface-2 px-2.5 py-1 text-[13px] text-muted">{current.blocks.length} ćw.</span>
             </div>
-            {current.blocks.length > 0 && (
-              <ul className="grid gap-1.5">
-                {current.blocks.map((b, j) => (
-                  <li key={j} className="flex items-center gap-2.5 text-[15px]">
-                    <ExerciseArt exercise={byId.get(b.exercise_id) ?? b} size={40} />
-                    <span className="min-w-0 flex-1 truncate">{b.name}</span>
-                  </li>
+            {groupsOf(current).length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {groupsOf(current).map((g) => (
+                  <span key={g.name} className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[13px] font-semibold" style={{ borderColor: g.color, color: g.color }}>
+                    <span className="size-2 rounded-full" style={{ background: g.color }} />
+                    {g.name}
+                  </span>
                 ))}
-              </ul>
+              </div>
+            )}
+            {current.blocks.length > 0 && (
+              <details className="group">
+                <summary className="flex cursor-pointer list-none items-center gap-1.5">
+                  <span className="flex flex-wrap gap-1.5">
+                    {current.blocks.map((b, j) => (
+                      <ExerciseArt key={j} exercise={byId.get(b.exercise_id) ?? b} size={44} />
+                    ))}
+                  </span>
+                </summary>
+                <ul className="mt-2 grid gap-1 border-t border-line/60 pt-2">
+                  {current.blocks.map((b, j) => (
+                    <li key={j} className="flex items-baseline justify-between gap-3 text-[15px]">
+                      <span className="min-w-0 truncate">{b.name}</span>
+                      <span className="num shrink-0 text-[13px] text-muted">{blockText(b)}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-1 text-center font-mono text-[11px] text-muted group-open:hidden">dotknij obrazków, żeby zobaczyć listę</p>
+              </details>
             )}
             <div className="grid grid-cols-[1fr_auto] gap-2">
               <Button className="min-h-14 text-lg" onClick={() => onStart(current)} disabled={busy || stamping != null}>
@@ -329,7 +386,6 @@ export function PlanLoop({
                 <IconCheck size={20} strokeWidth={3} /> Zalicz
               </Button>
             </div>
-            {n > 1 && stamping == null && <p className="text-center text-[13px] text-muted">Dotknij innego treningu na kole, żeby zrobić go teraz.</p>}
           </div>
         )
       )}

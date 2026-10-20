@@ -83,6 +83,16 @@ BADGES = (
     BadgeDef("full_stack", "Full Stack", "Ranga Exploit Dev we wszystkich bojach rankingowych"),
     BadgeDef("snapshot", "Snapshot", "Pierwsze zdjęcie postępu"),
     BadgeDef("git_diff", "git diff", "Zdjęcia w tej samej pozie w odstępie 12 tygodni"),
+    BadgeDef("stack_overflow", "Stack Overflow", "50 treningów"),
+    BadgeDef("mainframe", "Mainframe", "100 treningów"),
+    BadgeDef("overclock", "Overclock", "10 ton na jednym treningu"),
+    BadgeDef("big_data", "Big Data", "100 ton łącznie"),
+    BadgeDef("rootkit", "Rootkit", "25 pobitych rekordów"),
+    BadgeDef("load_balancer", "Load Balancer", "4 tygodnie z rzędu po co najmniej 3 treningi"),
+    BadgeDef("ctrl_z", "Ctrl+Z", "Powrót na salę po co najmniej 2 tygodniach przerwy"),
+    BadgeDef("night_shift", "Night Shift", "Trening zaczęty po 22:00"),
+    BadgeDef("cron_job", "Cron 06:00", "Trening zaczęty przed 7:00"),
+    BadgeDef("weekend_deploy", "Weekend Deploy", "10 treningów w soboty i niedziele"),
 )
 
 BRUTE_FORCE_SETS = 100
@@ -92,6 +102,15 @@ EXPLOIT_CHAIN_RECORDS = 5
 SUDO_TIER = TITLES.index("Root Access")
 FULL_STACK_TIER = TITLES.index("Exploit Dev")
 GIT_DIFF_DAYS = 84
+STACK_OVERFLOW_SESSIONS = 50
+MAINFRAME_SESSIONS = 100
+OVERCLOCK_KG = 10_000
+BIG_DATA_KG = 100_000
+ROOTKIT_RECORDS = 25
+LOAD_BALANCER_WEEKS = 4
+LOAD_BALANCER_PER_WEEK = 3
+CTRL_Z_GAP_DAYS = 14
+WEEKEND_SESSIONS = 10
 
 
 @dataclass
@@ -129,6 +148,30 @@ def _uptime(dates: list[str], days: int) -> tuple[str | None, float]:
     return earned, best / days
 
 
+def _nth(dates: list[str], n: int) -> tuple[str | None, float]:
+    """Data n-tego zdarzenia (już posortowane) i postęp do n."""
+    return (dates[n - 1] if len(dates) >= n else None), len(dates) / n
+
+
+def _load_balancer(dates: list[str]) -> tuple[str | None, float]:
+    """Kolejne tygodnie, w których jest co najmniej 3 treningi; data spełnienia 4. tygodnia."""
+    per_week: dict[str, list[str]] = defaultdict(list)
+    for d in dates:
+        per_week[_week(d)].append(d)
+    earned, streak, best, prev = None, 0, 0, None
+    for week in sorted(per_week):
+        days = per_week[week]
+        if len(days) < LOAD_BALANCER_PER_WEEK:
+            streak, prev = 0, None
+            continue
+        streak = streak + 1 if prev is not None and _days(prev, week) == 7 else 1
+        prev = week
+        best = max(best, streak)
+        if earned is None and streak >= LOAD_BALANCER_WEEKS:
+            earned = days[LOAD_BALANCER_PER_WEEK - 1]
+    return earned, best / LOAD_BALANCER_WEEKS
+
+
 def evaluate_badges(
     sessions: Sequence[dict],
     beaten_records: Sequence[dict],
@@ -137,7 +180,8 @@ def evaluate_badges(
 ) -> list[Badge]:
     """Stan wszystkich odznak.
 
-    sessions: {date, hard_sets, tonnage_kg}; beaten_records: {date}, jeden wpis na serię,
+    sessions: {date, hard_sets, tonnage_kg, hour?}; hour to lokalna godzina rozpoczęcia
+    (bez niej odznaki za porę dnia się nie liczą); beaten_records: {date}, jeden wpis na serię,
     która pobiła poprzedni rekord; rank_events: bój -> wpisy z rank_history;
     photos: {pose, date}.
     """
@@ -196,6 +240,42 @@ def evaluate_badges(
         if diff is None and span >= GIT_DIFF_DAYS:
             diff = p["date"]
     result["git_diff"] = (diff, best_span / GIT_DIFF_DAYS)
+
+    # Kolejne treningi (także kilka jednego dnia), w kolejności dnia i godziny.
+    ordered = sorted(sessions, key=lambda s: (s["date"], s.get("hour") or 0))
+    session_dates = [s["date"] for s in ordered]
+    result["stack_overflow"] = _nth(session_dates, STACK_OVERFLOW_SESSIONS)
+    result["mainframe"] = _nth(session_dates, MAINFRAME_SESSIONS)
+
+    heavy = next((s["date"] for s in ordered if s["tonnage_kg"] >= OVERCLOCK_KG), None)
+    top_session = max((s["tonnage_kg"] for s in ordered), default=0.0)
+    result["overclock"] = (heavy, top_session / OVERCLOCK_KG)
+
+    total, big = 0.0, None
+    for s in ordered:
+        total += s["tonnage_kg"]
+        if big is None and total >= BIG_DATA_KG:
+            big = s["date"]
+    result["big_data"] = (big, total / BIG_DATA_KG)
+
+    result["rootkit"] = _nth(beaten, ROOTKIT_RECORDS)
+    result["load_balancer"] = _load_balancer(session_dates)
+
+    gaps = [(_days(a, b), b) for a, b in zip(dates, dates[1:], strict=False)]
+    back = next((d for gap, d in gaps if gap >= CTRL_Z_GAP_DAYS), None)
+    result["ctrl_z"] = (back, max((g for g, _ in gaps), default=0) / CTRL_Z_GAP_DAYS)
+
+    def first_at(test) -> tuple[str | None, float]:
+        d = next(
+            (s["date"] for s in ordered if s.get("hour") is not None and test(s["hour"])), None
+        )
+        return (d, 1.0 if d else 0.0)
+
+    result["night_shift"] = first_at(lambda h: h >= 22 or h < 4)
+    result["cron_job"] = first_at(lambda h: 4 <= h < 7)
+
+    weekend = [d for d in session_dates if date.fromisoformat(d).weekday() >= 5]
+    result["weekend_deploy"] = _nth(weekend, WEEKEND_SESSIONS)
 
     return [
         Badge(

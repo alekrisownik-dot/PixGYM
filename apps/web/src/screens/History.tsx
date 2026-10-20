@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { CalendarData, CalendarEvent, EventKind, SessionListItem } from "../api";
 import { href } from "../app/router";
@@ -146,7 +146,7 @@ function MonthCalendar({
             onClick={() => onSelect(isSel ? null : day)}
             className={`num relative aspect-square rounded-xl text-[15px] font-semibold transition ${
               count ? (level(day) >= 3 ? "text-accent-ink" : "text-fg") : "text-muted/80"
-            } ${day === today && !count ? "border border-fg/60 text-fg" : plan ? "border border-dashed border-accent/60 text-fg" : ""} ${isSel ? "ring-2 ring-amber ring-offset-2 ring-offset-surface" : ""}`}
+            } ${day === today && !count && !isSel ? "border border-fg/60 text-fg" : plan && !isSel ? "border border-dashed border-accent/60 text-fg" : ""} ${isSel ? "ring-2 ring-amber ring-offset-2 ring-offset-surface" : ""}`}
             style={count ? { background: LEVEL_BG[Math.max(1, level(day))] } : undefined}
             aria-label={`${day}${count ? `, treningów: ${count}` : ""}${evs.length ? `, wydarzenia: ${evs.map((e) => e.title).join(", ")}` : ""}`}
           >
@@ -197,6 +197,14 @@ export function History() {
     return m;
   }, [active.data, month]);
   const isFuture = !!selected && selected >= iso(new Date());
+
+  // Po wybraniu dnia przewijamy do jego szczegółów (są pod kalendarzem, często poza ekranem).
+  const dayDetails = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!selected) return;
+    const el = dayDetails.current;
+    if (el && el.getBoundingClientRect().top > window.innerHeight - 160) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [selected]);
 
   // Dni z treningami: z serwera i z treningów, które jeszcze czekają na wysłanie.
   const trained = useMemo(() => {
@@ -266,6 +274,7 @@ export function History() {
         </div>
       </Card>
 
+      <div ref={dayDetails} className="-mt-2 scroll-mt-4" aria-hidden />
       {selected && planned.get(selected) && !trained.get(selected) && (
         <div className="card flex items-center gap-3 border-dashed !border-accent/60 px-3.5 py-3">
           <span className="text-2xl" aria-hidden>

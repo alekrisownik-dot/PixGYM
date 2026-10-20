@@ -3566,6 +3566,76 @@
           "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
           "earned_at": null,
           "progress": 0.0
+        },
+        {
+          "slug": "stack_overflow",
+          "title": "Stack Overflow",
+          "description": "50 treningów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "mainframe",
+          "title": "Mainframe",
+          "description": "100 treningów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "overclock",
+          "title": "Overclock",
+          "description": "10 ton na jednym treningu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "big_data",
+          "title": "Big Data",
+          "description": "100 ton łącznie",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "rootkit",
+          "title": "Rootkit",
+          "description": "25 pobitych rekordów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "load_balancer",
+          "title": "Load Balancer",
+          "description": "4 tygodnie z rzędu po co najmniej 3 treningi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ctrl_z",
+          "title": "Ctrl+Z",
+          "description": "Powrót na salę po co najmniej 2 tygodniach przerwy",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "night_shift",
+          "title": "Night Shift",
+          "description": "Trening zaczęty po 22:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "cron_job",
+          "title": "Cron 06:00",
+          "description": "Trening zaczęty przed 7:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "weekend_deploy",
+          "title": "Weekend Deploy",
+          "description": "10 treningów w soboty i niedziele",
+          "earned_at": null,
+          "progress": 0.0
         }
       ]
     },
@@ -3669,6 +3739,76 @@
           "slug": "git_diff",
           "title": "git diff",
           "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "stack_overflow",
+          "title": "Stack Overflow",
+          "description": "50 treningów",
+          "earned_at": null,
+          "progress": 0.02
+        },
+        {
+          "slug": "mainframe",
+          "title": "Mainframe",
+          "description": "100 treningów",
+          "earned_at": null,
+          "progress": 0.01
+        },
+        {
+          "slug": "overclock",
+          "title": "Overclock",
+          "description": "10 ton na jednym treningu",
+          "earned_at": null,
+          "progress": 0.6
+        },
+        {
+          "slug": "big_data",
+          "title": "Big Data",
+          "description": "100 ton łącznie",
+          "earned_at": null,
+          "progress": 0.06
+        },
+        {
+          "slug": "rootkit",
+          "title": "Rootkit",
+          "description": "25 pobitych rekordów",
+          "earned_at": null,
+          "progress": 0.04
+        },
+        {
+          "slug": "load_balancer",
+          "title": "Load Balancer",
+          "description": "4 tygodnie z rzędu po co najmniej 3 treningi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ctrl_z",
+          "title": "Ctrl+Z",
+          "description": "Powrót na salę po co najmniej 2 tygodniach przerwy",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "night_shift",
+          "title": "Night Shift",
+          "description": "Trening zaczęty po 22:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "cron_job",
+          "title": "Cron 06:00",
+          "description": "Trening zaczęty przed 7:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "weekend_deploy",
+          "title": "Weekend Deploy",
+          "description": "10 treningów w soboty i niedziele",
           "earned_at": null,
           "progress": 0.0
         }
@@ -3794,6 +3934,76 @@
           "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
           "earned_at": null,
           "progress": 0.0
+        },
+        {
+          "slug": "stack_overflow",
+          "title": "Stack Overflow",
+          "description": "50 treningów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "mainframe",
+          "title": "Mainframe",
+          "description": "100 treningów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "overclock",
+          "title": "Overclock",
+          "description": "10 ton na jednym treningu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "big_data",
+          "title": "Big Data",
+          "description": "100 ton łącznie",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "rootkit",
+          "title": "Rootkit",
+          "description": "25 pobitych rekordów",
+          "earned_at": null,
+          "progress": 0.36
+        },
+        {
+          "slug": "load_balancer",
+          "title": "Load Balancer",
+          "description": "4 tygodnie z rzędu po co najmniej 3 treningi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ctrl_z",
+          "title": "Ctrl+Z",
+          "description": "Powrót na salę po co najmniej 2 tygodniach przerwy",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "night_shift",
+          "title": "Night Shift",
+          "description": "Trening zaczęty po 22:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "cron_job",
+          "title": "Cron 06:00",
+          "description": "Trening zaczęty przed 7:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "weekend_deploy",
+          "title": "Weekend Deploy",
+          "description": "10 treningów w soboty i niedziele",
+          "earned_at": null,
+          "progress": 0.0
         }
       ]
     },
@@ -3910,6 +4120,76 @@
           "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
           "earned_at": null,
           "progress": 0.0
+        },
+        {
+          "slug": "stack_overflow",
+          "title": "Stack Overflow",
+          "description": "50 treningów",
+          "earned_at": null,
+          "progress": 0.08
+        },
+        {
+          "slug": "mainframe",
+          "title": "Mainframe",
+          "description": "100 treningów",
+          "earned_at": null,
+          "progress": 0.04
+        },
+        {
+          "slug": "overclock",
+          "title": "Overclock",
+          "description": "10 ton na jednym treningu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "big_data",
+          "title": "Big Data",
+          "description": "100 ton łącznie",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "rootkit",
+          "title": "Rootkit",
+          "description": "25 pobitych rekordów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "load_balancer",
+          "title": "Load Balancer",
+          "description": "4 tygodnie z rzędu po co najmniej 3 treningi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ctrl_z",
+          "title": "Ctrl+Z",
+          "description": "Powrót na salę po co najmniej 2 tygodniach przerwy",
+          "earned_at": "2026-01-31",
+          "progress": 1.0
+        },
+        {
+          "slug": "night_shift",
+          "title": "Night Shift",
+          "description": "Trening zaczęty po 22:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "cron_job",
+          "title": "Cron 06:00",
+          "description": "Trening zaczęty przed 7:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "weekend_deploy",
+          "title": "Weekend Deploy",
+          "description": "10 treningów w soboty i niedziele",
+          "earned_at": null,
+          "progress": 0.3
         }
       ]
     },
@@ -4021,6 +4301,76 @@
           "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
           "earned_at": null,
           "progress": 0.0
+        },
+        {
+          "slug": "stack_overflow",
+          "title": "Stack Overflow",
+          "description": "50 treningów",
+          "earned_at": null,
+          "progress": 0.06
+        },
+        {
+          "slug": "mainframe",
+          "title": "Mainframe",
+          "description": "100 treningów",
+          "earned_at": null,
+          "progress": 0.03
+        },
+        {
+          "slug": "overclock",
+          "title": "Overclock",
+          "description": "10 ton na jednym treningu",
+          "earned_at": "2026-10-18",
+          "progress": 1.0
+        },
+        {
+          "slug": "big_data",
+          "title": "Big Data",
+          "description": "100 ton łącznie",
+          "earned_at": null,
+          "progress": 0.35
+        },
+        {
+          "slug": "rootkit",
+          "title": "Rootkit",
+          "description": "25 pobitych rekordów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "load_balancer",
+          "title": "Load Balancer",
+          "description": "4 tygodnie z rzędu po co najmniej 3 treningi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ctrl_z",
+          "title": "Ctrl+Z",
+          "description": "Powrót na salę po co najmniej 2 tygodniach przerwy",
+          "earned_at": null,
+          "progress": 0.42
+        },
+        {
+          "slug": "night_shift",
+          "title": "Night Shift",
+          "description": "Trening zaczęty po 22:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "cron_job",
+          "title": "Cron 06:00",
+          "description": "Trening zaczęty przed 7:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "weekend_deploy",
+          "title": "Weekend Deploy",
+          "description": "10 treningów w soboty i niedziele",
+          "earned_at": null,
+          "progress": 0.2
         }
       ]
     },
@@ -4252,6 +4602,76 @@
           "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
           "earned_at": null,
           "progress": 0.0
+        },
+        {
+          "slug": "stack_overflow",
+          "title": "Stack Overflow",
+          "description": "50 treningów",
+          "earned_at": null,
+          "progress": 0.54
+        },
+        {
+          "slug": "mainframe",
+          "title": "Mainframe",
+          "description": "100 treningów",
+          "earned_at": null,
+          "progress": 0.27
+        },
+        {
+          "slug": "overclock",
+          "title": "Overclock",
+          "description": "10 ton na jednym treningu",
+          "earned_at": null,
+          "progress": 0.5
+        },
+        {
+          "slug": "big_data",
+          "title": "Big Data",
+          "description": "100 ton łącznie",
+          "earned_at": "2026-05-14",
+          "progress": 1.0
+        },
+        {
+          "slug": "rootkit",
+          "title": "Rootkit",
+          "description": "25 pobitych rekordów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "load_balancer",
+          "title": "Load Balancer",
+          "description": "4 tygodnie z rzędu po co najmniej 3 treningi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ctrl_z",
+          "title": "Ctrl+Z",
+          "description": "Powrót na salę po co najmniej 2 tygodniach przerwy",
+          "earned_at": null,
+          "progress": 0.5
+        },
+        {
+          "slug": "night_shift",
+          "title": "Night Shift",
+          "description": "Trening zaczęty po 22:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "cron_job",
+          "title": "Cron 06:00",
+          "description": "Trening zaczęty przed 7:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "weekend_deploy",
+          "title": "Weekend Deploy",
+          "description": "10 treningów w soboty i niedziele",
+          "earned_at": null,
+          "progress": 0.0
         }
       ]
     },
@@ -4383,6 +4803,76 @@
           "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
           "earned_at": null,
           "progress": 0.0
+        },
+        {
+          "slug": "stack_overflow",
+          "title": "Stack Overflow",
+          "description": "50 treningów",
+          "earned_at": null,
+          "progress": 0.14
+        },
+        {
+          "slug": "mainframe",
+          "title": "Mainframe",
+          "description": "100 treningów",
+          "earned_at": null,
+          "progress": 0.07
+        },
+        {
+          "slug": "overclock",
+          "title": "Overclock",
+          "description": "10 ton na jednym treningu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "big_data",
+          "title": "Big Data",
+          "description": "100 ton łącznie",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "rootkit",
+          "title": "Rootkit",
+          "description": "25 pobitych rekordów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "load_balancer",
+          "title": "Load Balancer",
+          "description": "4 tygodnie z rzędu po co najmniej 3 treningi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ctrl_z",
+          "title": "Ctrl+Z",
+          "description": "Powrót na salę po co najmniej 2 tygodniach przerwy",
+          "earned_at": null,
+          "progress": 0.64
+        },
+        {
+          "slug": "night_shift",
+          "title": "Night Shift",
+          "description": "Trening zaczęty po 22:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "cron_job",
+          "title": "Cron 06:00",
+          "description": "Trening zaczęty przed 7:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "weekend_deploy",
+          "title": "Weekend Deploy",
+          "description": "10 treningów w soboty i niedziele",
+          "earned_at": null,
+          "progress": 0.1
         }
       ]
     },
@@ -4511,6 +5001,76 @@
           "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
           "earned_at": null,
           "progress": 0.0
+        },
+        {
+          "slug": "stack_overflow",
+          "title": "Stack Overflow",
+          "description": "50 treningów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "mainframe",
+          "title": "Mainframe",
+          "description": "100 treningów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "overclock",
+          "title": "Overclock",
+          "description": "10 ton na jednym treningu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "big_data",
+          "title": "Big Data",
+          "description": "100 ton łącznie",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "rootkit",
+          "title": "Rootkit",
+          "description": "25 pobitych rekordów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "load_balancer",
+          "title": "Load Balancer",
+          "description": "4 tygodnie z rzędu po co najmniej 3 treningi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ctrl_z",
+          "title": "Ctrl+Z",
+          "description": "Powrót na salę po co najmniej 2 tygodniach przerwy",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "night_shift",
+          "title": "Night Shift",
+          "description": "Trening zaczęty po 22:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "cron_job",
+          "title": "Cron 06:00",
+          "description": "Trening zaczęty przed 7:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "weekend_deploy",
+          "title": "Weekend Deploy",
+          "description": "10 treningów w soboty i niedziele",
+          "earned_at": null,
+          "progress": 0.0
         }
       ]
     },
@@ -4625,6 +5185,76 @@
           "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
           "earned_at": null,
           "progress": 0.0
+        },
+        {
+          "slug": "stack_overflow",
+          "title": "Stack Overflow",
+          "description": "50 treningów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "mainframe",
+          "title": "Mainframe",
+          "description": "100 treningów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "overclock",
+          "title": "Overclock",
+          "description": "10 ton na jednym treningu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "big_data",
+          "title": "Big Data",
+          "description": "100 ton łącznie",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "rootkit",
+          "title": "Rootkit",
+          "description": "25 pobitych rekordów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "load_balancer",
+          "title": "Load Balancer",
+          "description": "4 tygodnie z rzędu po co najmniej 3 treningi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ctrl_z",
+          "title": "Ctrl+Z",
+          "description": "Powrót na salę po co najmniej 2 tygodniach przerwy",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "night_shift",
+          "title": "Night Shift",
+          "description": "Trening zaczęty po 22:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "cron_job",
+          "title": "Cron 06:00",
+          "description": "Trening zaczęty przed 7:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "weekend_deploy",
+          "title": "Weekend Deploy",
+          "description": "10 treningów w soboty i niedziele",
+          "earned_at": null,
+          "progress": 0.0
         }
       ]
     },
@@ -4736,6 +5366,627 @@
           "title": "git diff",
           "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
           "earned_at": "2026-03-26",
+          "progress": 1.0
+        },
+        {
+          "slug": "stack_overflow",
+          "title": "Stack Overflow",
+          "description": "50 treningów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "mainframe",
+          "title": "Mainframe",
+          "description": "100 treningów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "overclock",
+          "title": "Overclock",
+          "description": "10 ton na jednym treningu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "big_data",
+          "title": "Big Data",
+          "description": "100 ton łącznie",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "rootkit",
+          "title": "Rootkit",
+          "description": "25 pobitych rekordów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "load_balancer",
+          "title": "Load Balancer",
+          "description": "4 tygodnie z rzędu po co najmniej 3 treningi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ctrl_z",
+          "title": "Ctrl+Z",
+          "description": "Powrót na salę po co najmniej 2 tygodniach przerwy",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "night_shift",
+          "title": "Night Shift",
+          "description": "Trening zaczęty po 22:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "cron_job",
+          "title": "Cron 06:00",
+          "description": "Trening zaczęty przed 7:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "weekend_deploy",
+          "title": "Weekend Deploy",
+          "description": "10 treningów w soboty i niedziele",
+          "earned_at": null,
+          "progress": 0.0
+        }
+      ]
+    },
+    {
+      "name": "Load Balancer i Ctrl+Z: 4 tygodnie po 3 treningi, potem 3 tygodnie przerwy",
+      "args": {
+        "sessions": [
+          {
+            "date": "2026-01-05",
+            "hard_sets": 0,
+            "tonnage_kg": 1000,
+            "hour": 18
+          },
+          {
+            "date": "2026-01-07",
+            "hard_sets": 0,
+            "tonnage_kg": 1000,
+            "hour": 18
+          },
+          {
+            "date": "2026-01-09",
+            "hard_sets": 0,
+            "tonnage_kg": 1000,
+            "hour": 18
+          },
+          {
+            "date": "2026-01-12",
+            "hard_sets": 0,
+            "tonnage_kg": 1000,
+            "hour": 18
+          },
+          {
+            "date": "2026-01-14",
+            "hard_sets": 0,
+            "tonnage_kg": 1000,
+            "hour": 18
+          },
+          {
+            "date": "2026-01-16",
+            "hard_sets": 0,
+            "tonnage_kg": 1000,
+            "hour": 18
+          },
+          {
+            "date": "2026-01-19",
+            "hard_sets": 0,
+            "tonnage_kg": 1000,
+            "hour": 18
+          },
+          {
+            "date": "2026-01-21",
+            "hard_sets": 0,
+            "tonnage_kg": 1000,
+            "hour": 18
+          },
+          {
+            "date": "2026-01-23",
+            "hard_sets": 0,
+            "tonnage_kg": 1000,
+            "hour": 18
+          },
+          {
+            "date": "2026-01-26",
+            "hard_sets": 0,
+            "tonnage_kg": 1000,
+            "hour": 18
+          },
+          {
+            "date": "2026-01-28",
+            "hard_sets": 0,
+            "tonnage_kg": 1000,
+            "hour": 18
+          },
+          {
+            "date": "2026-01-30",
+            "hard_sets": 0,
+            "tonnage_kg": 1000,
+            "hour": 18
+          },
+          {
+            "date": "2026-02-20",
+            "hard_sets": 0,
+            "tonnage_kg": 1000,
+            "hour": 18
+          }
+        ],
+        "beaten_records": [],
+        "rank_events": {},
+        "photos": []
+      },
+      "expected": [
+        {
+          "slug": "first_blood",
+          "title": "First Blood",
+          "description": "Pierwszy trening",
+          "earned_at": "2026-01-05",
+          "progress": 1.0
+        },
+        {
+          "slug": "buffer_overflow",
+          "title": "Buffer Overflow",
+          "description": "Pierwszy pobity rekord",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "exploit_chain",
+          "title": "Exploit Chain",
+          "description": "5 serii z nowym rekordem na jednym treningu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "brute_force",
+          "title": "Brute Force",
+          "description": "100 ciężkich serii w miesiącu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ddos",
+          "title": "DDoS",
+          "description": "20 ton w jednym tygodniu",
+          "earned_at": null,
+          "progress": 0.15
+        },
+        {
+          "slug": "uptime_30d",
+          "title": "Uptime 30d",
+          "description": "30 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.83
+        },
+        {
+          "slug": "uptime_180d",
+          "title": "Uptime 180d",
+          "description": "180 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.13
+        },
+        {
+          "slug": "privilege_escalation",
+          "title": "Privilege Escalation",
+          "description": "Pierwszy awans rangi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "sudo",
+          "title": "sudo su",
+          "description": "Ranga Root Access w dowolnym boju",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "full_stack",
+          "title": "Full Stack",
+          "description": "Ranga Exploit Dev we wszystkich bojach rankingowych",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "snapshot",
+          "title": "Snapshot",
+          "description": "Pierwsze zdjęcie postępu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "git_diff",
+          "title": "git diff",
+          "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "stack_overflow",
+          "title": "Stack Overflow",
+          "description": "50 treningów",
+          "earned_at": null,
+          "progress": 0.26
+        },
+        {
+          "slug": "mainframe",
+          "title": "Mainframe",
+          "description": "100 treningów",
+          "earned_at": null,
+          "progress": 0.13
+        },
+        {
+          "slug": "overclock",
+          "title": "Overclock",
+          "description": "10 ton na jednym treningu",
+          "earned_at": null,
+          "progress": 0.1
+        },
+        {
+          "slug": "big_data",
+          "title": "Big Data",
+          "description": "100 ton łącznie",
+          "earned_at": null,
+          "progress": 0.13
+        },
+        {
+          "slug": "rootkit",
+          "title": "Rootkit",
+          "description": "25 pobitych rekordów",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "load_balancer",
+          "title": "Load Balancer",
+          "description": "4 tygodnie z rzędu po co najmniej 3 treningi",
+          "earned_at": "2026-01-30",
+          "progress": 1.0
+        },
+        {
+          "slug": "ctrl_z",
+          "title": "Ctrl+Z",
+          "description": "Powrót na salę po co najmniej 2 tygodniach przerwy",
+          "earned_at": "2026-02-20",
+          "progress": 1.0
+        },
+        {
+          "slug": "night_shift",
+          "title": "Night Shift",
+          "description": "Trening zaczęty po 22:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "cron_job",
+          "title": "Cron 06:00",
+          "description": "Trening zaczęty przed 7:00",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "weekend_deploy",
+          "title": "Weekend Deploy",
+          "description": "10 treningów w soboty i niedziele",
+          "earned_at": null,
+          "progress": 0.0
+        }
+      ]
+    },
+    {
+      "name": "pora dnia i weekend: Night Shift o 23, Cron o 5, 10 weekendów, Overclock, Rootkit",
+      "args": {
+        "sessions": [
+          {
+            "date": "2026-03-07",
+            "hard_sets": 0,
+            "tonnage_kg": 2000,
+            "hour": 23
+          },
+          {
+            "date": "2026-03-08",
+            "hard_sets": 0,
+            "tonnage_kg": 2000,
+            "hour": 5
+          },
+          {
+            "date": "2026-03-14",
+            "hard_sets": 0,
+            "tonnage_kg": 12000,
+            "hour": 12
+          },
+          {
+            "date": "2026-03-15",
+            "hard_sets": 0,
+            "tonnage_kg": 2000,
+            "hour": 12
+          },
+          {
+            "date": "2026-03-21",
+            "hard_sets": 0,
+            "tonnage_kg": 2000,
+            "hour": 12
+          },
+          {
+            "date": "2026-03-22",
+            "hard_sets": 0,
+            "tonnage_kg": 2000,
+            "hour": 12
+          },
+          {
+            "date": "2026-03-28",
+            "hard_sets": 0,
+            "tonnage_kg": 2000,
+            "hour": 12
+          },
+          {
+            "date": "2026-03-29",
+            "hard_sets": 0,
+            "tonnage_kg": 2000,
+            "hour": 12
+          },
+          {
+            "date": "2026-04-04",
+            "hard_sets": 0,
+            "tonnage_kg": 2000,
+            "hour": 12
+          },
+          {
+            "date": "2026-04-05",
+            "hard_sets": 0,
+            "tonnage_kg": 2000,
+            "hour": 12
+          },
+          {
+            "date": "2026-03-02",
+            "hard_sets": 0,
+            "tonnage_kg": 0
+          }
+        ],
+        "beaten_records": [
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          },
+          {
+            "date": "2026-03-10"
+          }
+        ],
+        "rank_events": {},
+        "photos": []
+      },
+      "expected": [
+        {
+          "slug": "first_blood",
+          "title": "First Blood",
+          "description": "Pierwszy trening",
+          "earned_at": "2026-03-02",
+          "progress": 1.0
+        },
+        {
+          "slug": "buffer_overflow",
+          "title": "Buffer Overflow",
+          "description": "Pierwszy pobity rekord",
+          "earned_at": "2026-03-10",
+          "progress": 1.0
+        },
+        {
+          "slug": "exploit_chain",
+          "title": "Exploit Chain",
+          "description": "5 serii z nowym rekordem na jednym treningu",
+          "earned_at": "2026-03-10",
+          "progress": 1.0
+        },
+        {
+          "slug": "brute_force",
+          "title": "Brute Force",
+          "description": "100 ciężkich serii w miesiącu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "ddos",
+          "title": "DDoS",
+          "description": "20 ton w jednym tygodniu",
+          "earned_at": null,
+          "progress": 0.7
+        },
+        {
+          "slug": "uptime_30d",
+          "title": "Uptime 30d",
+          "description": "30 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": "2026-04-04",
+          "progress": 1.0
+        },
+        {
+          "slug": "uptime_180d",
+          "title": "Uptime 180d",
+          "description": "180 dni treningów bez przerwy dłuższej niż tydzień",
+          "earned_at": null,
+          "progress": 0.18
+        },
+        {
+          "slug": "privilege_escalation",
+          "title": "Privilege Escalation",
+          "description": "Pierwszy awans rangi",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "sudo",
+          "title": "sudo su",
+          "description": "Ranga Root Access w dowolnym boju",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "full_stack",
+          "title": "Full Stack",
+          "description": "Ranga Exploit Dev we wszystkich bojach rankingowych",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "snapshot",
+          "title": "Snapshot",
+          "description": "Pierwsze zdjęcie postępu",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "git_diff",
+          "title": "git diff",
+          "description": "Zdjęcia w tej samej pozie w odstępie 12 tygodni",
+          "earned_at": null,
+          "progress": 0.0
+        },
+        {
+          "slug": "stack_overflow",
+          "title": "Stack Overflow",
+          "description": "50 treningów",
+          "earned_at": null,
+          "progress": 0.22
+        },
+        {
+          "slug": "mainframe",
+          "title": "Mainframe",
+          "description": "100 treningów",
+          "earned_at": null,
+          "progress": 0.11
+        },
+        {
+          "slug": "overclock",
+          "title": "Overclock",
+          "description": "10 ton na jednym treningu",
+          "earned_at": "2026-03-14",
+          "progress": 1.0
+        },
+        {
+          "slug": "big_data",
+          "title": "Big Data",
+          "description": "100 ton łącznie",
+          "earned_at": null,
+          "progress": 0.3
+        },
+        {
+          "slug": "rootkit",
+          "title": "Rootkit",
+          "description": "25 pobitych rekordów",
+          "earned_at": "2026-03-10",
+          "progress": 1.0
+        },
+        {
+          "slug": "load_balancer",
+          "title": "Load Balancer",
+          "description": "4 tygodnie z rzędu po co najmniej 3 treningi",
+          "earned_at": null,
+          "progress": 0.25
+        },
+        {
+          "slug": "ctrl_z",
+          "title": "Ctrl+Z",
+          "description": "Powrót na salę po co najmniej 2 tygodniach przerwy",
+          "earned_at": null,
+          "progress": 0.42
+        },
+        {
+          "slug": "night_shift",
+          "title": "Night Shift",
+          "description": "Trening zaczęty po 22:00",
+          "earned_at": "2026-03-07",
+          "progress": 1.0
+        },
+        {
+          "slug": "cron_job",
+          "title": "Cron 06:00",
+          "description": "Trening zaczęty przed 7:00",
+          "earned_at": "2026-03-08",
+          "progress": 1.0
+        },
+        {
+          "slug": "weekend_deploy",
+          "title": "Weekend Deploy",
+          "description": "10 treningów w soboty i niedziele",
+          "earned_at": "2026-04-05",
           "progress": 1.0
         }
       ]

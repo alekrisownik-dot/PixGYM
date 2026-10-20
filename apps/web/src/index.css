@@ -563,6 +563,20 @@ select {
   animation: impatient 0.18s linear infinite;
 }
 
+/* Węzeł „teraz” na kole planu: pulsująca poświata. */
+@keyframes loop-now {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(var(--accent-rgb) / 0.55), 0 0 22px -4px rgb(var(--accent-rgb) / 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgb(var(--accent-rgb) / 0), 0 0 30px -2px rgb(var(--accent-rgb) / 0.9);
+  }
+}
+.loop-now {
+  animation: loop-now 2.2s ease-out infinite;
+}
+
 /* Zarys karty w trakcie ładowania. */
 @keyframes skeleton {
   50% {
@@ -574,6 +588,7 @@ select {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .loop-now,
   .bit-impatient,
   .pr-in,
   .pr-title,

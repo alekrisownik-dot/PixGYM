@@ -97,11 +97,12 @@ def rank_timeline(conn: Connection, user_id: uuid.UUID) -> dict[str, list[RankEv
     return {slug: rank_history(slug, pts, sex) for slug, pts in points.items()}
 
 
-def _session_summaries(conn: Connection, user_id: uuid.UUID) -> list[dict]:
+def _session_summaries(conn: Connection, user_id: uuid.UUID, tz: ZoneInfo) -> list[dict]:
     rows = conn.execute(
         select(
             WorkoutSession.id,
             WorkoutSession.local_date,
+            WorkoutSession.started_at,
             WorkoutSet.set_type,
             WorkoutSet.rpe,
             WorkoutSet.rir,
@@ -120,7 +121,14 @@ def _session_summaries(conn: Connection, user_id: uuid.UUID) -> list[dict]:
     summaries: dict[uuid.UUID, dict] = {}
     for r in rows:
         s = summaries.setdefault(
-            r.id, {"date": r.local_date.isoformat(), "hard_sets": 0.0, "tonnage_kg": 0.0}
+            r.id,
+            {
+                "date": r.local_date.isoformat(),
+                "hard_sets": 0.0,
+                "tonnage_kg": 0.0,
+                # Lokalna godzina rozpoczęcia (odznaki Night Shift i Cron).
+                "hour": r.started_at.astimezone(tz).hour,
+            },
         )
         rpe = float(r.rpe) if r.rpe is not None else None
         effective = float(r.effective_kg) if r.effective_kg is not None else None
@@ -172,7 +180,7 @@ def user_badges(conn: Connection, user_id: uuid.UUID) -> list[Badge]:
         slug: [asdict(e) for e in events] for slug, events in rank_timeline(conn, user_id).items()
     }
     return evaluate_badges(
-        _session_summaries(conn, user_id),
+        _session_summaries(conn, user_id, tz),
         _beaten_records(conn, user_id, tz),
         timeline,
         _photos(conn, user_id, tz),

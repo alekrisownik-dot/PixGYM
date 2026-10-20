@@ -67,9 +67,28 @@ export const BADGES: readonly BadgeDef[] = [
   { slug: "full_stack", title: "Full Stack", description: "Ranga Exploit Dev we wszystkich bojach rankingowych" },
   { slug: "snapshot", title: "Snapshot", description: "Pierwsze zdjęcie postępu" },
   { slug: "git_diff", title: "git diff", description: "Zdjęcia w tej samej pozie w odstępie 12 tygodni" },
+  { slug: "stack_overflow", title: "Stack Overflow", description: "50 treningów" },
+  { slug: "mainframe", title: "Mainframe", description: "100 treningów" },
+  { slug: "overclock", title: "Overclock", description: "10 ton na jednym treningu" },
+  { slug: "big_data", title: "Big Data", description: "100 ton łącznie" },
+  { slug: "rootkit", title: "Rootkit", description: "25 pobitych rekordów" },
+  { slug: "load_balancer", title: "Load Balancer", description: "4 tygodnie z rzędu po co najmniej 3 treningi" },
+  { slug: "ctrl_z", title: "Ctrl+Z", description: "Powrót na salę po co najmniej 2 tygodniach przerwy" },
+  { slug: "night_shift", title: "Night Shift", description: "Trening zaczęty po 22:00" },
+  { slug: "cron_job", title: "Cron 06:00", description: "Trening zaczęty przed 7:00" },
+  { slug: "weekend_deploy", title: "Weekend Deploy", description: "10 treningów w soboty i niedziele" },
 ];
 
 export const BRUTE_FORCE_SETS = 100;
+export const STACK_OVERFLOW_SESSIONS = 50;
+export const MAINFRAME_SESSIONS = 100;
+export const OVERCLOCK_KG = 10_000;
+export const BIG_DATA_KG = 100_000;
+export const ROOTKIT_RECORDS = 25;
+export const LOAD_BALANCER_WEEKS = 4;
+export const LOAD_BALANCER_PER_WEEK = 3;
+export const CTRL_Z_GAP_DAYS = 14;
+export const WEEKEND_SESSIONS = 10;
 export const DDOS_TONNAGE_KG = 20_000;
 export const MAX_GAP_DAYS = 7;
 export const EXPLOIT_CHAIN_RECORDS = 5;
@@ -81,6 +100,8 @@ export interface BadgeSession {
   date: string;
   hard_sets: number;
   tonnage_kg: number;
+  /** Lokalna godzina rozpoczęcia; bez niej odznaki za porę dnia się nie liczą. */
+  hour?: number | null;
 }
 export interface Badge extends BadgeDef {
   earned_at: string | null;
@@ -118,6 +139,34 @@ function uptime(dates: readonly string[], target: number): Result {
     prev = d;
   }
   return [earned, best / target];
+}
+
+/** Data n-tego zdarzenia (już posortowane) i postęp do n. */
+function nth(dates: readonly string[], n: number): Result {
+  return [dates.length >= n ? dates[n - 1]! : null, dates.length / n];
+}
+
+/** Kolejne tygodnie, w których jest co najmniej 3 treningi; data spełnienia 4. tygodnia. */
+function loadBalancer(dates: readonly string[]): Result {
+  const perWeek = new Map<string, string[]>();
+  for (const d of dates) perWeek.set(weekStart(d), [...(perWeek.get(weekStart(d)) ?? []), d]);
+  let earned: string | null = null;
+  let streak = 0;
+  let best = 0;
+  let prev: string | null = null;
+  for (const week of [...perWeek.keys()].sort(cmp)) {
+    const inWeek = perWeek.get(week)!;
+    if (inWeek.length < LOAD_BALANCER_PER_WEEK) {
+      streak = 0;
+      prev = null;
+      continue;
+    }
+    streak = prev !== null && days(prev, week) === 7 ? streak + 1 : 1;
+    prev = week;
+    best = Math.max(best, streak);
+    if (earned === null && streak >= LOAD_BALANCER_WEEKS) earned = inWeek[LOAD_BALANCER_PER_WEEK - 1]!;
+  }
+  return [earned, best / LOAD_BALANCER_WEEKS];
 }
 
 export function evaluateBadges(
@@ -176,6 +225,41 @@ export function evaluateBadges(
     if (diff === null && span >= GIT_DIFF_DAYS) diff = p.date;
   }
   result.git_diff = [diff, bestSpan / GIT_DIFF_DAYS];
+
+  // Kolejne treningi (także kilka jednego dnia), w kolejności dnia i godziny.
+  const ordered = [...sessions].sort((a, b) => cmp(a.date, b.date) || (a.hour ?? 0) - (b.hour ?? 0));
+  const sessionDates = ordered.map((s) => s.date);
+  result.stack_overflow = nth(sessionDates, STACK_OVERFLOW_SESSIONS);
+  result.mainframe = nth(sessionDates, MAINFRAME_SESSIONS);
+
+  const heavy = ordered.find((s) => s.tonnage_kg >= OVERCLOCK_KG)?.date ?? null;
+  result.overclock = [heavy, Math.max(0, ...ordered.map((s) => s.tonnage_kg)) / OVERCLOCK_KG];
+
+  let total = 0;
+  let big: string | null = null;
+  for (const s of ordered) {
+    total += s.tonnage_kg;
+    if (big === null && total >= BIG_DATA_KG) big = s.date;
+  }
+  result.big_data = [big, total / BIG_DATA_KG];
+
+  result.rootkit = nth(beaten, ROOTKIT_RECORDS);
+  result.load_balancer = loadBalancer(sessionDates);
+
+  const gaps = dates.slice(1).map((d, i) => [days(dates[i]!, d), d] as const);
+  const back = gaps.find(([gap]) => gap >= CTRL_Z_GAP_DAYS)?.[1] ?? null;
+  result.ctrl_z = [back, Math.max(0, ...gaps.map(([gap]) => gap)) / CTRL_Z_GAP_DAYS];
+
+  const firstAt = (test: (h: number) => boolean): Result => {
+    const d = ordered.find((s) => s.hour != null && test(s.hour))?.date ?? null;
+    return [d, d ? 1 : 0];
+  };
+  result.night_shift = firstAt((h) => h >= 22 || h < 4);
+  result.cron_job = firstAt((h) => h >= 4 && h < 7);
+
+  // Sobota i niedziela: dzień tygodnia z daty w UTC (daty są lokalne, bez strefy).
+  const weekend = sessionDates.filter((d) => [0, 6].includes(new Date(`${d}T12:00:00Z`).getUTCDay()));
+  result.weekend_deploy = nth(weekend, WEEKEND_SESSIONS);
 
   return BADGES.map((b) => {
     const [earned, progress] = result[b.slug]!;
