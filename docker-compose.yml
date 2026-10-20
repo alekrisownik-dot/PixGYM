@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: pixgym
+      POSTGRES_USER: pixgym
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?ustaw w .env}
+      PIXGYM_APP_DB_PASSWORD: ${PIXGYM_APP_DB_PASSWORD:?ustaw w .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infra/postgres/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pixgym -d pixgym"]
+      interval: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redisdata:/data
+
+  api:
+    build:
+      context: apps/api
+      args:
+        INSTALL_DEV: "true"
+    environment:
+      # Aplikacja łączy się rolą bez uprawnień właściciela, więc obowiązuje ją RLS.
+      PIXGYM_DATABASE_URL: postgresql+psycopg://pixgym_app:${PIXGYM_APP_DB_PASSWORD}@db:5432/pixgym
+      PIXGYM_MIGRATIONS_DATABASE_URL: postgresql+psycopg://pixgym:${POSTGRES_PASSWORD}@db:5432/pixgym
+      PIXGYM_APP_DB_PASSWORD: ${PIXGYM_APP_DB_PASSWORD}
+      PIXGYM_REDIS_URL: redis://redis:6379/0
+    volumes:
+      - ./apps/api:/app
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: sh -c "alembic upgrade head && python -m pixgym.seed && uvicorn pixgym.main:app --host 0.0.0.0 --port 8000 --reload"
+
+volumes:
+  pgdata:
+  redisdata:
