@@ -11,10 +11,22 @@ class Settings(BaseSettings):
     # Właściciel schematu: migracje i seed.
     migrations_database_url: str
     redis_url: str = "redis://localhost:6379/0"
+    # Bez puli połączeń (testy: każdy klient HTTP ma własną pętlę zdarzeń).
+    db_null_pool: bool = False
     # Zdjęcia sylwetki: katalog na zaszyfrowane pliki i klucz AES-256 (base64, 32 bajty).
     # Wygeneruj: python -c "import os, base64; print(base64.b64encode(os.urandom(32)).decode())"
     photo_dir: str = "/data/photos"
     photo_key: str | None = None
+    # Klucz do podpisu tokenów dostępu. Wygeneruj: openssl rand -hex 32
+    secret_key: str
+    # Ciasteczka tylko po HTTPS. Chrome traktuje http://localhost jako bezpieczne,
+    # więc lokalnie też działa; wyłączać tylko przy wejściu po zwykłym http z innego hosta.
+    cookie_secure: bool = True
+    access_ttl_s: int = 15 * 60
+    refresh_ttl_s: int = 30 * 24 * 3600
+    invite_ttl_s: int = 7 * 24 * 3600
+    # Zbudowany front (apps/web/dist). Brak katalogu = tylko API.
+    web_dir: str | None = None
 
 
 @lru_cache

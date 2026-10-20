@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+/* Kolory jak w specyfikacji: ciemny motyw, zielony akcent, monospace w liczbach. */
+@theme {
+  --color-bg: #0a0f0d;
+  --color-surface: #121a16;
+  --color-surface-2: #18231e;
+  --color-line: #26362e;
+  --color-fg: #e4efe8;
+  --color-muted: #9db1a6;
+  --color-accent: #5cf2a0;
+  --color-accent-ink: #04120a;
+  --color-amber: #ffbe5c;
+  --color-danger: #ff7a7a;
+  --color-cyan: #7dd8ff;
+  --font-mono: ui-monospace, "JetBrains Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
+}
+
+/* Liczby się nie przesuwają przy zmianie cyfr. */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Wcięcie pod aparatem: na body, żeby nie gryzło się z pt-* Tailwinda. */
+body {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+@utility safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+.cursor {
+  display: inline-block;
+  width: 0.5em;
+  height: 0.85em;
+  background: var(--color-accent);
+  vertical-align: -0.05em;
+  margin-left: 4px;
+  animation: blink 1.1s steps(1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    animation: none;
+  }
+}

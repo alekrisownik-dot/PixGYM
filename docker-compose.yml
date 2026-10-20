@@ -32,10 +32,14 @@ services:
       PIXGYM_REDIS_URL: redis://redis:6379/0
       PIXGYM_PHOTO_KEY: ${PIXGYM_PHOTO_KEY:?ustaw w .env}
       PIXGYM_PHOTO_DIR: /data/photos
+      PIXGYM_SECRET_KEY: ${PIXGYM_SECRET_KEY:?ustaw w .env}
+      PIXGYM_WEB_DIR: /web
     volumes:
       - ./apps/api:/app
       - ./packages:/packages:ro
       - photos:/data/photos
+      # Zbudowany front: cd apps/web && npm run build
+      - ./apps/web/dist:/web:ro
     ports:
       - "127.0.0.1:8000:8000"
     depends_on:

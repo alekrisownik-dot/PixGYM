@@ -11,6 +11,35 @@ docker-compose up -d          # Postgres 17, Redis 7, API
 curl http://127.0.0.1:8000/api/v1/health
 ```
 
+Front (PWA) buduje się raz i po każdej zmianie; pliki serwuje API pod tym samym adresem:
+
+```bash
+cd apps/web && npm install && npm run build
+```
+
+Pierwsze konto (administrator), hasło wpisuje się z klawiatury:
+
+```bash
+docker-compose exec api python -m pixgym.admin create-admin TWOJ@EMAIL Imię
+```
+
+Znajomi zakładają konta z kodu zaproszenia (zakładka „Ja” → „Nowy kod” albo
+`python -m pixgym.admin invite TWOJ@EMAIL`). Reset hasła: `python -m pixgym.admin set-password EMAIL`.
+
+### Telefon przez Tailscale
+
+API słucha tylko na `127.0.0.1:8000`. Do telefonu wystawia je `tailscale serve` z certyfikatem
+`*.ts.net` (PWA wymaga HTTPS). Raz: w panelu Tailscale (DNS) włącz MagicDNS i HTTPS Certificates.
+
+```bash
+sudo tailscale serve --bg 8000     # https://<komputer>.<tailnet>.ts.net
+tailscale serve status
+```
+
+Znajomi muszą być w tej samej sieci Tailscale (albo dostać udostępnione urządzenie).
+
+Podczas pracy nad frontem: `cd apps/web && npm run dev` (http://localhost:5173, `/api` idzie do Dockera).
+
 Przy starcie API wykonuje migracje (`alembic upgrade head`) i seed
 (150 ćwiczeń, 8 reguł progresji, 6 szablonów planów). Seed można puszczać wielokrotnie.
 

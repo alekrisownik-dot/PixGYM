@@ -17,7 +17,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from pixgym.db.base import Base, SoftDelete, UUIDPk, Versioned, str_enum
+from pixgym.db.base import Base, CreatedAt, SoftDelete, UUIDPk, Versioned, str_enum
 
 
 class Region(enum.StrEnum):
@@ -96,6 +96,27 @@ class Exercise(UUIDPk, Versioned, SoftDelete, Base):
     # Jaka część masy ciała jest podnoszona (pompki ~0.65, podciąganie 1.0).
     bw_factor: Mapped[Decimal | None] = mapped_column(Numeric(3, 2))
     video_url: Mapped[str | None] = mapped_column(Text)
+    # Własne ćwiczenia: np. ustawienie maszyny („siedzisko 4, oparcie 2”).
+    notes: Mapped[str | None] = mapped_column(Text)
+
+
+class ExercisePhoto(UUIDPk, CreatedAt, SoftDelete, Base):
+    """Zdjęcie maszyny lub stanowiska. Do dowolnego ćwiczenia (także wbudowanego), bo na
+    różnych siłowniach ta sama nazwa to różne maszyny. Plik leży zaszyfrowany jak zdjęcia
+    postępu (services/photos.PhotoStore), widzi go tylko właściciel."""
+
+    __tablename__ = "exercise_photos"
+    __table_args__ = (
+        CheckConstraint("width > 0 AND height > 0", name="dimensions"),
+        Index(None, "user_id", "exercise_id"),
+    )
+
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    exercise_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("exercises.id", ondelete="CASCADE"))
+    # Np. nazwa siłowni.
+    caption: Mapped[str | None] = mapped_column(String(80))
+    width: Mapped[int] = mapped_column(SmallInteger)
+    height: Mapped[int] = mapped_column(SmallInteger)
 
 
 class ExerciseMuscle(Base):

@@ -1,5 +1,12 @@
 from pixgym.models.account import Invite, MfaTotp, RecoveryCode, RefreshToken, User, UserSettings
-from pixgym.models.catalog import Equipment, Exercise, ExerciseMuscle, MovementPattern, MuscleGroup
+from pixgym.models.catalog import (
+    Equipment,
+    Exercise,
+    ExerciseMuscle,
+    ExercisePhoto,
+    MovementPattern,
+    MuscleGroup,
+)
 from pixgym.models.program import (
     Program,
     ProgramDay,
@@ -18,6 +25,7 @@ __all__ = [
     "Equipment",
     "Exercise",
     "ExerciseMuscle",
+    "ExercisePhoto",
     "Invite",
     "MfaTotp",
     "MovementPattern",

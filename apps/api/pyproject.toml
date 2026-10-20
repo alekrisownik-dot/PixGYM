@@ -13,13 +13,17 @@ dependencies = [
     "alembic>=1.14",
     "psycopg[binary]>=3.2",
     "pydantic-settings>=2.6",
+    "email-validator>=2.2",
     "pillow>=11.0",
     "cryptography>=44.0",
     "tzdata>=2025.1",
+    "argon2-cffi>=23.1",
+    "pyjwt>=2.10",
+    "redis>=5.2",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.3", "ruff>=0.8"]
+dev = ["pytest>=8.3", "ruff>=0.8", "httpx>=0.28"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pixgym"]
