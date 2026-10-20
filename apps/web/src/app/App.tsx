@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { ApiError, setLoggedOutHandler, type Me } from "../api";
 import { kv, outbox } from "../offline/db";
@@ -14,17 +14,19 @@ import { Progress } from "../screens/Progress";
 import { Summary } from "../screens/Summary";
 import { Today } from "../screens/Today";
 import { Workout } from "../screens/Workout";
-import { IconChart, IconCloudOff, IconDumbbell, IconGrid, IconHome, IconRefresh, IconUser } from "../ui/icons";
+import { IconCloudOff, IconRefresh } from "../ui/icons";
+import { PixelIcon, type PixelIconName } from "../ui/pixel-icons";
 import { Button, Loading, changes } from "../ui/kit";
+import { Celebrations } from "../ui/celebrate";
 import { Toasts } from "../ui/toast";
 import { href, useRoute, type Route } from "./router";
 
-const TABS: ReadonlyArray<{ route: Route; label: string; Icon: (p: { size?: number }) => ReactNode; match: Route["name"][] }> = [
-  { route: { name: "today" }, label: "Dziś", Icon: IconHome, match: ["today"] },
-  { route: { name: "history" }, label: "Trening", Icon: IconDumbbell, match: ["history", "workout", "summary"] },
-  { route: { name: "plans" }, label: "Plany", Icon: IconGrid, match: ["plans", "plan"] },
-  { route: { name: "progress" }, label: "Postęp", Icon: IconChart, match: ["progress", "exercise"] },
-  { route: { name: "me" }, label: "Ja", Icon: IconUser, match: ["me"] },
+const TABS: ReadonlyArray<{ route: Route; label: string; icon: PixelIconName; match: Route["name"][] }> = [
+  { route: { name: "today" }, label: "Dziś", icon: "home", match: ["today"] },
+  { route: { name: "history" }, label: "Trening", icon: "dumbbell", match: ["history", "workout", "summary"] },
+  { route: { name: "plans" }, label: "Plany", icon: "plan", match: ["plans", "plan"] },
+  { route: { name: "progress" }, label: "Postęp", icon: "chart", match: ["progress", "exercise"] },
+  { route: { name: "me" }, label: "Ja", icon: "user", match: ["me"] },
 ];
 
 /** Pasek stanu synchronizacji: widoczny tylko, gdy coś czeka albo coś poszło nie tak. */
@@ -93,6 +95,7 @@ export function App() {
   return (
     <>
       <Toasts />
+      <Celebrations />
       <SyncBar />
       {route.name === "today" && <Today me={me} />}
       {route.name === "history" && <History />}
@@ -124,7 +127,7 @@ export function App() {
                 aria-current={on ? "page" : undefined}
               >
                 <span className={`grid h-8 w-14 place-items-center rounded-full transition ${on ? "bg-accent/15" : ""}`}>
-                  <t.Icon size={22} />
+                  <PixelIcon name={t.icon} size={20} />
                 </span>
                 {t.label}
               </a>

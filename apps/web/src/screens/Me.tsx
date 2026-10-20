@@ -7,7 +7,9 @@ import { cachedGet } from "../offline/sessions";
 import { Button, Card, Empty, ErrorText, Loading, ProgressBar, Screen, Segmented, clock, kg, shortDate, changes, SectionTitle } from "../ui/kit";
 import { IconTrophy } from "../ui/icons";
 import { Bit } from "../ui/mascot";
+import { PixelIcon, hasPixelIcon } from "../ui/pixel-icons";
 import { Sheet } from "../ui/sheet";
+import { GEAR, toggleGear, useGear } from "../ui/gear";
 import { setTheme, useTheme } from "../ui/theme";
 
 // Krótkie nazwy, żeby cztery boje zmieściły się w jednym rzędzie; pełna nazwa pod przełącznikiem.
@@ -85,8 +87,8 @@ function Badges() {
             onClick={() => setOpen(b)}
             className={`card grid content-start justify-items-center gap-1.5 px-1.5 py-3 text-center ${b.earned_at ? "!border-accent/60" : ""}`}
           >
-            <span className={`grid size-10 place-items-center rounded-xl ${b.earned_at ? "bg-accent/15 text-accent" : "bg-surface-2 text-muted/70"}`}>
-              <IconTrophy size={20} />
+            <span className={`grid size-11 place-items-center rounded-xl ${b.earned_at ? "bg-accent/15 text-accent" : "bg-surface-2 text-muted/50"}`}>
+              {hasPixelIcon(b.slug) ? <PixelIcon name={b.slug} size={26} accent={b.earned_at ? undefined : "currentColor"} /> : <IconTrophy size={20} />}
             </span>
             <span className={`font-mono text-[12px] leading-tight font-bold ${b.earned_at ? "text-accent" : "text-fg/70"}`}>{b.title}</span>
             {!b.earned_at && <ProgressBar value={b.progress} className="h-1 w-full" />}
@@ -96,6 +98,11 @@ function Badges() {
       {open && (
         <Sheet title={open.title} onClose={() => setOpen(null)}>
           <div className="grid gap-3">
+            {hasPixelIcon(open.slug) && (
+              <span className={`grid size-24 place-items-center justify-self-center rounded-3xl ${open.earned_at ? "pop bg-accent/15 text-accent" : "bg-surface-2 text-muted/50"}`}>
+                <PixelIcon name={open.slug} size={64} accent={open.earned_at ? undefined : "currentColor"} />
+              </span>
+            )}
             <p className="text-lg">{open.description}</p>
             {open.earned_at ? (
               <p className="font-mono text-accent">✓ zdobyta {shortDate(open.earned_at)}</p>
@@ -210,6 +217,43 @@ function ThemePicker() {
   );
 }
 
+/** Akcesoria Bita: odblokowane odznakami, zakładane dotknięciem (jedno na miejsce). */
+function GearPicker() {
+  const { data: badges } = useLoad(() => cachedGet<Badge[]>("/badges"), []);
+  const gear = useGear();
+  const earned = new Set((badges ?? []).filter((b) => b.earned_at).map((b) => b.slug));
+  return (
+    <section className="grid gap-2">
+      <SectionTitle>Akcesoria Bita</SectionTitle>
+      <div className="card flex items-center gap-4 p-3">
+        <Bit mood="idle" size={84} />
+        <p className="text-[15px] text-muted">Zdobywaj odznaki, a Bit dostanie nowe rzeczy. Dotknij, żeby założyć albo zdjąć.</p>
+      </div>
+      <div className="grid grid-cols-[repeat(3,minmax(0,1fr))] gap-2">
+        {GEAR.map((g) => {
+          const unlocked = earned.has(g.badge);
+          const on = gear[g.slot] === g.id;
+          return (
+            <button
+              key={g.id}
+              onClick={() => unlocked && toggleGear(g.id)}
+              disabled={!unlocked}
+              aria-pressed={on}
+              className={`card grid justify-items-center gap-1 px-1.5 py-2.5 text-center ${on ? "!border-accent shadow-[0_0_20px_-8px_rgb(var(--accent-rgb)/.8)]" : ""} ${unlocked ? "" : "opacity-55"}`}
+            >
+              <span className={unlocked ? "" : "grayscale"}>
+                <Bit mood="idle" size={46} gear={{ [g.slot]: g.id }} />
+              </span>
+              <span className={`font-mono text-[12.5px] font-bold ${on ? "text-accent" : ""}`}>{g.name}</span>
+              <span className="text-[11px] leading-tight text-muted">{unlocked ? (on ? "założone" : "dotknij") : `🔒 ${g.badgeName}`}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function TrainingSettings() {
   const { data, setData, error: loadError } = useLoad(() => cachedGet<Settings>("/me/settings"), []);
   const [error, setError] = useState<string | null>(null);
@@ -294,6 +338,7 @@ export function MeScreen({ me, onChange, onLogout }: { me: Me; onChange: (m: Me)
       {tab === "settings" && (
         <>
           <ThemePicker />
+          <GearPicker />
 
           <section className="grid gap-2">
             <SectionTitle>Profil</SectionTitle>

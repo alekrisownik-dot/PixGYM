@@ -75,6 +75,7 @@ class ExerciseOut(Out):
     custom: bool
     notes: str | None
     per_side: bool
+    muscle: str | None
     photos: list[ExercisePhotoOut]
 
 

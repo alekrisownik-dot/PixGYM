@@ -33,6 +33,8 @@ export interface Exercise {
   notes: string | null;
   /** Ciężar wpisywany na jedną stronę / rękę (w seriach zapisany łącznie, ×2). */
   per_side: boolean;
+  /** Partia główna (slug), np. „chest”. */
+  muscle: string | null;
   photos: ExercisePhoto[];
 }
 

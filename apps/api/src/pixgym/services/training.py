@@ -17,6 +17,8 @@ from pixgym.core.ids import uuid7
 from pixgym.models import (
     Equipment,
     Exercise,
+    ExerciseMuscle,
+    MuscleGroup,
     PersonalRecord,
     ProgramDay,
     SessionExercise,
@@ -45,6 +47,15 @@ SET_FIELDS = (
 
 
 def list_exercises(conn: Connection) -> list[dict[str, Any]]:
+    # Partia główna: największy udział (kolor partii w aplikacji).
+    primary = (
+        select(MuscleGroup.slug)
+        .join(ExerciseMuscle, ExerciseMuscle.muscle_group_id == MuscleGroup.id)
+        .where(ExerciseMuscle.exercise_id == Exercise.id)
+        .order_by(ExerciseMuscle.contribution.desc(), MuscleGroup.id)
+        .limit(1)
+        .scalar_subquery()
+    )
     rows = conn.execute(
         select(
             Exercise.id,
@@ -56,6 +67,7 @@ def list_exercises(conn: Connection) -> list[dict[str, Any]]:
             (Exercise.owner_user_id.is_not(None)).label("custom"),
             Exercise.notes,
             Exercise.per_side,
+            primary.label("muscle"),
         )
         .join(Equipment, Equipment.id == Exercise.equipment_id)
         .where(Exercise.deleted_at.is_(None))

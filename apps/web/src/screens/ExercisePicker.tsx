@@ -6,6 +6,7 @@ import { cachedGet } from "../offline/sessions";
 import { Button, ErrorText, Field, Segmented } from "../ui/kit";
 import { photoUrl, shrinkImage } from "../ui/image";
 import { LoadModePicker } from "./ExerciseInfo";
+import { muscleGroup } from "../ui/muscles";
 import { ExerciseArt } from "../ui/exercise-art";
 
 const fold = (s: string) =>
@@ -77,6 +78,7 @@ export function ExercisePicker({
                 <ExerciseArt exercise={e} size={56} />
               )}
               <span className="min-w-0 flex-1 text-lg">
+                {muscleGroup(e.muscle) && <span className="mr-2 inline-block size-2.5 -translate-y-0.5 rounded-full" style={{ background: muscleGroup(e.muscle)!.color }} />}
                 {e.name}
                 {e.custom && <span className="ml-2 align-middle font-mono text-xs text-accent">własne</span>}
               </span>

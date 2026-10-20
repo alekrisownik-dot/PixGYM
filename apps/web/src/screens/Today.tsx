@@ -9,6 +9,7 @@ import { IconChevronRight, IconDumbbell, IconFlame, IconGrid, IconPlay, IconPlus
 import { Button, Card, Empty, ErrorText, Loading, Screen, SectionTitle, longDate, sets } from "../ui/kit";
 import { ExerciseArt } from "../ui/exercise-art";
 import { BitSays, type Mood } from "../ui/mascot";
+import { muscleGroup } from "../ui/muscles";
 import { Sheet } from "../ui/sheet";
 import { quipOfDay } from "../ui/quips";
 import { useTheme } from "../ui/theme";
@@ -150,6 +151,7 @@ function PlanToday({ active, onStart, busy }: { active: ActivePlan; onStart: (d?
 const WEEKLY_TARGET = 20;
 
 function VolumeBar({ m }: { m: MuscleVolume }) {
+  const color = muscleGroup(m.muscle)?.color ?? "var(--color-accent)";
   return (
     <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-1">
       <span className="flex items-baseline justify-between gap-2 text-[14px]">
@@ -163,8 +165,8 @@ function VolumeBar({ m }: { m: MuscleVolume }) {
         {/* znacznik 10 serii (dolna granica zalecanego zakresu) */}
         <span className="absolute inset-y-0 left-1/2 w-px bg-line" />
         <div
-          className={`h-full rounded-full ${m.hard_sets >= 10 ? "bg-accent" : "bg-gradient-to-r from-accent/40 to-accent/70"}`}
-          style={{ width: `${Math.min(100, (m.hard_sets / WEEKLY_TARGET) * 100)}%` }}
+          className="h-full rounded-full"
+          style={{ width: `${Math.min(100, (m.hard_sets / WEEKLY_TARGET) * 100)}%`, background: color, opacity: m.hard_sets >= 10 ? 1 : 0.55 }}
         />
       </div>
     </div>

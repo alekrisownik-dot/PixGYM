@@ -704,6 +704,7 @@ def test_custom_exercise_per_side(new_client, admin):
     assert r.json()["per_side"] is False
     builtin = next(e for e in api.get("/api/v1/exercises").json() if e["slug"] == "bench_press")
     assert builtin["per_side"] is False
+    assert builtin["muscle"] == "chest" and ex["muscle"] == "chest"
 
 
 def test_body_module(new_client, owner_engine, admin):

@@ -507,7 +507,77 @@ select {
   animation: scan 7s linear infinite;
 }
 
+/* Ekran rekordu: wejście i rozszczepiony napis NEW PR. */
+@keyframes pr-in {
+  from {
+    opacity: 0;
+    transform: scale(1.08);
+  }
+}
+@keyframes pr-title {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+    text-shadow: none;
+  }
+  45% {
+    transform: scale(1.15);
+    opacity: 1;
+    text-shadow:
+      -6px 0 #00e5ff,
+      6px 0 var(--color-amber);
+  }
+  70% {
+    transform: scale(0.97);
+    text-shadow:
+      3px 0 #00e5ff,
+      -3px 0 var(--color-amber);
+  }
+  100% {
+    transform: scale(1);
+    text-shadow: 0 0 24px rgb(var(--accent-rgb) / 0.6);
+  }
+}
+.pr-in {
+  animation: pr-in 0.25s ease-out;
+}
+.pr-title {
+  animation: pr-title 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+/* Bit niecierpliwy pod koniec przerwy: drobne podskoki w miejscu. */
+@keyframes impatient {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  25% {
+    translate: -2px -1px;
+  }
+  75% {
+    translate: 2px -1px;
+  }
+}
+.bit-impatient {
+  display: inline-block;
+  animation: impatient 0.18s linear infinite;
+}
+
+/* Zarys karty w trakcie ładowania. */
+@keyframes skeleton {
+  50% {
+    opacity: 0.45;
+  }
+}
+.skeleton {
+  animation: skeleton 1.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .bit-impatient,
+  .pr-in,
+  .pr-title,
+  .skeleton,
   :root[data-theme="red"] h1,
   :root[data-theme="red"] .bit,
   :root[data-theme="red"] body::after {

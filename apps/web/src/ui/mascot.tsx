@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { useGear, type Gear, type GearId } from "./gear";
 import { useTheme } from "./theme";
 
 /**
@@ -17,6 +18,12 @@ export const PALETTE: Record<string, string> = {
   A: "var(--color-amber)",
   M: "#7e8f86",
   m: "#c9d6cf",
+  // akcesoria
+  R: "#ff4d6d",
+  S: "#0b0b0b",
+  w: "#ffffff",
+  Y: "#ffd23f",
+  D: "#2b2f33",
 };
 
 const W = 20;
@@ -65,6 +72,27 @@ const HORNS: Px[] = [[5, 3, "G"], [4, 3, "G"], [4, 2, "G"], [3, 1, "G"], [14, 3,
 const EYES_EVIL: Px[] = [[3, 3, "W"], [3, 4, "W"], [4, 4, "W"], [5, 4, "W"], [10, 3, "W"], [10, 4, "W"], [9, 4, "W"], [8, 4, "W"]];
 const FANGS: Px[] = [3, 4, 5, 6, 7, 8, 9, 10].map((x) => [x, 6, "W"] as Px).concat([[4, 7, "W"], [9, 7, "W"]] as Px[]);
 const isAntenna = ([x, y]: Px) => (x === 9 || x === 10) && (y === 2 || y === 3);
+
+// Akcesoria (współrzędne całej postaci 20×21; głowa zaczyna się w (3, 4)).
+const GEAR_PX: Record<GearId, Px[]> = {
+  headband: [...[3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].map((x) => [x, 5, "R"] as Px), [17, 5, "R"], [18, 6, "R"], [17, 6, "R"], [18, 7, "R"]],
+  headphones: [
+    ...[5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map((x) => [x, 2, "D"] as Px),
+    [4, 3, "D"], [15, 3, "D"], [3, 4, "D"], [16, 4, "D"],
+    ...[6, 7, 8, 9].flatMap((y) => [[1, y, "D"], [2, y, "D"], [17, y, "D"], [18, y, "D"]] as Px[]),
+    [1, 7, "R"], [18, 7, "R"],
+  ],
+  crown: [
+    ...[6, 7, 8, 9, 10, 11, 12, 13].map((x) => [x, 3, "Y"] as Px),
+    [6, 2, "Y"], [8, 2, "Y"], [9, 2, "R"], [10, 2, "R"], [11, 2, "Y"], [13, 2, "Y"],
+    [6, 1, "Y"], [9, 1, "Y"], [10, 1, "Y"], [13, 1, "Y"],
+  ],
+  shades: [
+    ...[5, 6, 7, 8, 11, 12, 13, 14].flatMap((x) => [[x, 7, "S"], [x, 8, "S"]] as Px[]),
+    [9, 7, "S"], [10, 7, "S"], [6, 7, "w"], [12, 7, "w"],
+  ],
+  chain: [[7, 14, "Y"], [8, 15, "Y"], [9, 15, "Y"], [10, 15, "Y"], [11, 15, "Y"], [12, 14, "Y"], [9, 16, "Y"], [10, 16, "Y"]],
+};
 
 const BODY_IDLE = rows([
   ...Array<string>(14).fill(""),
@@ -141,11 +169,28 @@ function Pixels({ px, dx = 0, dy = 0, className }: { px: Px[]; dx?: number; dy?:
   );
 }
 
-export function Bit({ mood = "idle", size = 64, className = "", evil: forced }: { mood?: Mood; size?: number; className?: string; evil?: boolean }) {
+export function Bit({
+  mood = "idle",
+  size = 64,
+  className = "",
+  evil: forced,
+  gear: forcedGear,
+}: {
+  mood?: Mood;
+  size?: number;
+  className?: string;
+  evil?: boolean;
+  /** Akcesoria do podglądu; domyślnie te wybrane w ustawieniach. */
+  gear?: Gear;
+}) {
   const theme = useTheme();
+  const worn = useGear();
+  const gear = forcedGear ?? worn;
+  const gearPx = (Object.values(gear).filter(Boolean) as GearId[]).flatMap((id) => GEAR_PX[id]);
   const evil = forced ?? theme === "red";
   const base = MOODS[mood];
-  const m: Parts = evil
+  const hatted = gear.head === "crown" || gear.head === "headphones";
+  const m0: Parts = evil
     ? {
         ...base,
         body: [...base.body.filter((p) => !isAntenna(p)), ...HORNS],
@@ -154,6 +199,7 @@ export function Bit({ mood = "idle", size = 64, className = "", evil: forced }: 
         extra: undefined,
       }
     : base;
+  const m: Parts = hatted ? { ...m0, body: m0.body.filter((p) => !isAntenna(p)) } : m0;
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
@@ -170,6 +216,7 @@ export function Bit({ mood = "idle", size = 64, className = "", evil: forced }: 
       <Pixels px={m.mouth} dx={HEAD_X} dy={HEAD_Y} />
       {m.extra && <Pixels px={m.extra} dx={HEAD_X} dy={HEAD_Y} />}
       {m.zzz && <Pixels px={ZZZ} className="bit-z" />}
+      {gearPx.length > 0 && <Pixels px={gearPx} />}
     </svg>
   );
 }

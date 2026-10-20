@@ -1,5 +1,7 @@
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from "react";
 
+import { Bit } from "./mascot";
+
 type Variant = "primary" | "ghost" | "danger" | "outline";
 
 export function Button({
@@ -104,16 +106,30 @@ export function ErrorText({ children }: { children: ReactNode }) {
   );
 }
 
-export function Loading() {
+/** Ładowanie: szare, pulsujące zarysy kart zamiast napisu (ekran nie „skacze” po wczytaniu). */
+export function Loading({ rows = 3 }: { rows?: number }) {
   return (
-    <p className="py-12 text-center font-mono text-sm text-muted">
-      ładowanie<span className="cursor" />
-    </p>
+    <div className="grid gap-2.5 py-2" role="status" aria-label="ładowanie">
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="card skeleton grid gap-2.5 p-4" style={{ animationDelay: `${i * 120}ms` }}>
+          <span className="h-3 w-1/3 rounded-full bg-surface-2" />
+          <span className="h-5 w-3/4 rounded-full bg-surface-2" />
+          <span className="h-3 w-1/2 rounded-full bg-surface-2" />
+        </div>
+      ))}
+    </div>
   );
 }
 
-export function Empty({ children }: { children: ReactNode }) {
-  return <p className="py-6 text-center text-muted">{children}</p>;
+/** Pusty stan: drzemiący Bit, krótki tekst i opcjonalnie przycisk, co zrobić. */
+export function Empty({ children, action }: { children: ReactNode; action?: ReactNode }) {
+  return (
+    <div className="grid justify-items-center gap-2 py-6 text-center">
+      <Bit mood="sleep" size={56} />
+      <p className="max-w-xs text-[15px] text-muted">{children}</p>
+      {action}
+    </div>
+  );
 }
 
 export function Segmented<T extends string>({

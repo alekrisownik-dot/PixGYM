@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { clock } from "../ui/kit";
+import { Bit } from "../ui/mascot";
 
 /**
  * Przerwa między seriami. Zapisujemy godzinę końca (nie odliczamy w pętli), więc
@@ -117,20 +118,76 @@ export function useRestTimer(): RestTimer {
   };
 }
 
+/** Pełny ekran przerwy: duży pierścień czytelny z ławki i Bit, który pod koniec się niecierpliwi. */
+function RestRing({ timer, left, onClose }: { timer: RestTimer; left: number; onClose: () => void }) {
+  const R = 120;
+  const C = 2 * Math.PI * R;
+  const frac = Math.min(1, left / timer.total);
+  const soon = left <= 10;
+  return (
+    <div className="pr-in fixed inset-0 z-[65] grid place-items-center bg-bg/95 px-6 backdrop-blur-sm" onClick={onClose} role="dialog" aria-label="Przerwa">
+      <div className="grid justify-items-center gap-6" onClick={(e) => e.stopPropagation()}>
+        <div className="relative grid size-[300px] place-items-center">
+          <svg viewBox="-150 -150 300 300" className="absolute inset-0" aria-hidden>
+            <circle r={R} fill="none" stroke="var(--color-surface-2)" strokeWidth="16" />
+            <circle
+              r={R}
+              fill="none"
+              stroke={soon ? "var(--color-amber)" : "var(--color-accent)"}
+              strokeWidth="16"
+              strokeLinecap="round"
+              strokeDasharray={C}
+              strokeDashoffset={C * (1 - frac)}
+              transform="rotate(-90)"
+              className="transition-[stroke-dashoffset] duration-300 ease-linear"
+              style={{ filter: `drop-shadow(0 0 10px ${soon ? "rgb(255 190 92 / .5)" : "rgb(var(--accent-rgb) / .5)"})` }}
+            />
+          </svg>
+          <div className="grid justify-items-center gap-1">
+            <span className={soon ? "bit-impatient" : ""}>
+              <Bit mood={soon ? "flex" : "lift"} size={86} />
+            </span>
+            <span className={`num text-[54px] leading-none font-bold ${soon ? "text-amber" : "text-fg"}`} aria-live="polite">
+              {clock(left)}
+            </span>
+            <span className="font-mono text-[12px] text-muted">{soon ? "zaraz następna seria!" : "przerwa"}</span>
+          </div>
+        </div>
+        <div className="grid w-full max-w-xs grid-cols-3 gap-2">
+          <button className="num min-h-14 rounded-xl border border-line text-lg" onClick={() => timer.add(-15)}>
+            −15
+          </button>
+          <button className="num min-h-14 rounded-xl border border-line text-lg" onClick={() => timer.add(15)}>
+            +15
+          </button>
+          <button className="min-h-14 rounded-xl bg-accent font-mono font-bold text-accent-ink" onClick={timer.stop}>
+            pomiń
+          </button>
+        </div>
+        <button onClick={onClose} className="min-h-11 font-mono text-sm text-muted">
+          zwiń ▾
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function RestBar({ timer }: { timer: RestTimer }) {
+  const [big, setBig] = useState(false);
   if (!timer.end || timer.end <= timer.now) return null;
   const left = (timer.end - timer.now) / 1000;
+  if (big) return <RestRing timer={timer} left={left} onClose={() => setBig(false)} />;
   return (
     <div className="safe-bottom fixed inset-x-0 bottom-[62px] z-20 px-3">
       <div className="glow mx-auto max-w-xl overflow-hidden rounded-2xl bg-surface/95 backdrop-blur">
         <div className="h-1 bg-gradient-to-r from-accent/60 to-accent transition-[width] duration-200" style={{ width: `${Math.min(100, (left / timer.total) * 100)}%` }} />
         <div className="flex items-center justify-between gap-2 px-3 py-2">
-          <span className="grid leading-none">
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-muted">przerwa</span>
+          <button onClick={() => setBig(true)} className="grid text-left leading-none" aria-label="Pokaż przerwę na cały ekran">
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-muted">przerwa ⤢</span>
             <span className="num text-[30px] font-bold text-accent" aria-live="polite">
               {clock(left)}
             </span>
-          </span>
+          </button>
           <div className="flex gap-1.5">
             <button className="num min-h-11 rounded-lg border border-line px-3 text-sm" onClick={() => timer.add(-15)}>
               −15

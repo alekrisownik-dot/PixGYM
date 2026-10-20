@@ -11,9 +11,9 @@ import { Button, ErrorText, Loading, Screen, Segmented, clock, kg } from "../ui/
 import { IconCheck, IconChevronRight, IconMore, IconNote, IconPlus, IconTimer, IconTrash } from "../ui/icons";
 import { Bit } from "../ui/mascot";
 import { Sheet } from "../ui/sheet";
-import { getTheme } from "../ui/theme";
-import { toast } from "../ui/toast";
+import { celebrate } from "../ui/celebrate";
 import { ExerciseArt, sceneFor } from "../ui/exercise-art";
+import { muscleGroup } from "../ui/muscles";
 import { ExerciseInfo } from "./ExerciseInfo";
 import { ExercisePicker } from "./ExercisePicker";
 import { blockText, schemeText } from "./plan-format";
@@ -412,14 +412,14 @@ function ExerciseCard({
       if (!beaten.length) return;
       const best = beaten.find((r) => r.record_type === "e1rm") ?? beaten[0]!;
       const name = best.record_type === "rep_max" ? `${best.reps}RM` : RECORD_NAMES[best.record_type];
-      toast({ tone: "record", title: getTheme() === "red" ? "Nowy rekord! Natty? Nikt nie uwierzy." : "Nowy rekord!", body: `${se.name} · ${name} ${best.record_type === "bodyweight_reps" ? best.value : `${kg(best.value)} kg`}` });
-      navigator.vibrate?.(80);
+      celebrate({ exercise: se.name, label: name ?? "rekord", value: best.value, unit: best.record_type === "bodyweight_reps" ? "powt." : "kg" });
     };
     window.addEventListener(SET_SYNCED, on);
     return () => window.removeEventListener(SET_SYNCED, on);
   }, [se.id, se.name]);
 
   const isReps = isRepsTracking(se.tracking);
+  const group = muscleGroup(exercise?.muscle);
   // Ciężar wpisywany na stronę / rękę: na ekranie połowa, w zapisie całość.
   const perSide = !!exercise?.per_side && se.tracking === "weight_reps";
   const total = (a: number | null) => (a != null && perSide ? Math.round(a * 2 * 100) / 100 : a);
@@ -558,7 +558,11 @@ function ExerciseCard({
   const sheetDraft = sheet?.kind === "set" ? (drafts[sheet.key] ?? {}) : {};
 
   return (
-    <section id={`ex-${se.id}`} className={`card scroll-mt-28 grid grid-cols-[minmax(0,1fr)] gap-2.5 p-3 transition ${open ? "glow" : ""}`}>
+    <section
+      id={`ex-${se.id}`}
+      className={`card scroll-mt-28 grid grid-cols-[minmax(0,1fr)] gap-2.5 p-3 transition ${open ? "glow" : ""}`}
+      style={group ? { borderLeft: `4px solid ${group.color}` } : undefined}
+    >
       <div className="flex items-start gap-2">
         <button onClick={onToggle} className="shrink-0" aria-hidden tabIndex={-1}>
           <ExerciseArt exercise={exercise ?? { name: se.name, tracking: se.tracking }} size={58} />
@@ -566,6 +570,12 @@ function ExerciseCard({
         <button onClick={onToggle} className="min-w-0 flex-1 text-left" aria-expanded={open}>
           <p className="text-[18px] leading-snug font-bold">{se.name}</p>
           <p className="mt-0.5 truncate font-mono text-[12.5px]">
+            {group && (
+              <span className="font-semibold" style={{ color: group.color }}>
+                {group.name}
+                {(se.target || lastWorking) && <span className="text-muted"> · </span>}
+              </span>
+            )}
             {se.target && <span className="font-semibold text-accent">{blockText(se.target)}</span>}
             {se.target && lastWorking && <span className="text-muted"> · </span>}
             {lastWorking && <span className="text-cyan">ost. {setLabel(lastWorking, se.tracking, perSide)}</span>}

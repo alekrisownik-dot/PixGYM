@@ -7,6 +7,7 @@ import { cachedGet, listSessions } from "../offline/sessions";
 import { IconArrowDown, IconArrowUp, IconChevronRight } from "../ui/icons";
 import { ErrorText, Loading, ProgressBar, Screen, SectionTitle, Segmented, Tile, kg, plural, shortDate, tonnage } from "../ui/kit";
 import { BitSays } from "../ui/mascot";
+import { muscleGroup } from "../ui/muscles";
 import { Body } from "./Body";
 import { ExerciseArt } from "../ui/exercise-art";
 
@@ -256,7 +257,12 @@ export function Progress() {
           {!!exercises.data?.length && (
             <div className="grid gap-2">
               {exercises.data.map((e) => (
-                <a key={e.id} href={href({ name: "exercise", id: e.id })} className="card flex items-center gap-3 py-3 pr-3 pl-3 active:bg-surface-2">
+                <a
+                  key={e.id}
+                  href={href({ name: "exercise", id: e.id })}
+                  className="card flex items-center gap-3 py-3 pr-3 pl-3 active:bg-surface-2"
+                  style={muscleGroup(byId.get(e.id)?.muscle) ? { borderLeft: `4px solid ${muscleGroup(byId.get(e.id)?.muscle)!.color}` } : undefined}
+                >
                   <ExerciseArt exercise={byId.get(e.id) ?? e} size={60} />
                   <span className="min-w-0 flex-1">
                     <span className="block text-[17px] leading-snug font-semibold">{e.name}</span>
