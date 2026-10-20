@@ -612,14 +612,14 @@ def test_flexible_plan_counts_days_done_this_week(new_client, admin):
         == 422
     )
 
-    today = date.today()
-    monday = today - timedelta(days=today.weekday())
-    empty = api.get(f"/api/v1/programs/{plan['id']}/progress?start={monday}").json()
-    assert empty == {"last_day_index": None, "done": []}
-
     # „Plecy” zrobione dziś (np. w środę zamiast wtorku) zaliczają dzień 1.
+    # Datę bierzemy z treningu (strefa użytkownika), nie z zegara testu (UTC).
     sid = str(uuid7())
-    api.post("/api/v1/sessions", json={"id": sid, "program_day_id": plan["days"][1]["id"]})
+    started = api.post(
+        "/api/v1/sessions", json={"id": sid, "program_day_id": plan["days"][1]["id"]}
+    )
+    today = date.fromisoformat(started.json()["local_date"])
+    monday = today - timedelta(days=today.weekday())
     prog = api.get(f"/api/v1/programs/{plan['id']}/progress?start={monday}").json()
     assert prog["last_day_index"] == 1
     assert prog["done"] == [{"day_index": 1, "local_date": str(today), "session_id": sid}]
@@ -760,12 +760,12 @@ def test_attach_and_detach_workout_from_plan_day(new_client, admin):
     plan = api.post(
         "/api/v1/programs", json={"name": "Pętla", "schedule": "flexible", "days": days}
     ).json()
-    today = date.today()
+    # Pusty trening „bez planu”, potem zaliczony jako Plecy.
+    started = api.post("/api/v1/sessions", json={}).json()
+    sid = started["id"]
+    today = date.fromisoformat(started["local_date"])
     monday = today - timedelta(days=today.weekday())
     progress = f"/api/v1/programs/{plan['id']}/progress?start={monday}"
-
-    # Pusty trening „bez planu”, potem zaliczony jako Plecy.
-    sid = api.post("/api/v1/sessions", json={}).json()["id"]
     day = plan["days"][1]["id"]
     r = api.patch(f"/api/v1/sessions/{sid}", json={"program_day_id": day})
     assert r.status_code == 200, r.text
