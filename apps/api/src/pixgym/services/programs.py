@@ -7,6 +7,7 @@ Wywoływać w transakcji użytkownika (RLS).
 """
 
 import uuid
+from datetime import date, timedelta
 from typing import Any
 
 from sqlalchemy import Connection, func, insert, select, update
@@ -19,6 +20,7 @@ from pixgym.models import (
     ProgramExercise,
     ProgramVersion,
     UserSettings,
+    WorkoutSession,
 )
 from pixgym.services.errors import NotFound
 
@@ -60,6 +62,7 @@ def list_programs(conn: Connection, user_id: uuid.UUID) -> list[dict[str, Any]]:
             Program.name,
             Program.description,
             Program.split,
+            Program.schedule,
             Program.is_template,
             (Program.owner_user_id.is_(None)).label("builtin"),
             func.coalesce(days.c.days, 0).label("days"),
@@ -121,6 +124,7 @@ def get_program(conn: Connection, user_id: uuid.UUID, program_id: uuid.UUID) -> 
         "name": row.name,
         "description": row.description,
         "split": row.split,
+        "schedule": row.schedule,
         "builtin": row.owner_user_id is None,
         "version_id": row.version_id,
         "version_no": row.version_no,
@@ -194,6 +198,7 @@ def create_program(conn: Connection, user_id: uuid.UUID, data: dict[str, Any]) -
             name=data["name"].strip(),
             description=data.get("description"),
             split=data.get("split") or "custom",
+            schedule=data.get("schedule") or "weekdays",
             is_template=False,
         )
     )
@@ -211,7 +216,11 @@ def update_program(
     conn.execute(
         update(Program)
         .where(Program.id == program_id)
-        .values(name=data["name"].strip(), description=data.get("description"))
+        .values(
+            name=data["name"].strip(),
+            description=data.get("description"),
+            schedule=data.get("schedule") or "weekdays",
+        )
     )
     _write_version(conn, program_id, row.version_no + 1, data["days"])
 
@@ -227,9 +236,43 @@ def copy_program(conn: Connection, user_id: uuid.UUID, source_id: uuid.UUID) -> 
             "name": name[:100],
             "description": src["description"],
             "split": src["split"],
+            "schedule": src["schedule"],
             "days": src["days"],
         },
     )
+
+
+def plan_progress(
+    conn: Connection, user_id: uuid.UUID, program_id: uuid.UUID, week_start: date
+) -> dict[str, Any]:
+    """Treningi zaczęte z dni tego planu: zaliczone w tygodniu od week_start i ostatni dzień.
+
+    Dzień rozpoznajemy po day_index, bo edycja planu tworzy nowe wersje (i nowe id dni).
+    """
+    _current_version(conn, program_id)
+    q = (
+        select(ProgramDay.day_index, WorkoutSession.local_date, WorkoutSession.id)
+        .join(ProgramDay, ProgramDay.id == WorkoutSession.program_day_id)
+        .join(ProgramVersion, ProgramVersion.id == ProgramDay.program_version_id)
+        .where(
+            ProgramVersion.program_id == program_id,
+            WorkoutSession.user_id == user_id,
+            WorkoutSession.deleted_at.is_(None),
+        )
+    )
+    last = conn.execute(q.order_by(WorkoutSession.started_at.desc()).limit(1)).first()
+    week = conn.execute(
+        q.where(
+            WorkoutSession.local_date >= week_start,
+            WorkoutSession.local_date < week_start + timedelta(days=7),
+        ).order_by(WorkoutSession.started_at)
+    ).all()
+    return {
+        "last_day_index": last.day_index if last else None,
+        "done": [
+            {"day_index": r.day_index, "local_date": r.local_date, "session_id": r.id} for r in week
+        ],
+    }
 
 
 def delete_program(conn: Connection, user_id: uuid.UUID, program_id: uuid.UUID) -> None:

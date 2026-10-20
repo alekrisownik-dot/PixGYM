@@ -55,6 +55,7 @@ def list_exercises(conn: Connection) -> list[dict[str, Any]]:
             Equipment.name.label("equipment"),
             (Exercise.owner_user_id.is_not(None)).label("custom"),
             Exercise.notes,
+            Exercise.per_side,
         )
         .join(Equipment, Equipment.id == Exercise.equipment_id)
         .where(Exercise.deleted_at.is_(None))
@@ -107,7 +108,8 @@ def list_sessions(conn: Connection, user_id: uuid.UUID, limit: int = 30) -> list
     stats = (
         select(
             se.session_id,
-            func.count(func.distinct(se.id)).label("exercise_count"),
+            # Ćwiczenie bez serii (pominięte) nie liczy się do „N ćwiczeń”.
+            func.count(func.distinct(se.id)).filter(working).label("exercise_count"),
             func.count(st.id).filter(working).label("set_count"),
             func.coalesce(func.sum(st.effective_kg * st.reps).filter(working), 0).label(
                 "tonnage_kg"
@@ -448,7 +450,12 @@ def trained_exercises(conn: Connection) -> list[dict[str, Any]]:
             func.count(func.distinct(WorkoutSession.id)).label("sessions"),
         )
         .join(WorkoutSession, WorkoutSession.id == SessionExercise.session_id)
-        .where(_live(SessionExercise), _live(WorkoutSession))
+        .where(
+            _live(SessionExercise),
+            _live(WorkoutSession),
+            # Ćwiczenie dodane do treningu, ale pominięte (bez serii), się nie liczy.
+            exists().where(WorkoutSet.session_exercise_id == SessionExercise.id, _live(WorkoutSet)),
+        )
         .group_by(SessionExercise.exercise_id)
         .subquery()
     )

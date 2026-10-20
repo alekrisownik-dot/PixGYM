@@ -72,6 +72,7 @@ def create_exercise(
             # Ćwiczenie z masą ciała liczy całą masę (jak podciąganie), da się to poprawić.
             bw_factor=1.0 if data["tracking"] == "bodyweight_reps" else None,
             notes=data.get("notes") or None,
+            per_side=bool(data.get("per_side")),
         )
     )
     conn.execute(

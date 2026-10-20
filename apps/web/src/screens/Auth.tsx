@@ -2,6 +2,7 @@ import { useState, type FormEvent } from "react";
 
 import { api, errorText, type Me } from "../api";
 import { Button, ErrorText, Field } from "../ui/kit";
+import { Bit } from "../ui/mascot";
 
 export function Auth({ onDone }: { onDone: (me: Me) => void }) {
   // Link z zaproszeniem: https://.../#kod=XXXX-XXXX-XXXX-XXXX
@@ -32,16 +33,19 @@ export function Auth({ onDone }: { onDone: (me: Me) => void }) {
   }
 
   return (
-    <main className="mx-auto grid max-w-md gap-6 px-4 pt-14 pb-10">
-      <div>
-        <p className="font-mono text-sm font-semibold text-accent">&gt; pixgym --{mode === "login" ? "login" : "register"}</p>
-        <h1 className="mt-1 font-mono text-4xl font-bold tracking-tight">
-          PixGYM<span className="cursor" aria-hidden />
-        </h1>
-        <p className="mt-2 text-muted">{mode === "login" ? "Zaloguj się, żeby zapisywać treningi." : "Załóż konto z kodem od znajomego."}</p>
+    <main className="mx-auto grid max-w-md gap-7 px-5 pt-12 pb-10">
+      <div className="grid gap-4">
+        <Bit mood={error ? "sleep" : "idle"} size={80} />
+        <div>
+          <p className="font-mono text-[13px] font-semibold text-accent">&gt; pixgym --{mode === "login" ? "login" : "register"}</p>
+          <h1 className="mt-1 font-mono text-[44px] leading-none font-bold tracking-tight">
+            PixGYM<span className="cursor" aria-hidden />
+          </h1>
+          <p className="mt-3 text-[17px] text-muted">{mode === "login" ? "Dziennik treningów, rekordy i rangi. Zaloguj się." : "Załóż konto z kodem zaproszenia od znajomego."}</p>
+        </div>
       </div>
 
-      <form onSubmit={submit} className="grid gap-4">
+      <form onSubmit={submit} className="card grid gap-4 p-5">
         {mode === "register" && (
           <>
             <Field label="Kod zaproszenia" value={form.invite_code} onChange={set("invite_code")} autoCapitalize="characters" autoComplete="off" placeholder="ABCD-EFGH-JKLM-NPQR" required />

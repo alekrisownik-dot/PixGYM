@@ -122,11 +122,14 @@ export function RestBar({ timer }: { timer: RestTimer }) {
   const left = (timer.end - timer.now) / 1000;
   return (
     <div className="safe-bottom fixed inset-x-0 bottom-[62px] z-20 px-3">
-      <div className="mx-auto max-w-xl overflow-hidden rounded-2xl border border-accent bg-surface shadow-lg">
-        <div className="h-1 bg-accent transition-[width] duration-200" style={{ width: `${Math.min(100, (left / timer.total) * 100)}%` }} />
+      <div className="glow mx-auto max-w-xl overflow-hidden rounded-2xl bg-surface/95 backdrop-blur">
+        <div className="h-1 bg-gradient-to-r from-accent/60 to-accent transition-[width] duration-200" style={{ width: `${Math.min(100, (left / timer.total) * 100)}%` }} />
         <div className="flex items-center justify-between gap-2 px-3 py-2">
-          <span className="num text-3xl font-bold text-accent" aria-live="polite">
-            {clock(left)}
+          <span className="grid leading-none">
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-muted">przerwa</span>
+            <span className="num text-[30px] font-bold text-accent" aria-live="polite">
+              {clock(left)}
+            </span>
           </span>
           <div className="flex gap-1.5">
             <button className="num min-h-11 rounded-lg border border-line px-3 text-sm" onClick={() => timer.add(-15)}>

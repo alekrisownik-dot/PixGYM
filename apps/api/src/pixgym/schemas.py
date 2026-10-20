@@ -74,6 +74,7 @@ class ExerciseOut(Out):
     equipment: str
     custom: bool
     notes: str | None
+    per_side: bool
     photos: list[ExercisePhotoOut]
 
 
@@ -89,11 +90,41 @@ class ExerciseIn(BaseModel):
     secondary_muscles: list[str] = Field(default_factory=list, max_length=6)
     is_unilateral: bool = False
     notes: str | None = Field(None, max_length=1000)
+    per_side: bool = False
 
 
 class ExercisePatch(BaseModel):
     name: str | None = Field(None, min_length=2, max_length=100)
     notes: str | None = Field(None, max_length=1000)
+    per_side: bool | None = None
+
+
+EventKind = Literal["event", "competition", "trip", "health", "rest", "workout"]
+# Pole nazywa się „date”; alias typu, żeby pydantic nie pomylił go z wartością domyślną pola.
+Day = date
+
+
+class EventIn(BaseModel):
+    id: uuid.UUID | None = None
+    date: Day
+    title: str = Field(min_length=1, max_length=80)
+    kind: EventKind = "event"
+    note: str | None = Field(None, max_length=1000)
+
+
+class EventPatch(BaseModel):
+    date: Day | None = None
+    title: str | None = Field(None, min_length=1, max_length=80)
+    kind: EventKind | None = None
+    note: str | None = Field(None, max_length=1000)
+
+
+class EventOut(Out):
+    id: uuid.UUID
+    date: Day
+    title: str
+    kind: str
+    note: str | None
 
 
 class NamedSlug(BaseModel):
@@ -262,6 +293,7 @@ class PlanIn(BaseModel):
     id: uuid.UUID | None = None
     name: str = Field(min_length=1, max_length=100)
     description: str | None = Field(None, max_length=2000)
+    schedule: Literal["weekdays", "flexible"] = "weekdays"
     days: list[PlanDayIn] = Field(min_length=1, max_length=14)
 
 
@@ -270,6 +302,7 @@ class PlanOut(BaseModel):
     name: str
     description: str | None
     split: str
+    schedule: str
     builtin: bool
     version_id: uuid.UUID
     version_no: int
@@ -282,9 +315,23 @@ class PlanListItem(Out):
     name: str
     description: str | None
     split: str
+    schedule: str
     builtin: bool
     days: int
     active: bool
+
+
+class PlanDayDone(BaseModel):
+    day_index: int
+    local_date: date
+    session_id: uuid.UUID
+
+
+class PlanProgressOut(BaseModel):
+    """Które dni planu są zaliczone w tygodniu i który dzień był ostatnio (do podpowiedzi)."""
+
+    last_day_index: int | None
+    done: list[PlanDayDone]
 
 
 class ActivePlanIn(BaseModel):

@@ -1,12 +1,13 @@
 """Plany treningowe: lista, szczegóły, zapis bloczków, kopia szablonu, aktywny plan."""
 
 import uuid
+from datetime import date
 
 from fastapi import APIRouter, HTTPException, status
 
 from pixgym.api.deps import UserId
 from pixgym.api.v1.training import _run
-from pixgym.schemas import ActivePlanIn, PlanIn, PlanListItem, PlanOut
+from pixgym.schemas import ActivePlanIn, PlanIn, PlanListItem, PlanOut, PlanProgressOut
 from pixgym.services import programs
 from pixgym.services.programs import PlanError
 
@@ -28,6 +29,11 @@ async def list_programs(user_id: UserId) -> list:
 @router.get("/programs/{program_id}", response_model=PlanOut)
 async def get_program(program_id: uuid.UUID, user_id: UserId) -> dict:
     return await _plans(user_id, programs.get_program, user_id, program_id)
+
+
+@router.get("/programs/{program_id}/progress", response_model=PlanProgressOut)
+async def plan_progress(program_id: uuid.UUID, start: date, user_id: UserId) -> dict:
+    return await _plans(user_id, programs.plan_progress, user_id, program_id, start)
 
 
 @router.post("/programs", response_model=PlanOut, status_code=status.HTTP_201_CREATED)

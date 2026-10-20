@@ -5,6 +5,8 @@ import { useLoad } from "../app/useLoad";
 import { cachedGet } from "../offline/sessions";
 import { Button, ErrorText, Field, Segmented } from "../ui/kit";
 import { photoUrl, shrinkImage } from "../ui/image";
+import { LoadModePicker } from "./ExerciseInfo";
+import { ExerciseArt } from "../ui/exercise-art";
 
 const fold = (s: string) =>
   s
@@ -69,7 +71,11 @@ export function ExercisePicker({
         {list.map((e) => (
           <li key={e.id}>
             <button onClick={() => onPick(e)} className="flex min-h-14 w-full items-center gap-3 border-b border-line py-2 text-left active:bg-surface">
-              {e.photos[0] && <img src={photoUrl(e.photos[0].id)} alt="" className="size-11 shrink-0 rounded-lg object-cover" loading="lazy" />}
+              {e.photos[0] ? (
+                <img src={photoUrl(e.photos[0].id)} alt="" className="h-[39px] w-14 shrink-0 rounded-lg object-cover" loading="lazy" />
+              ) : (
+                <ExerciseArt exercise={e} size={56} />
+              )}
               <span className="min-w-0 flex-1 text-lg">
                 {e.name}
                 {e.custom && <span className="ml-2 align-middle font-mono text-xs text-accent">własne</span>}
@@ -104,6 +110,7 @@ function CreateExercise({ initialName, onCancel, onCreated }: { initialName: str
   const [primary, setPrimary] = useState("chest");
   const [secondary, setSecondary] = useState<string[]>([]);
   const [notes, setNotes] = useState("");
+  const [perSide, setPerSide] = useState(false);
   const [caption, setCaption] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
@@ -123,6 +130,7 @@ function CreateExercise({ initialName, onCancel, onCreated }: { initialName: str
         primary_muscle: primary,
         secondary_muscles: secondary,
         notes: notes.trim() || null,
+        per_side: tracking === "weight_reps" && perSide,
       });
       if (photo) {
         try {
@@ -173,6 +181,8 @@ function CreateExercise({ initialName, onCancel, onCreated }: { initialName: str
           <span className="font-mono text-sm font-semibold text-muted">Co zapisujesz</span>
           <Segmented value={tracking} options={TRACKING} onChange={setTracking} />
         </div>
+
+        {tracking === "weight_reps" && <LoadModePicker perSide={perSide} onChange={setPerSide} />}
 
         {meta && (
           <>

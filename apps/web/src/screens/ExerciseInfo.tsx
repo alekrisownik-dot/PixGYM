@@ -1,13 +1,14 @@
 import { useRef, useState } from "react";
 
 import { api, errorText, type Exercise, type ExercisePhoto } from "../api";
-import { ErrorText } from "../ui/kit";
+import { ErrorText, Segmented } from "../ui/kit";
 import { photoUrl, shrinkImage } from "../ui/image";
 
 /** Zdjęcia maszyny (np. z różnych siłowni) i notatka do własnego ćwiczenia. */
 export function ExerciseInfo({ exercise, onChange }: { exercise: Exercise; onChange: () => void }) {
   const [photos, setPhotos] = useState<ExercisePhoto[]>(exercise.photos);
   const [notes, setNotes] = useState(exercise.notes ?? "");
+  const [perSide, setPerSide] = useState(exercise.per_side);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [big, setBig] = useState<ExercisePhoto | null>(null);
@@ -43,6 +44,17 @@ export function ExerciseInfo({ exercise, onChange }: { exercise: Exercise; onCha
     }
   }
 
+  async function savePerSide(v: boolean) {
+    setPerSide(v);
+    try {
+      await api.patch(`/exercises/${exercise.id}`, { per_side: v });
+      onChange();
+    } catch (e) {
+      setPerSide(!v);
+      setError(errorText(e));
+    }
+  }
+
   async function saveNotes() {
     if (notes === (exercise.notes ?? "")) return;
     try {
@@ -70,6 +82,8 @@ export function ExerciseInfo({ exercise, onChange }: { exercise: Exercise; onCha
       <button onClick={() => file.current?.click()} disabled={busy} className="min-h-12 rounded-xl border border-dashed border-line font-mono text-sm disabled:opacity-50">
         {busy ? "wysyłanie…" : "📷 Zrób / dodaj zdjęcie"}
       </button>
+
+      {exercise.custom && exercise.tracking === "weight_reps" && <LoadModePicker perSide={perSide} onChange={(v) => void savePerSide(v)} />}
 
       {exercise.custom && (
         <label className="grid gap-1.5">
@@ -102,6 +116,26 @@ export function ExerciseInfo({ exercise, onChange }: { exercise: Exercise; onCha
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+const LOAD_MODES = [
+  ["total", "Łącznie"],
+  ["side", "Na stronę (×2)"],
+] as const;
+
+/** Jak wpisujesz ciężar: cały albo na jedną stronę / rękę (np. talerze na jednej stronie maszyny, jeden hantel). */
+export function LoadModePicker({ perSide, onChange }: { perSide: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="grid gap-1.5">
+      <span className="font-mono text-sm font-semibold text-muted">Jak wpisujesz ciężar</span>
+      <Segmented value={perSide ? "side" : "total"} options={LOAD_MODES} onChange={(v) => onChange(v === "side")} full />
+      <span className="text-sm text-muted">
+        {perSide
+          ? "Wpisujesz ciężar jednej strony lub jednego hantla. Do rekordów i tonażu liczy się podwójnie."
+          : "Wpisujesz cały ciężar, np. stos na maszynie albo sztangę z talerzami."}
+      </span>
     </div>
   );
 }

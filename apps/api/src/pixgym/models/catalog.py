@@ -98,6 +98,8 @@ class Exercise(UUIDPk, Versioned, SoftDelete, Base):
     video_url: Mapped[str | None] = mapped_column(Text)
     # Własne ćwiczenia: np. ustawienie maszyny („siedzisko 4, oparcie 2”).
     notes: Mapped[str | None] = mapped_column(Text)
+    # Ciężar wpisywany na jedną stronę / rękę; w seriach i tak zapisany łącznie (×2).
+    per_side: Mapped[bool] = mapped_column(Boolean, server_default=false())
 
 
 class ExercisePhoto(UUIDPk, CreatedAt, SoftDelete, Base):

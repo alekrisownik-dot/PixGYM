@@ -4,7 +4,8 @@ import { api, errorText, type Exercise, type Plan, type PlanBlock, type PlanDay 
 import { go } from "../app/router";
 import { useLoad } from "../app/useLoad";
 import { cachedGet } from "../offline/sessions";
-import { Button, Card, ErrorText, Loading, Screen, clock } from "../ui/kit";
+import { Button, Card, ErrorText, Loading, Screen, Segmented, clock, SectionTitle } from "../ui/kit";
+import { ExerciseArt } from "../ui/exercise-art";
 import { ExercisePicker } from "./ExercisePicker";
 import { WEEKDAYS_LONG, WEEKDAYS_SHORT, blockText, schemeText } from "./plan-format";
 
@@ -32,6 +33,7 @@ function Mini({ label, value, onMinus, onPlus }: { label: string; value: string;
 
 function BlockCard({
   block,
+  exercise,
   index,
   count,
   readOnly,
@@ -40,6 +42,7 @@ function BlockCard({
   onRemove,
 }: {
   block: PlanBlock;
+  exercise?: Exercise;
   index: number;
   count: number;
   readOnly: boolean;
@@ -55,7 +58,10 @@ function BlockCard({
   return (
     <Card className={`grid gap-3 p-3 ${open ? "border-accent/60" : ""}`}>
       <div className="flex items-start gap-2">
-        <span className="num mt-0.5 grid size-7 shrink-0 place-items-center rounded-full border border-accent font-bold text-accent">{index + 1}</span>
+        <span className="relative shrink-0">
+          <ExerciseArt exercise={exercise ?? block} size={58} />
+          <span className="num absolute -top-2 -left-2 grid size-5 place-items-center rounded-full bg-accent text-[12px] font-bold text-accent-ink ring-2 ring-surface">{index + 1}</span>
+        </span>
         <button className="min-w-0 flex-1 text-left" onClick={() => !readOnly && setOpen(!open)} aria-expanded={open}>
           <p className="font-bold leading-snug">{block.name}</p>
           <p className="font-mono text-sm text-cyan">
@@ -133,9 +139,15 @@ const newBlock = (e: Exercise): PlanBlock => ({
   notes: null,
 });
 
+const SCHEDULES = [
+  ["weekdays", "Stałe dni"],
+  ["flexible", "Elastycznie"],
+] as const;
+
 const toPayload = (plan: Plan) => ({
   name: plan.name,
   description: plan.description,
+  schedule: plan.schedule,
   days: plan.days.map((d) => ({
     name: d.name,
     weekdays: d.weekdays,
@@ -171,6 +183,7 @@ export function PlanEditor({ id }: { id: string }) {
   if (!plan) return <Loading />;
 
   const readOnly = plan.builtin;
+  const flexible = plan.schedule === "flexible";
   const day: PlanDay | undefined = plan.days[dayIdx];
   const update = (p: Plan) => {
     setPlan(p);
@@ -198,6 +211,13 @@ export function PlanEditor({ id }: { id: string }) {
           : { ...d, weekdays: has ? d.weekdays : d.weekdays.filter((x) => x !== w) },
       ),
     });
+  }
+
+  function moveDay(dir: -1 | 1) {
+    const days = [...plan!.days];
+    [days[dayIdx], days[dayIdx + dir]] = [days[dayIdx + dir]!, days[dayIdx]!];
+    update({ ...plan!, days });
+    setDayIdx(dayIdx + dir);
   }
 
   function removeDay() {
@@ -255,7 +275,7 @@ export function PlanEditor({ id }: { id: string }) {
   const byWeekday = WEEKDAYS_SHORT.map((_, w) => plan.days.findIndex((d) => d.weekdays.includes(w)));
 
   return (
-    <Screen title={readOnly ? plan.name : "Edycja planu"} sub={<a href="#/plany" className="text-accent">← plany</a>}>
+    <Screen kicker={readOnly ? "gotowy plan" : "edycja planu"} title={readOnly ? plan.name : "Twój plan"} sub={<a href="#/plany" className="text-accent">← plany</a>}>
       {readOnly ? (
         <Card className="grid gap-3">
           <p className="text-muted">{plan.description}</p>
@@ -273,9 +293,27 @@ export function PlanEditor({ id }: { id: string }) {
         />
       )}
 
+      {!readOnly && (
+        <section className="grid gap-2">
+          <SectionTitle>Jak trenujesz?</SectionTitle>
+          <Segmented
+            value={plan.schedule}
+            options={SCHEDULES}
+            onChange={(v) => update({ ...plan, schedule: v })}
+            full
+          />
+          <p className="px-1 text-[15px] text-muted">
+            {flexible
+              ? "Treningi robisz po kolei, w dowolne dni. Zrobiony trening zalicza dzień planu w tym tygodniu, a „Dziś” podpowiada następny."
+              : "Każdy trening ma swoje dni tygodnia, np. klatka w poniedziałek."}
+          </p>
+        </section>
+      )}
+
       {/* Tydzień: który trening w który dzień. Pusty dzień = odpoczynek; dotknij, żeby dodać trening. */}
+      {!flexible && (
       <section className="grid gap-2">
-        <h2 className="font-mono text-sm font-semibold uppercase tracking-wide text-muted">Tydzień</h2>
+        <SectionTitle>Tydzień</SectionTitle>
         <div className="grid grid-cols-7 gap-1">
           {WEEKDAYS_SHORT.map((w, i) => {
             const di = byWeekday[i]!;
@@ -296,6 +334,9 @@ export function PlanEditor({ id }: { id: string }) {
           })}
         </div>
       </section>
+      )}
+
+      {flexible && <SectionTitle>Kolejność treningów</SectionTitle>}
 
       {/* Wszystkie treningi planu (także bez stałego dnia, np. A/B na zmianę). */}
       <div className="flex gap-2 overflow-x-auto pb-1">
@@ -305,6 +346,7 @@ export function PlanEditor({ id }: { id: string }) {
             onClick={() => setDayIdx(i)}
             className={`min-h-10 shrink-0 rounded-full border px-4 font-mono text-sm font-semibold ${i === dayIdx ? "border-accent bg-accent text-accent-ink" : "border-line text-muted"}`}
           >
+            {flexible && <span className="opacity-60">{i + 1}. </span>}
             {d.name}
           </button>
         ))}
@@ -326,6 +368,17 @@ export function PlanEditor({ id }: { id: string }) {
                 aria-label="Nazwa treningu"
                 className="min-h-12 rounded-xl border border-line bg-bg px-3 text-lg font-semibold outline-none focus:border-accent"
               />
+              {flexible && plan.days.length > 1 && (
+                <div className="grid grid-cols-2 gap-2">
+                  <button onClick={() => moveDay(-1)} disabled={dayIdx === 0} className="min-h-11 rounded-lg border border-line font-mono text-sm disabled:opacity-30">
+                    ← wcześniej
+                  </button>
+                  <button onClick={() => moveDay(1)} disabled={dayIdx === plan.days.length - 1} className="min-h-11 rounded-lg border border-line font-mono text-sm disabled:opacity-30">
+                    później →
+                  </button>
+                </div>
+              )}
+              {!flexible && (
               <div className="grid gap-1.5">
                 <span className="font-mono text-xs font-semibold text-muted">w które dni</span>
                 <div className="grid grid-cols-7 gap-1">
@@ -340,6 +393,7 @@ export function PlanEditor({ id }: { id: string }) {
                   ))}
                 </div>
               </div>
+              )}
             </Card>
           )}
 
@@ -348,6 +402,7 @@ export function PlanEditor({ id }: { id: string }) {
             <BlockCard
               key={`${dayIdx}-${i}-${b.exercise_id}`}
               block={b}
+              exercise={catalog.data?.find((e) => e.id === b.exercise_id)}
               index={i}
               count={day.blocks.length}
               readOnly={readOnly}

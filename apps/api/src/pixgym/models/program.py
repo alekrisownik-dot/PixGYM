@@ -62,6 +62,7 @@ class Program(UUIDPk, Versioned, SoftDelete, Base):
     __table_args__ = (
         # Plan bez właściciela musi być szablonem wbudowanym.
         CheckConstraint("owner_user_id IS NOT NULL OR is_template", name="builtin_is_template"),
+        CheckConstraint("schedule IN ('weekdays', 'flexible')", name="schedule"),
         Index(None, "owner_user_id", "server_version"),
     )
 
@@ -73,6 +74,9 @@ class Program(UUIDPk, Versioned, SoftDelete, Base):
     description: Mapped[str | None] = mapped_column(Text)
     split: Mapped[Split] = mapped_column(str_enum(Split))
     is_template: Mapped[bool] = mapped_column(Boolean, server_default=false())
+    # weekdays: dzień planu ma stałe dni tygodnia; flexible: dni robi się po kolei,
+    # kiedy jest czas, a trening z danego dnia „zalicza” go w tym tygodniu.
+    schedule: Mapped[str] = mapped_column(String(10), server_default="weekdays")
 
 
 class ProgramVersion(UUIDPk, Versioned, Base):

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { ApiError, setLoggedOutHandler, type Me } from "../api";
 import { kv, outbox } from "../offline/db";
@@ -14,15 +14,17 @@ import { Progress } from "../screens/Progress";
 import { Summary } from "../screens/Summary";
 import { Today } from "../screens/Today";
 import { Workout } from "../screens/Workout";
+import { IconChart, IconCloudOff, IconDumbbell, IconGrid, IconHome, IconRefresh, IconUser } from "../ui/icons";
 import { Button, Loading, changes } from "../ui/kit";
+import { Toasts } from "../ui/toast";
 import { href, useRoute, type Route } from "./router";
 
-const TABS: ReadonlyArray<{ route: Route; label: string; icon: string; match: Route["name"][] }> = [
-  { route: { name: "today" }, label: "Dziś", icon: "◉", match: ["today"] },
-  { route: { name: "history" }, label: "Trening", icon: "▤", match: ["history", "workout", "summary"] },
-  { route: { name: "plans" }, label: "Plany", icon: "▦", match: ["plans", "plan"] },
-  { route: { name: "progress" }, label: "Postęp", icon: "↗", match: ["progress", "exercise"] },
-  { route: { name: "me" }, label: "Ja", icon: "☰", match: ["me"] },
+const TABS: ReadonlyArray<{ route: Route; label: string; Icon: (p: { size?: number }) => ReactNode; match: Route["name"][] }> = [
+  { route: { name: "today" }, label: "Dziś", Icon: IconHome, match: ["today"] },
+  { route: { name: "history" }, label: "Trening", Icon: IconDumbbell, match: ["history", "workout", "summary"] },
+  { route: { name: "plans" }, label: "Plany", Icon: IconGrid, match: ["plans", "plan"] },
+  { route: { name: "progress" }, label: "Postęp", Icon: IconChart, match: ["progress", "exercise"] },
+  { route: { name: "me" }, label: "Ja", Icon: IconUser, match: ["me"] },
 ];
 
 /** Pasek stanu synchronizacji: widoczny tylko, gdy coś czeka albo coś poszło nie tak. */
@@ -33,8 +35,9 @@ function SyncBar() {
   return (
     <div className="mx-auto max-w-xl px-4 pt-2">
       {s.pending > 0 && (
-        <p className={`rounded-xl border px-3 py-2 font-mono text-sm ${s.offline ? "border-amber text-amber" : "border-line text-muted"}`}>
-          {s.offline ? `⚠ offline · ${changes(s.pending)} czeka na sieć (zapisane w telefonie)` : `⟳ wysyłanie: ${changes(s.pending)}…`}
+        <p className={`flex items-center gap-2 rounded-xl border px-3 py-2 font-mono text-[13px] ${s.offline ? "border-amber/60 bg-amber/10 text-amber" : "border-line bg-surface text-muted"}`}>
+          {s.offline ? <IconCloudOff size={18} /> : <IconRefresh size={18} className="animate-spin" />}
+          {s.offline ? `offline · ${changes(s.pending)} w telefonie, wyśle się samo` : `wysyłanie: ${changes(s.pending)}…`}
         </p>
       )}
       {s.rejected.length > 0 && (
@@ -89,6 +92,7 @@ export function App() {
 
   return (
     <>
+      <Toasts />
       <SyncBar />
       {route.name === "today" && <Today me={me} />}
       {route.name === "history" && <History />}
@@ -108,18 +112,20 @@ export function App() {
           onLogout={() => setMe(null)}
         />
       )}
-      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-10 border-t border-line bg-bg/95 backdrop-blur">
-        <div className="mx-auto grid max-w-xl grid-cols-5">
+      <nav className="safe-bottom fixed inset-x-0 bottom-0 z-10 border-t border-line/80 bg-bg/90 backdrop-blur-lg">
+        <div className="mx-auto grid max-w-xl grid-cols-5 px-1">
           {TABS.map((t) => {
             const on = t.match.includes(route.name);
             return (
               <a
                 key={t.label}
                 href={href(t.route)}
-                className={`grid place-items-center gap-0.5 py-2.5 font-mono text-xs font-semibold ${on ? "text-accent" : "text-muted"}`}
+                className={`grid place-items-center gap-1 pt-2 pb-2.5 font-mono text-[11px] font-semibold ${on ? "text-accent" : "text-muted"}`}
                 aria-current={on ? "page" : undefined}
               >
-                <span className="text-xl leading-none">{t.icon}</span>
+                <span className={`grid h-8 w-14 place-items-center rounded-full transition ${on ? "bg-accent/15" : ""}`}>
+                  <t.Icon size={22} />
+                </span>
                 {t.label}
               </a>
             );

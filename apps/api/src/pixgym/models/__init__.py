@@ -1,4 +1,5 @@
 from pixgym.models.account import Invite, MfaTotp, RecoveryCode, RefreshToken, User, UserSettings
+from pixgym.models.calendar import CalendarEvent
 from pixgym.models.catalog import (
     Equipment,
     Exercise,
@@ -21,6 +22,7 @@ from pixgym.models.workout import SessionExercise, WorkoutSession, WorkoutSet
 __all__ = [
     "AuditLog",
     "BodyMeasurement",
+    "CalendarEvent",
     "DataJob",
     "Equipment",
     "Exercise",

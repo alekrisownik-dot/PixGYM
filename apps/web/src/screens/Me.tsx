@@ -4,14 +4,25 @@ import { api, errorText, type Badge, type LeaderboardRow, type Me, type Settings
 import { useLoad } from "../app/useLoad";
 import { kv, outbox } from "../offline/db";
 import { cachedGet } from "../offline/sessions";
-import { Button, Card, Empty, ErrorText, Loading, ProgressBar, Screen, Segmented, clock, kg, shortDate, changes } from "../ui/kit";
+import { Button, Card, Empty, ErrorText, Loading, ProgressBar, Screen, Segmented, clock, kg, shortDate, changes, SectionTitle } from "../ui/kit";
+import { IconTrophy } from "../ui/icons";
+import { Bit } from "../ui/mascot";
+import { Sheet } from "../ui/sheet";
+import { setTheme, useTheme } from "../ui/theme";
 
+// Krótkie nazwy, żeby cztery boje zmieściły się w jednym rzędzie; pełna nazwa pod przełącznikiem.
 const LIFTS = [
-  ["bench_press", "Wyciskanie"],
-  ["pull_up", "Podciąganie"],
+  ["bench_press", "Klata"],
+  ["pull_up", "Drążek"],
   ["dip", "Poręcze"],
-  ["concentration_curl", "Uginanie"],
+  ["concentration_curl", "Biceps"],
 ] as const;
+const LIFT_NAMES: Record<string, string> = {
+  bench_press: "Wyciskanie sztangi leżąc",
+  pull_up: "Podciąganie na drążku",
+  dip: "Pompki na poręczach",
+  concentration_curl: "Uginanie w koncentracji",
+};
 type Lift = (typeof LIFTS)[number][0];
 
 function Leaderboard({ visible }: { visible: boolean }) {
@@ -21,9 +32,13 @@ function Leaderboard({ visible }: { visible: boolean }) {
 
   return (
     <section className="grid gap-3">
-      <h2 className="font-mono text-sm font-semibold uppercase tracking-wide text-muted">Ranking znajomych</h2>
-      <Segmented value={lift} options={LIFTS} onChange={setLift} />
-      <Segmented value={metric} options={[["kg", "kg"], ["dots", "DOTS"]] as const} onChange={setMetric} />
+      <Segmented value={lift} options={LIFTS} onChange={setLift} full />
+      <div className="flex items-center justify-between gap-3 px-1">
+        <span className="min-w-0 text-[15px] font-semibold">{LIFT_NAMES[lift]}</span>
+        <div className="w-36 shrink-0">
+          <Segmented value={metric} options={[["kg", "kg"], ["dots", "DOTS"]] as const} onChange={setMetric} full />
+        </div>
+      </div>
       <ErrorText>{error}</ErrorText>
       {!visible && <Card><p className="text-muted">Jesteś ukryty, więc nie widzisz też innych. Włącz widoczność niżej.</p></Card>}
       {visible && !data && !error && <Loading />}
@@ -31,8 +46,14 @@ function Leaderboard({ visible }: { visible: boolean }) {
       {visible && data && data.length > 0 && (
         <Card className="grid p-2">
           {data.map((r, i) => (
-            <div key={i} className={`grid grid-cols-[2rem_1fr_auto] items-center gap-2 rounded-lg px-2 py-2.5 ${r.is_me ? "bg-accent/10" : ""}`}>
-              <span className="num text-lg font-bold text-muted">{r.position}</span>
+            <div key={i} className={`grid grid-cols-[2.25rem_1fr_auto] items-center gap-2.5 rounded-xl px-2 py-2.5 ${r.is_me ? "bg-accent/10 outline outline-1 outline-accent/40" : ""}`}>
+              <span
+                className={`num grid size-8 place-items-center rounded-full text-sm font-bold ${
+                  r.position === 1 ? "bg-amber text-accent-ink" : r.position === 2 ? "bg-fg/80 text-accent-ink" : r.position === 3 ? "bg-[#c98a5a] text-accent-ink" : "bg-surface-2 text-muted"
+                }`}
+              >
+                {r.position}
+              </span>
               <div className="min-w-0">
                 <p className="truncate font-semibold">{r.display_name}{r.is_me && " (ty)"}</p>
                 {r.title && <p className="font-mono text-xs text-accent">{r.title}</p>}
@@ -49,24 +70,46 @@ function Leaderboard({ visible }: { visible: boolean }) {
 
 function Badges() {
   const { data, error } = useLoad(() => cachedGet<Badge[]>("/badges"), []);
+  const [open, setOpen] = useState<Badge | null>(null);
   return (
     <section className="grid gap-2">
-      <h2 className="font-mono text-sm font-semibold uppercase tracking-wide text-muted">
+      <SectionTitle>
         Odznaki {data && `· ${data.filter((b) => b.earned_at).length}/${data.length}`}
-      </h2>
+      </SectionTitle>
       <ErrorText>{error}</ErrorText>
       {!data && !error && <Loading />}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         {data?.map((b) => (
-          <Card key={b.slug} className={`grid gap-1.5 p-3 ${b.earned_at ? "border-accent/60" : "opacity-70"}`}>
-            <p className={`font-mono font-bold ${b.earned_at ? "text-accent" : "text-muted"}`}>{b.title}</p>
-            <p className="text-sm leading-snug text-muted">{b.description}</p>
-            {b.earned_at ? <p className="font-mono text-xs text-accent">✓ {shortDate(b.earned_at)}</p> : <ProgressBar value={b.progress} />}
-          </Card>
+          <button
+            key={b.slug}
+            onClick={() => setOpen(b)}
+            className={`card grid content-start justify-items-center gap-1.5 px-1.5 py-3 text-center ${b.earned_at ? "!border-accent/60" : ""}`}
+          >
+            <span className={`grid size-10 place-items-center rounded-xl ${b.earned_at ? "bg-accent/15 text-accent" : "bg-surface-2 text-muted/70"}`}>
+              <IconTrophy size={20} />
+            </span>
+            <span className={`font-mono text-[12px] leading-tight font-bold ${b.earned_at ? "text-accent" : "text-fg/70"}`}>{b.title}</span>
+            {!b.earned_at && <ProgressBar value={b.progress} className="h-1 w-full" />}
+          </button>
         ))}
       </div>
+      {open && (
+        <Sheet title={open.title} onClose={() => setOpen(null)}>
+          <div className="grid gap-3">
+            <p className="text-lg">{open.description}</p>
+            {open.earned_at ? (
+              <p className="font-mono text-accent">✓ zdobyta {shortDate(open.earned_at)}</p>
+            ) : (
+              <>
+                <ProgressBar value={open.progress} />
+                <p className="num text-muted">{Math.round(open.progress * 100)}% drogi</p>
+              </>
+            )}
+          </div>
+        </Sheet>
+      )}
     </section>
-  );
+  )
 }
 
 function Invites() {
@@ -101,7 +144,7 @@ function Invites() {
 
   return (
     <section className="grid gap-2">
-      <h2 className="font-mono text-sm font-semibold uppercase tracking-wide text-muted">Zaproszenia (admin)</h2>
+      <SectionTitle>Zaproszenia (admin)</SectionTitle>
       <Card className="grid gap-3">
         <p className="text-muted">
           Kod jest jednorazowy i ważny 7 dni. Znajomy musi też być w Twojej sieci Tailscale, żeby otworzyć aplikację.
@@ -126,7 +169,46 @@ function Invites() {
   );
 }
 
+const TABS = [
+  ["ranking", "Ranking"],
+  ["badges", "Odznaki"],
+  ["settings", "Ustawienia"],
+] as const;
+type Tab = (typeof TABS)[number][0];
+
 const REST = [60, 90, 120, 150, 180, 240, 300] as const;
+
+const THEMES = [
+  { theme: "green", name: "Bit", sub: "zielony, klasyczny" },
+  { theme: "red", name: "Red Team", sub: "zły Bit i glitche" },
+] as const;
+
+function ThemePicker() {
+  const current = useTheme();
+  return (
+    <section className="grid gap-2">
+      <SectionTitle>Wygląd</SectionTitle>
+      <div className="grid grid-cols-2 gap-2.5">
+        {THEMES.map((t) => {
+          const on = current === t.theme;
+          return (
+            <button
+              key={t.theme}
+              data-theme={t.theme}
+              onClick={() => setTheme(t.theme)}
+              aria-pressed={on}
+              className={`grid justify-items-center gap-1.5 rounded-2xl border-2 bg-bg px-2 pt-3 pb-3 text-center text-fg transition ${on ? "border-accent shadow-[0_0_28px_-8px_rgb(var(--accent-rgb)/.8)]" : "border-line"}`}
+            >
+              <Bit mood={t.theme === "red" ? "flex" : "idle"} size={64} evil={t.theme === "red"} />
+              <span className="font-mono text-[16px] font-bold text-accent">{t.name}</span>
+              <span className="text-[13px] text-muted">{t.sub}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
 function TrainingSettings() {
   const { data, setData, error: loadError } = useLoad(() => cachedGet<Settings>("/me/settings"), []);
@@ -144,10 +226,10 @@ function TrainingSettings() {
 
   return (
     <section className="grid gap-2">
-      <h2 className="font-mono text-sm font-semibold uppercase tracking-wide text-muted">Trening</h2>
+      <SectionTitle>Trening</SectionTitle>
       <Card className="grid gap-4">
         <div className="grid gap-1.5">
-          <span className="font-mono text-sm font-semibold text-muted">Domyślna przerwa</span>
+          <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted">Domyślna przerwa</span>
           {data && (
             <Segmented
               value={String(data.default_rest_s)}
@@ -155,7 +237,7 @@ function TrainingSettings() {
               onChange={(v) => void patch({ default_rest_s: Number(v) })}
             />
           )}
-          <span className="text-sm text-muted">Dla pojedynczego ćwiczenia zmienisz ją przyciskiem ⏱ w treningu.</span>
+          <span className="text-sm text-muted">Dla pojedynczego ćwiczenia zmienisz ją przyciskiem z zegarem w treningu.</span>
         </div>
         <label className="flex items-center justify-between gap-3">
           <span>Waga gryfu</span>
@@ -181,6 +263,7 @@ function TrainingSettings() {
 }
 
 export function MeScreen({ me, onChange, onLogout }: { me: Me; onChange: (m: Me) => void; onLogout: () => void }) {
+  const [tab, setTab] = useState<Tab>("ranking");
   const [name, setName] = useState(me.display_name);
   const [error, setError] = useState<string | null>(null);
 
@@ -203,54 +286,61 @@ export function MeScreen({ me, onChange, onLogout }: { me: Me; onChange: (m: Me)
   }
 
   return (
-    <Screen title="Ja" sub={me.email}>
-      <Leaderboard visible={me.leaderboard_visible} />
-      <Badges />
+    <Screen kicker="konto" title={me.display_name} sub={me.email}>
+      <Segmented value={tab} options={TABS} onChange={setTab} full />
 
-      <section className="grid gap-2">
-        <h2 className="font-mono text-sm font-semibold uppercase tracking-wide text-muted">Profil</h2>
-        <Card className="grid gap-4">
-          <label className="grid gap-1.5">
-            <span className="font-mono text-sm font-semibold text-muted">Imię w rankingu</span>
-            <input
-              value={name}
-              maxLength={50}
-              onChange={(e) => setName(e.target.value)}
-              onBlur={() => name.trim() && name !== me.display_name && patch({ display_name: name.trim() })}
-              className="min-h-12 rounded-xl border border-line bg-bg px-3 text-lg outline-none focus:border-accent"
-            />
-          </label>
-          <div className="grid gap-1.5">
-            <span className="font-mono text-sm font-semibold text-muted">Płeć (do rang i DOTS)</span>
-            <Segmented
-              value={me.sex ?? ""}
-              options={[["male", "mężczyzna"], ["female", "kobieta"]] as const}
-              onChange={(v) => patch({ sex: v as Me["sex"] })}
-            />
-          </div>
-          <label className="flex min-h-12 items-center justify-between gap-3">
-            <span>
-              Widoczny w rankingu
-              <span className="block text-sm text-muted">Ukryty nie widzi też innych.</span>
-            </span>
-            <input
-              type="checkbox"
-              className="size-6 accent-[var(--color-accent)]"
-              checked={me.leaderboard_visible}
-              onChange={(e) => patch({ leaderboard_visible: e.target.checked })}
-            />
-          </label>
-          <ErrorText>{error}</ErrorText>
-        </Card>
-      </section>
+      {tab === "ranking" && <Leaderboard visible={me.leaderboard_visible} />}
+      {tab === "badges" && <Badges />}
+      {tab === "settings" && (
+        <>
+          <ThemePicker />
 
-      <TrainingSettings />
+          <section className="grid gap-2">
+            <SectionTitle>Profil</SectionTitle>
+            <Card className="grid gap-4">
+              <label className="grid gap-1.5">
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted">Imię w rankingu</span>
+                <input
+                  value={name}
+                  maxLength={50}
+                  onChange={(e) => setName(e.target.value)}
+                  onBlur={() => name.trim() && name !== me.display_name && patch({ display_name: name.trim() })}
+                  className="min-h-12 rounded-xl border border-line bg-bg px-3 text-lg outline-none focus:border-accent"
+                />
+              </label>
+              <div className="grid gap-1.5">
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted">Płeć (do rang i DOTS)</span>
+                <Segmented
+                  value={me.sex ?? ""}
+                  options={[["male", "mężczyzna"], ["female", "kobieta"]] as const}
+                  onChange={(v) => patch({ sex: v as Me["sex"] })}
+                />
+              </div>
+              <label className="flex min-h-12 items-center justify-between gap-3">
+                <span>
+                  Widoczny w rankingu
+                  <span className="block text-sm text-muted">Ukryty nie widzi też innych.</span>
+                </span>
+                <input
+                  type="checkbox"
+                  className="size-6 accent-[var(--color-accent)]"
+                  checked={me.leaderboard_visible}
+                  onChange={(e) => patch({ leaderboard_visible: e.target.checked })}
+                />
+              </label>
+              <ErrorText>{error}</ErrorText>
+            </Card>
+          </section>
 
-      {me.role === "admin" && <Invites />}
+          <TrainingSettings />
 
-      <Button variant="danger" onClick={logout}>
-        Wyloguj
-      </Button>
+          {me.role === "admin" && <Invites />}
+
+          <Button variant="danger" onClick={logout}>
+            Wyloguj
+          </Button>
+        </>
+      )}
     </Screen>
   );
 }

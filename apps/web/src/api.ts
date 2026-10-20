@@ -31,6 +31,8 @@ export interface Exercise {
   equipment: string;
   custom: boolean;
   notes: string | null;
+  /** Ciężar wpisywany na jedną stronę / rękę (w seriach zapisany łącznie, ×2). */
+  per_side: boolean;
   photos: ExercisePhoto[];
 }
 
@@ -134,6 +136,7 @@ export interface Plan {
   name: string;
   description: string | null;
   split: string;
+  schedule: Schedule;
   builtin: boolean;
   version_id: string;
   version_no: number;
@@ -141,11 +144,21 @@ export interface Plan {
   days: PlanDay[];
 }
 
+/** weekdays: stałe dni tygodnia; flexible: dni po kolei, w dowolne dni tygodnia. */
+export type Schedule = "weekdays" | "flexible";
+
+/** Zaliczone dni planu w tygodniu i ostatnio zrobiony dzień. */
+export interface PlanProgress {
+  last_day_index: number | null;
+  done: { day_index: number; local_date: string; session_id: string }[];
+}
+
 export interface PlanListItem {
   id: string;
   name: string;
   description: string | null;
   split: string;
+  schedule: Schedule;
   builtin: boolean;
   days: number;
   active: boolean;
@@ -361,4 +374,15 @@ export function errorText(e: unknown): string {
     return `Błąd serwera (${e.status}).`;
   }
   return "Brak połączenia z serwerem.";
+}
+
+export type EventKind = "workout" | "event" | "competition" | "trip" | "health" | "rest";
+
+/** Własne wydarzenie w kalendarzu (zawody, wyjazd, badanie…). */
+export interface CalendarEvent {
+  id: string;
+  date: string;
+  title: string;
+  kind: EventKind;
+  note: string | null;
 }

@@ -93,6 +93,38 @@ export async function startSession(day?: PlanDay): Promise<Session> {
   return s;
 }
 
+/** Dzień planu odhaczony bez zapisywania serii: krótki, od razu zakończony trening. */
+export async function completeDay(day: PlanDay): Promise<Session> {
+  const now = new Date();
+  const s: Session = {
+    id: uuid7(),
+    started_at: now.toISOString(),
+    ended_at: now.toISOString(),
+    local_date: localDate(now),
+    bodyweight_kg: null,
+    notes: DAY_DONE_NOTE,
+    program_day_id: day.id ?? null,
+    day_name: day.name,
+    exercises: [],
+  };
+  await save(s);
+  await enqueue({ method: "POST", path: "/sessions", body: { id: s.id, started_at: s.started_at, program_day_id: s.program_day_id }, sessionId: s.id });
+  await enqueue({ method: "PATCH", path: `/sessions/${s.id}`, body: { ended_at: s.ended_at, notes: s.notes }, sessionId: s.id });
+  return s;
+}
+
+export const DAY_DONE_NOTE = "Dzień planu zaliczony bez zapisu serii.";
+
+/** Treningi, które jeszcze czekają na wysłanie (np. zaliczone bez sieci). */
+export async function pendingSessions(): Promise<Session[]> {
+  const out: Session[] = [];
+  for (const id of await pendingSessionIds()) {
+    const s = await kv.get<Session>(key(id));
+    if (s) out.push(s);
+  }
+  return out;
+}
+
 export async function patchSession(s: Session, changes: Partial<Pick<Session, "ended_at" | "bodyweight_kg" | "notes">>): Promise<Session> {
   const next = { ...s, ...changes };
   await save(next);

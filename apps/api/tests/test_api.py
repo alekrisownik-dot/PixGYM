@@ -3,6 +3,7 @@
 import os
 import uuid
 from collections.abc import Iterator
+from datetime import date, timedelta
 
 import pytest
 import redis
@@ -584,3 +585,114 @@ def test_plans_are_private(new_client, owner_engine, admin):
     assert all(p["id"] != plan["id"] for p in bob.get("/api/v1/programs").json())
     assert bob.put("/api/v1/me/active-program", json={"program_id": plan["id"]}).status_code == 404
     assert bob.delete(f"/api/v1/programs/{plan['id']}").status_code == 404
+
+
+def test_flexible_plan_counts_days_done_this_week(new_client, admin):
+    api = new_client()
+    login(api, admin)
+    days = [{"name": n, "blocks": []} for n in ("Klata", "Plecy", "Nogi")]
+    plan = api.post(
+        "/api/v1/programs", json={"name": "Elastyczny", "schedule": "flexible", "days": days}
+    ).json()
+    assert plan["schedule"] == "flexible"
+    listed = {p["id"]: p for p in api.get("/api/v1/programs").json()}
+    assert listed[plan["id"]]["schedule"] == "flexible"
+    assert (
+        api.post(
+            "/api/v1/programs", json={"name": "x", "schedule": "random", "days": days}
+        ).status_code
+        == 422
+    )
+
+    today = date.today()
+    monday = today - timedelta(days=today.weekday())
+    empty = api.get(f"/api/v1/programs/{plan['id']}/progress?start={monday}").json()
+    assert empty == {"last_day_index": None, "done": []}
+
+    # „Plecy” zrobione dziś (np. w środę zamiast wtorku) zaliczają dzień 1.
+    sid = str(uuid7())
+    api.post("/api/v1/sessions", json={"id": sid, "program_day_id": plan["days"][1]["id"]})
+    prog = api.get(f"/api/v1/programs/{plan['id']}/progress?start={monday}").json()
+    assert prog["last_day_index"] == 1
+    assert prog["done"] == [{"day_index": 1, "local_date": str(today), "session_id": sid}]
+
+    # Edycja planu (nowa wersja, nowe id dni) nie gubi zaliczenia; tryb się zmienia.
+    plan2 = api.put(
+        f"/api/v1/programs/{plan['id']}", json={"name": "Elastyczny", "days": days}
+    ).json()
+    assert plan2["schedule"] == "weekdays"
+    prog = api.get(f"/api/v1/programs/{plan['id']}/progress?start={monday}").json()
+    assert [d["day_index"] for d in prog["done"]] == [1]
+
+    # Poprzedni tydzień: nic zaliczonego, ale ostatni dzień zostaje.
+    prev = api.get(
+        f"/api/v1/programs/{plan['id']}/progress?start={monday - timedelta(days=7)}"
+    ).json()
+    assert prev == {"last_day_index": 1, "done": []}
+
+
+def test_calendar_events(new_client, owner_engine, admin):
+    api = new_client()
+    login(api, admin)
+    eid = str(uuid7())
+    body = {
+        "id": eid,
+        "date": "2026-11-14",
+        "title": " Zawody w wyciskaniu ",
+        "kind": "competition",
+    }
+    r = api.post("/api/v1/events", json=body)
+    assert r.status_code == 201, r.text
+    assert r.json() == {
+        "id": eid,
+        "date": "2026-11-14",
+        "title": "Zawody w wyciskaniu",
+        "kind": "competition",
+        "note": None,
+    }
+    assert api.post("/api/v1/events", json=body).status_code == 201  # ponowienie z kolejki
+    assert api.post("/api/v1/events", json={**body, "id": None, "kind": "x"}).status_code == 422
+
+    got = api.get("/api/v1/events?start=2026-11-01&end=2026-11-30").json()
+    assert [e["id"] for e in got] == [eid]
+    assert api.get("/api/v1/events?start=2026-12-01&end=2026-12-31").json() == []
+
+    r = api.patch(f"/api/v1/events/{eid}", json={"note": "waga do 83 kg", "date": "2026-11-15"})
+    assert r.json()["note"] == "waga do 83 kg" and r.json()["date"] == "2026-11-15"
+
+    # Cudzych wydarzeń nie widać i nie da się ich zmienić.
+    bob = new_client()
+    register(bob, invite(owner_engine, admin), "bob-events")
+    assert bob.get("/api/v1/events?start=2026-11-01&end=2026-11-30").json() == []
+    assert bob.patch(f"/api/v1/events/{eid}", json={"title": "x"}).status_code == 404
+
+    # Trening zaplanowany na przyszły dzień.
+    plan = {"date": "2027-01-04", "title": "Push", "kind": "workout"}
+    assert api.post("/api/v1/events", json=plan).json()["kind"] == "workout"
+
+    assert api.delete(f"/api/v1/events/{eid}").status_code == 204
+    assert api.get("/api/v1/events?start=2026-11-01&end=2026-11-30").json() == []
+    assert [
+        e["title"] for e in api.get("/api/v1/events?start=2027-01-01&end=2027-01-31").json()
+    ] == ["Push"]
+
+
+def test_custom_exercise_per_side(new_client, admin):
+    api = new_client()
+    login(api, admin)
+    r = api.post(
+        "/api/v1/exercises",
+        json={
+            "name": "Wyciskanie na maszynie Hammer",
+            "equipment": "machine",
+            "primary_muscle": "chest",
+            "per_side": True,
+        },
+    )
+    assert r.status_code == 201, r.text
+    ex = r.json()
+    assert ex["per_side"] is True
+    r = api.patch(f"/api/v1/exercises/{ex['id']}", json={"per_side": False})
+    assert r.json()["per_side"] is False
+    builtin = next(e for e in api.get("/api/v1/exercises").json() if e["slug"] == "bench_press")
+    assert builtin["per_side"] is False
