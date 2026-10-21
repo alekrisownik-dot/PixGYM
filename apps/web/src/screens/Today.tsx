@@ -14,7 +14,8 @@ import { Sheet } from "../ui/sheet";
 import { quipOfDay } from "../ui/quips";
 import { useTheme } from "../ui/theme";
 import { SessionRow } from "./History";
-import { kindOf } from "./Events";
+import { eventIcon, kindOf } from "./Events";
+import { MuscleMap } from "../ui/muscle-map";
 import { PlanLoop } from "./PlanLoop";
 import { WEEKDAYS_LONG, WEEKDAYS_SHORT, blockText, weekdayOf } from "./plan-format";
 
@@ -176,25 +177,22 @@ function VolumeBar({ m }: { m: MuscleVolume }) {
 function WeeklyVolume() {
   const { data } = useLoad(() => cachedGet<MuscleVolume[]>("/volume"), []);
   const [all, setAll] = useState(false);
-  if (!data?.length) return null;
-  const top = data.slice(0, 6);
+  if (!data) return null;
   return (
     <section className="grid gap-2">
       <SectionTitle
         right={
-          data.length > top.length && (
+          data.length > 0 && (
             <button onClick={() => setAll(true)} className="font-mono text-[11px] text-accent">
-              wszystkie ({data.length}) →
+              lista ({data.length}) →
             </button>
           )
         }
       >
-        Ciężkie serie w tym tygodniu
+        Mięśnie w tym tygodniu
       </SectionTitle>
-      <Card className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-4 gap-y-3">
-        {top.map((m) => (
-          <VolumeBar key={m.muscle} m={m} />
-        ))}
+      <Card>
+        <MuscleMap data={data} />
       </Card>
       {all && (
         <Sheet title="Ciężkie serie w tym tygodniu" onClose={() => setAll(false)}>
@@ -219,7 +217,7 @@ function UpcomingEvent({ e }: { e: CalendarEvent }) {
   return (
     <a href={href({ name: "history" })} className="card flex items-center gap-3 px-3.5 py-2.5" style={{ borderLeft: `4px solid ${k.color}` }}>
       <span className="text-2xl" aria-hidden>
-        {k.icon}
+        {eventIcon(e)}
       </span>
       <span className="min-w-0 flex-1">
         <span className="block font-mono text-[11px] font-semibold uppercase tracking-wider" style={{ color: k.color }}>

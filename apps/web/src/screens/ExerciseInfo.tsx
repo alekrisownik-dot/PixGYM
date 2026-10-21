@@ -1,8 +1,9 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 import { api, errorText, type Exercise, type ExercisePhoto } from "../api";
 import { ErrorText, Segmented } from "../ui/kit";
 import { photoUrl, shrinkImage } from "../ui/image";
+import { usePhotoPicker } from "../ui/photo-input";
 
 /** Zdjęcia maszyny (np. z różnych siłowni) i notatka do własnego ćwiczenia. */
 export function ExerciseInfo({ exercise, onChange }: { exercise: Exercise; onChange: () => void }) {
@@ -12,7 +13,8 @@ export function ExerciseInfo({ exercise, onChange }: { exercise: Exercise; onCha
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [big, setBig] = useState<ExercisePhoto | null>(null);
-  const file = useRef<HTMLInputElement>(null);
+
+  const picker = usePhotoPicker((f) => void upload(f));
 
   async function upload(f: File) {
     setBusy(true);
@@ -28,7 +30,6 @@ export function ExerciseInfo({ exercise, onChange }: { exercise: Exercise; onCha
       setError(errorText(e));
     } finally {
       setBusy(false);
-      if (file.current) file.current.value = "";
     }
   }
 
@@ -78,10 +79,15 @@ export function ExerciseInfo({ exercise, onChange }: { exercise: Exercise; onCha
           ))}
         </div>
       )}
-      <input ref={file} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && void upload(e.target.files[0])} />
-      <button onClick={() => file.current?.click()} disabled={busy} className="min-h-12 rounded-xl border border-dashed border-line font-mono text-sm disabled:opacity-50">
-        {busy ? "wysyłanie…" : "📷 Zrób / dodaj zdjęcie"}
-      </button>
+      {picker.inputs}
+      <div className="grid grid-cols-2 gap-2">
+        <button onClick={picker.openCamera} disabled={busy} className="min-h-12 rounded-xl border border-dashed border-line font-mono text-sm disabled:opacity-50">
+          {busy ? "wysyłanie…" : "📷 Zrób zdjęcie"}
+        </button>
+        <button onClick={picker.openGallery} disabled={busy} className="min-h-12 rounded-xl border border-dashed border-line font-mono text-sm disabled:opacity-50">
+          🖼️ Z galerii
+        </button>
+      </div>
 
       {exercise.custom && exercise.tracking === "weight_reps" && <LoadModePicker perSide={perSide} onChange={(v) => void savePerSide(v)} />}
 

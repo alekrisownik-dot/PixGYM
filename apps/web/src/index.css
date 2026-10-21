@@ -587,7 +587,70 @@ select {
   animation: skeleton 1.4s ease-in-out infinite;
 }
 
+/* Zdjęcia sylwetki: wizjer (narożniki + linie skanowania) i taśma filmowa z perforacją. */
+.viewfinder::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgb(0 0 0 / 0.14) 0 1px, transparent 1px 3px);
+  mix-blend-mode: multiply;
+}
+.vf-corner {
+  position: absolute;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  border-color: var(--color-accent);
+  filter: drop-shadow(0 0 4px rgb(var(--accent-rgb) / 0.8));
+}
+.vf-tl {
+  top: 8px;
+  left: 8px;
+  border-top: 3px solid;
+  border-left: 3px solid;
+}
+.vf-tr {
+  top: 8px;
+  right: 8px;
+  border-top: 3px solid;
+  border-right: 3px solid;
+}
+.vf-bl {
+  bottom: 8px;
+  left: 8px;
+  border-bottom: 3px solid;
+  border-left: 3px solid;
+}
+.vf-br {
+  bottom: 8px;
+  right: 8px;
+  border-bottom: 3px solid;
+  border-right: 3px solid;
+}
+.film {
+  border-radius: 10px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 6px, #2a2a2a 6px 14px, transparent 14px 20px) top 4px left 0 / 100% 6px no-repeat,
+    repeating-linear-gradient(90deg, transparent 0 6px, #2a2a2a 6px 14px, transparent 14px 20px) bottom 4px left 0 / 100% 6px no-repeat,
+    #0b0b0b;
+  background-attachment: local;
+  scrollbar-width: none;
+}
+
+/* Mapa mięśni: wybrana partia miga. */
+@keyframes muscle-pick {
+  50% {
+    fill: var(--color-fg);
+  }
+}
+.muscle-picked {
+  animation: muscle-pick 0.9s steps(1) infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .muscle-picked,
   .loop-now,
   .bit-impatient,
   .pr-in,

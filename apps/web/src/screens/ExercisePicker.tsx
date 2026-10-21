@@ -5,6 +5,7 @@ import { useLoad } from "../app/useLoad";
 import { cachedGet } from "../offline/sessions";
 import { Button, ErrorText, Field, Segmented } from "../ui/kit";
 import { photoUrl, shrinkImage } from "../ui/image";
+import { usePhotoPicker } from "../ui/photo-input";
 import { LoadModePicker } from "./ExerciseInfo";
 import { muscleGroup } from "../ui/muscles";
 import { ExerciseArt } from "../ui/exercise-art";
@@ -117,7 +118,7 @@ function CreateExercise({ initialName, onCancel, onCreated }: { initialName: str
   const [photo, setPhoto] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const file = useRef<HTMLInputElement>(null);
+  const picker = usePhotoPicker(setPhoto);
   const preview = useMemo(() => (photo ? URL.createObjectURL(photo) : null), [photo]);
   useEffect(() => () => void (preview && URL.revokeObjectURL(preview)), [preview]);
 
@@ -166,16 +167,23 @@ function CreateExercise({ initialName, onCancel, onCreated }: { initialName: str
 
         <div className="grid gap-1.5">
           <span className="font-mono text-sm font-semibold text-muted">Zdjęcie maszyny (opcjonalnie)</span>
-          <input ref={file} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
-          {preview ? (
-            <button onClick={() => file.current?.click()} className="overflow-hidden rounded-xl border border-line">
+          {picker.inputs}
+          {preview && (
+            <div className="relative overflow-hidden rounded-xl border border-line">
               <img src={preview} alt="podgląd" className="max-h-64 w-full object-cover" />
-            </button>
-          ) : (
-            <button onClick={() => file.current?.click()} className="min-h-24 rounded-xl border border-dashed border-line font-mono text-muted">
-              📷 Zrób zdjęcie
-            </button>
+              <button onClick={() => setPhoto(null)} className="absolute top-2 right-2 grid size-10 place-items-center rounded-full bg-bg/80 font-mono" aria-label="Usuń zdjęcie">
+                ✕
+              </button>
+            </div>
           )}
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={picker.openCamera} className={`${preview ? "min-h-12" : "min-h-24"} rounded-xl border border-dashed border-line font-mono text-muted`}>
+              📷 {preview ? "Inne zdjęcie" : "Zrób zdjęcie"}
+            </button>
+            <button onClick={picker.openGallery} className={`${preview ? "min-h-12" : "min-h-24"} rounded-xl border border-dashed border-line font-mono text-muted`}>
+              🖼️ Z galerii
+            </button>
+          </div>
           {photo && <Field label="Podpis zdjęcia" value={caption} onChange={(e) => setCaption(e.target.value)} maxLength={80} placeholder="np. Zdrofit Mokotów" />}
         </div>
 

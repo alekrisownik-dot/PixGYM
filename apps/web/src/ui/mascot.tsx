@@ -45,7 +45,7 @@ const HEAD = [
 const HEAD_X = 3;
 const HEAD_Y = 4;
 
-type Px = readonly [x: number, y: number, c: string];
+export type Px = readonly [x: number, y: number, c: string];
 
 // Twarze we współrzędnych głowy.
 const EYES_OPEN: Px[] = [3, 4, 9, 10].flatMap((x) => [[x, 3, "W"], [x, 4, "W"]] as Px[]);
@@ -169,6 +169,34 @@ function Pixels({ px, dx = 0, dy = 0, className }: { px: Px[]; dx?: number; dy?:
   );
 }
 
+/**
+ * Wszystkie piksele Bita (współrzędne całej postaci 20×21) z kluczem koloru z PALETTE.
+ * Ten sam rysunek co komponent, np. do obrazka na canvasie.
+ */
+export function bitPixels({ mood = "idle", evil = false, gear = {} }: { mood?: Mood; evil?: boolean; gear?: Gear }): Px[] {
+  const m = parts(mood, evil, gear);
+  const head = (px: Px[]) => px.map(([x, y, c]) => [x + HEAD_X, y + HEAD_Y, c] as Px);
+  const gearPx = (Object.values(gear).filter(Boolean) as GearId[]).flatMap((id) => GEAR_PX[id]);
+  return [...m.body, ...head(rows(HEAD)), ...head(m.eyes), ...head(m.mouth), ...head(m.extra ?? []), ...(m.zzz ? ZZZ : []), ...gearPx];
+}
+
+export const BIT_SIZE = { w: W, h: H } as const;
+
+function parts(mood: Mood, evil: boolean, gear: Gear): Parts {
+  const base = MOODS[mood];
+  const hatted = gear.head === "crown" || gear.head === "headphones";
+  const m0: Parts = evil
+    ? {
+        ...base,
+        body: [...base.body.filter((p) => !isAntenna(p)), ...HORNS],
+        eyes: mood === "sleep" ? base.eyes : EYES_EVIL,
+        mouth: FANGS,
+        extra: undefined,
+      }
+    : base;
+  return hatted ? { ...m0, body: m0.body.filter((p) => !isAntenna(p)) } : m0;
+}
+
 export function Bit({
   mood = "idle",
   size = 64,
@@ -188,18 +216,7 @@ export function Bit({
   const gear = forcedGear ?? worn;
   const gearPx = (Object.values(gear).filter(Boolean) as GearId[]).flatMap((id) => GEAR_PX[id]);
   const evil = forced ?? theme === "red";
-  const base = MOODS[mood];
-  const hatted = gear.head === "crown" || gear.head === "headphones";
-  const m0: Parts = evil
-    ? {
-        ...base,
-        body: [...base.body.filter((p) => !isAntenna(p)), ...HORNS],
-        eyes: mood === "sleep" ? base.eyes : EYES_EVIL,
-        mouth: FANGS,
-        extra: undefined,
-      }
-    : base;
-  const m: Parts = hatted ? { ...m0, body: m0.body.filter((p) => !isAntenna(p)) } : m0;
+  const m = parts(mood, evil, gear);
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}

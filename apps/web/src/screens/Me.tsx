@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { api, errorText, type Badge, type LeaderboardRow, type Me, type Settings } from "../api";
 import { useLoad } from "../app/useLoad";
+import { disablePush, enablePush, pushState, testPush, type PushState } from "../app/push";
 import { kv, outbox } from "../offline/db";
 import { cachedGet } from "../offline/sessions";
 import { Button, Card, Empty, ErrorText, Loading, ProgressBar, Screen, Segmented, clock, kg, shortDate, changes, SectionTitle } from "../ui/kit";
@@ -307,6 +308,129 @@ function TrainingSettings() {
   );
 }
 
+interface BackupStatus {
+  configured: boolean;
+  count: number;
+  last_at: string | null;
+  last_size_bytes: number;
+}
+
+/** Stan automatycznej kopii zapasowej (admin). Kopia starsza niż 2 dni = coś nie działa. */
+function BackupCard() {
+  const { data } = useLoad(() => api.get<BackupStatus>("/admin/backups"), []);
+  if (!data) return null;
+  const age = data.last_at ? (Date.now() - new Date(data.last_at).getTime()) / 86400_000 : null;
+  const stale = age == null || age > 2;
+  const size = data.last_size_bytes > 1e6 ? `${(data.last_size_bytes / 1e6).toFixed(1)} MB` : `${Math.max(1, Math.round(data.last_size_bytes / 1e3))} KB`;
+  return (
+    <section className="grid gap-2">
+      <SectionTitle>Kopia zapasowa (admin)</SectionTitle>
+      <Card className={`flex items-center gap-3 ${stale ? "!border-danger/70" : ""}`}>
+        <span className="text-3xl" aria-hidden>
+          {stale ? "⚠️" : "💾"}
+        </span>
+        <span className="min-w-0 flex-1 text-[15px]">
+          {!data.configured ? (
+            "Kopie nie są skonfigurowane (brak kontenera backup)."
+          ) : data.last_at ? (
+            <>
+              <b className={stale ? "text-danger" : "text-accent"}>Ostatnia: {age! < 1 ? "dziś" : `${Math.floor(age!)} dni temu`}</b>, {new Date(data.last_at).toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" })}
+              <span className="block text-sm text-muted">
+                {size} · trzymam {data.count} {data.count === 1 ? "kopię" : data.count % 10 >= 2 && data.count % 10 <= 4 && (data.count % 100 < 12 || data.count % 100 > 14) ? "kopie" : "kopii"} (14 dni) · folder backups/
+              </span>
+            </>
+          ) : (
+            <b className="text-danger">Jeszcze żadnej kopii.</b>
+          )}
+          {stale && data.configured && <span className="block text-sm text-muted">Sprawdź: docker-compose logs backup</span>}
+        </span>
+      </Card>
+    </section>
+  );
+}
+
+const HOURS = [17, 18, 19, 20, 21] as const;
+
+/** Powiadomienia: przypomnienia dzień wcześniej i Bit pytający o trening. */
+function NotificationSettings() {
+  const { data: state, setData: setState } = useLoad(pushState, []);
+  const { data, setData } = useLoad(() => cachedGet<Settings>("/me/settings"), []);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [tested, setTested] = useState(false);
+
+  async function run(fn: () => Promise<unknown>) {
+    setBusy(true);
+    setError(null);
+    try {
+      await fn();
+    } catch (e) {
+      setError(errorText(e));
+    }
+    setBusy(false);
+  }
+  const patch = (body: Partial<Settings>) => run(async () => setData(await api.patch<Settings>("/me/settings", body)));
+  const toggle = (fn: () => Promise<PushState>) => run(async () => setState(await fn()));
+
+  const line: Record<PushState, string> = {
+    unsupported: "Ta przeglądarka nie obsługuje powiadomień. Zainstaluj PixGYM na ekranie głównym (Chrome → Dodaj do ekranu głównego).",
+    denied: "Powiadomienia są zablokowane. Odblokuj je w ustawieniach Chrome dla tej strony, a potem wróć tutaj.",
+    off: "Mogę Ci dzień wcześniej przypominać o wydarzeniach i pytać, czy jutro idziesz na trening.",
+    on: "Powiadomienia włączone. Wieczorem przypomnę Ci o jutrze.",
+  };
+
+  return (
+    <section className="grid gap-2">
+      <SectionTitle>Powiadomienia</SectionTitle>
+      <Card className="grid gap-4">
+        <div className="flex items-center gap-3">
+          <Bit mood={state === "on" ? "flex" : "idle"} size={60} />
+          <p className="text-[15px]">{state ? line[state] : "…"}</p>
+        </div>
+        {state === "off" && (
+          <Button onClick={() => void toggle(enablePush)} disabled={busy}>
+            🔔 Włącz powiadomienia
+          </Button>
+        )}
+        {state === "on" && data && (
+          <>
+            <div className="grid gap-1.5">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-wider text-muted">Przypomnienie o jutrze o godzinie</span>
+              <Segmented value={String(data.reminder_hour)} options={HOURS.map((h) => [String(h), `${h}:00`] as const)} onChange={(v) => void patch({ reminder_hour: Number(v) })} />
+            </div>
+            <label className="flex min-h-12 items-center justify-between gap-3">
+              <span>
+                🤖 Bit pyta o trening
+                <span className="block text-sm text-muted">Dzień przed treningiem z planu albo z kalendarza.</span>
+              </span>
+              <input
+                type="checkbox"
+                className="size-6 shrink-0 accent-[var(--color-accent)]"
+                checked={data.remind_workouts}
+                onChange={(e) => void patch({ remind_workouts: e.target.checked })}
+              />
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="outline" disabled={busy} onClick={() =>
+                  void run(async () => {
+                    await testPush();
+                    setTested(true);
+                  })
+                }>
+                {tested ? "✓ Wysłane" : "Wyślij próbne"}
+              </Button>
+              <Button variant="ghost" disabled={busy} onClick={() => void toggle(disablePush)}>
+                Wyłącz
+              </Button>
+            </div>
+          </>
+        )}
+        <ErrorText>{error}</ErrorText>
+      </Card>
+    </section>
+  );
+}
+
 export function MeScreen({ me, onChange, onLogout }: { me: Me; onChange: (m: Me) => void; onLogout: () => void }) {
   const [tab, setTab] = useState<Tab>("ranking");
   const [name, setName] = useState(me.display_name);
@@ -324,6 +448,8 @@ export function MeScreen({ me, onChange, onLogout }: { me: Me; onChange: (m: Me)
   async function logout() {
     const pending = (await outbox.all()).length;
     if (pending && !confirm(`Na serwer nie doszło jeszcze: ${changes(pending)}. Po wylogowaniu przepadnie. Wylogować?`)) return;
+    // Ten telefon przestaje dostawać przypomnienia tego konta.
+    await disablePush().catch(() => {});
     await api.post("/auth/logout").catch(() => {});
     // Dane treningowe nie zostają w telefonie po wylogowaniu.
     await Promise.all([kv.clear(), outbox.clear(), caches?.delete("pixgym-photos-v1")]);
@@ -379,8 +505,10 @@ export function MeScreen({ me, onChange, onLogout }: { me: Me; onChange: (m: Me)
           </section>
 
           <TrainingSettings />
+          <NotificationSettings />
 
           {me.role === "admin" && <Invites />}
+          {me.role === "admin" && <BackupCard />}
 
           <Button variant="danger" onClick={logout}>
             Wyloguj

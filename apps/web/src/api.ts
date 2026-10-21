@@ -44,6 +44,10 @@ export interface Settings {
   default_rest_s: number;
   bar_weight_kg: number;
   plate_inventory: Record<string, number>;
+  /** Godzina (czasu lokalnego), o której przychodzi przypomnienie o jutrze. */
+  reminder_hour: number;
+  /** Bit pyta wieczorem, czy jutro idziesz na trening. */
+  remind_workouts: boolean;
 }
 
 export interface CalendarDay {
@@ -369,9 +373,14 @@ export const ERRORS: Record<string, string> = {
   invalid_invite: "Kod zaproszenia jest zły, wygasł albo został już użyty.",
   email_taken: "Ten e-mail ma już konto.",
   csrf: "Odśwież stronę i spróbuj jeszcze raz.",
+  push_off: "Serwer nie ma włączonych powiadomień (brak klucza VAPID).",
 };
 
+/** Błąd z gotowym komunikatem dla użytkownika (np. nieczytelny plik zdjęcia). */
+export class UserError extends Error {}
+
 export function errorText(e: unknown): string {
+  if (e instanceof UserError) return e.message;
   if (e instanceof NetworkError) return "Brak połączenia z serwerem (sprawdź Tailscale).";
   if (e instanceof ApiError) {
     if (ERRORS[e.detail]) return ERRORS[e.detail]!;
@@ -391,6 +400,20 @@ export interface CalendarEvent {
   title: string;
   kind: EventKind;
   note: string | null;
+  /** Emoji z szablonu; brak = ikonka rodzaju. */
+  icon?: string | null;
+  /** Powiadomienie dzień wcześniej (starsze wpisy z pamięci telefonu mogą go nie mieć). */
+  remind?: boolean;
+}
+
+/** Własny szablon wydarzenia: jednym dotknięciem wypełnia nowe wydarzenie. */
+export interface EventTemplate {
+  id: string;
+  title: string;
+  icon: string | null;
+  kind: EventKind;
+  note: string | null;
+  remind: boolean;
 }
 
 export type Pose = "front" | "side" | "back" | "other";

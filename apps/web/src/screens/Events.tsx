@@ -1,7 +1,10 @@
 import { useState } from "react";
 
-import { errorText, type CalendarEvent, type EventKind } from "../api";
+import { api, errorText, type CalendarEvent, type EventKind, type EventTemplate } from "../api";
+import { useLoad } from "../app/useLoad";
+import { pushState } from "../app/push";
 import { deleteEvent, saveEvent } from "../offline/events";
+import { cachedGet } from "../offline/sessions";
 import { IconTrash } from "../ui/icons";
 import { Button, ErrorText, Field, shortDate } from "../ui/kit";
 import { Sheet } from "../ui/sheet";
@@ -16,6 +19,11 @@ export const KINDS: ReadonlyArray<{ kind: EventKind; icon: string; label: string
   { kind: "rest", icon: "😴", label: "Odpoczynek", color: "var(--color-muted)" },
 ];
 export const kindOf = (k: EventKind) => KINDS.find((x) => x.kind === k) ?? KINDS[0]!;
+/** Emoji wydarzenia: z szablonu albo ikonka rodzaju. */
+export const eventIcon = (e: { kind: EventKind; icon?: string | null }) => e.icon || kindOf(e.kind).icon;
+
+// Emoji do wyboru w szablonach (pierwsze miejsce zajmuje ikonka rodzaju).
+const EMOJI = ["💆", "🧘", "🏃", "🚴", "🏊", "⚽", "🥊", "🧗", "⛰️", "🍽️", "💊", "📸", "🎂", "🎉"];
 
 /** Wiersz wydarzenia (lista dnia, „Dziś”). */
 export function EventRow({ e, onClick, showDate }: { e: CalendarEvent; onClick?: () => void; showDate?: boolean }) {
@@ -23,7 +31,7 @@ export function EventRow({ e, onClick, showDate }: { e: CalendarEvent; onClick?:
   return (
     <button onClick={onClick} className="card flex w-full items-center gap-3 px-3.5 py-3 text-left active:bg-surface-2" style={{ borderLeft: `4px solid ${k.color}` }}>
       <span className="text-2xl" aria-hidden>
-        {k.icon}
+        {eventIcon(e)}
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[17px] font-semibold">{e.title}</span>
@@ -32,6 +40,11 @@ export function EventRow({ e, onClick, showDate }: { e: CalendarEvent; onClick?:
           {e.note ?? k.label}
         </span>
       </span>
+      {e.remind !== false && e.kind !== "workout" && (
+        <span className="text-base opacity-70" aria-label="Przypomnienie dzień wcześniej">
+          🔔
+        </span>
+      )}
     </button>
   );
 }
@@ -57,8 +70,15 @@ export function EventSheet({
   const [day, setDay] = useState(initial?.date ?? date);
   const [kind, setKind] = useState<EventKind>(initial?.kind ?? initialKind);
   const [note, setNote] = useState(initial?.note ?? "");
+  const [icon, setIcon] = useState<string | null>(initial?.icon ?? null);
+  const [remind, setRemind] = useState(initial?.remind ?? true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const templates = useLoad(() => cachedGet<EventTemplate[]>("/event-templates").catch(() => [] as EventTemplate[]), []);
+  const push = useLoad(pushState, []);
+  // Szablon, z którego wypełniono formularz (do aktualizacji) i tryb usuwania szablonów.
+  const [fromTemplate, setFromTemplate] = useState<EventTemplate | null>(null);
+  const [editTemplates, setEditTemplates] = useState(false);
 
   async function run(fn: () => Promise<unknown>) {
     setBusy(true);
@@ -73,7 +93,46 @@ export function EventSheet({
     }
   }
 
-  const body = { date: day, title: title.trim(), kind, note: note.trim() || null };
+  const body = { date: day, title: title.trim(), kind, note: note.trim() || null, icon, remind };
+  const template = { title: title.trim(), icon, kind, note: note.trim() || null, remind };
+
+  function apply(t: EventTemplate) {
+    setTitle(t.title);
+    setKind(t.kind);
+    setIcon(t.icon);
+    setNote(t.note ?? "");
+    setRemind(t.remind);
+    setFromTemplate(t);
+  }
+
+  async function saveTemplate() {
+    setError(null);
+    try {
+      const saved = fromTemplate
+        ? await api.put<EventTemplate>(`/event-templates/${fromTemplate.id}`, template)
+        : await api.post<EventTemplate>("/event-templates", template);
+      setFromTemplate(saved);
+      void templates.reload();
+    } catch (e) {
+      setError(errorText(e));
+    }
+  }
+
+  async function removeTemplate(t: EventTemplate) {
+    if (!confirm(`Usunąć szablon „${t.title}”?`)) return;
+    try {
+      await api.del(`/event-templates/${t.id}`);
+      if (fromTemplate?.id === t.id) setFromTemplate(null);
+      void templates.reload();
+    } catch (e) {
+      setError(errorText(e));
+    }
+  }
+
+  const changedTemplate =
+    fromTemplate != null &&
+    (fromTemplate.title !== template.title || fromTemplate.icon !== icon || fromTemplate.kind !== kind || (fromTemplate.note ?? null) !== template.note || fromTemplate.remind !== remind);
+  const list = templates.data ?? [];
   // Przez kolejkę: działa też bez sieci, wyśle się samo.
   const save = () => run(() => saveEvent(body, initial?.id));
   const remove = () => confirm(`Usunąć „${initial!.title}”?`) && run(() => deleteEvent(initial!.id));
@@ -81,6 +140,31 @@ export function EventSheet({
   return (
     <Sheet title={initial ? "Wydarzenie" : "Nowe wydarzenie"} onClose={onClose}>
       <div className="grid gap-4">
+        {!initial && list.length > 0 && (
+          <div className="grid gap-1.5">
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-xs font-semibold uppercase tracking-wider text-muted">Twoje szablony</span>
+              <button onClick={() => setEditTemplates((v) => !v)} className="min-h-9 px-2 font-mono text-[13px] text-muted">
+                {editTemplates ? "gotowe" : "✎ edytuj"}
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {list.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => (editTemplates ? void removeTemplate(t) : apply(t))}
+                  className={`flex min-h-11 items-center gap-1.5 rounded-full border px-3.5 text-[15px] font-semibold ${
+                    editTemplates ? "border-danger/60 text-danger" : fromTemplate?.id === t.id ? "border-accent bg-accent/15 text-accent" : "border-line"
+                  }`}
+                >
+                  <span aria-hidden>{eventIcon(t)}</span>
+                  {t.title}
+                  {editTemplates && <span aria-label="usuń">✕</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="grid grid-cols-3 gap-1.5">
           {KINDS.map((k) => (
             <button
@@ -120,10 +204,47 @@ export function EventSheet({
             className="rounded-xl border border-line bg-bg px-3 py-2 text-base outline-none focus:border-accent"
           />
         </label>
+        <div className="grid gap-1.5">
+          <span className="font-mono text-xs font-semibold uppercase tracking-wider text-muted">Ikonka</span>
+          <div className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1">
+            {[null, ...EMOJI].map((em) => (
+              <button
+                key={em ?? "kind"}
+                onClick={() => setIcon(em)}
+                className={`grid size-12 shrink-0 place-items-center rounded-xl border text-2xl ${icon === em ? "border-accent bg-accent/15" : "border-line"}`}
+                aria-pressed={icon === em}
+                aria-label={em ?? "ikonka rodzaju"}
+              >
+                {em ?? kindOf(kind).icon}
+              </button>
+            ))}
+          </div>
+        </div>
+        {kind === "workout" ? (
+          <p className="card flex items-center gap-2.5 px-3.5 py-3 text-[15px]">
+            <span className="text-2xl" aria-hidden>
+              🤖
+            </span>
+            Dzień wcześniej wieczorem Bit zapyta, czy idziesz.
+          </p>
+        ) : (
+          <label className="card flex min-h-14 items-center justify-between gap-3 px-3.5 py-2.5">
+            <span className="text-[16px]">
+              🔔 Przypomnij dzień wcześniej
+              {remind && push.data !== "on" && <span className="block text-[13px] text-muted">Włącz powiadomienia w zakładce Ja → Ustawienia.</span>}
+            </span>
+            <input type="checkbox" className="size-6 shrink-0 accent-[var(--color-accent)]" checked={remind} onChange={(e) => setRemind(e.target.checked)} />
+          </label>
+        )}
         <ErrorText>{error}</ErrorText>
         <Button onClick={() => void save()} disabled={busy || !title.trim() || !day}>
           {busy ? "zapisywanie…" : "✓ Zapisz"}
         </Button>
+        {title.trim() && (!fromTemplate || changedTemplate) && (
+          <Button variant="ghost" onClick={() => void saveTemplate()}>
+            {fromTemplate ? `💾 Zaktualizuj szablon „${fromTemplate.title}”` : "💾 Zapisz jako szablon"}
+          </Button>
+        )}
         {initial && (
           <Button variant="danger" onClick={() => void remove()} disabled={busy}>
             <IconTrash size={18} /> Usuń wydarzenie

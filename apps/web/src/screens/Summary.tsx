@@ -1,4 +1,6 @@
-import { NetworkError, type Exercise, type Summary as SummaryData } from "../api";
+import { useMemo, useState } from "react";
+
+import { NetworkError, type Exercise, type Me, type Summary as SummaryData } from "../api";
 import { href } from "../app/router";
 import { useLoad } from "../app/useLoad";
 import { cachedGet, listSessions, loadSession } from "../offline/sessions";
@@ -9,6 +11,41 @@ import { IconTrophy } from "../ui/icons";
 import { BitSays } from "../ui/mascot";
 import { useTheme } from "../ui/theme";
 import { ExerciseArt } from "../ui/exercise-art";
+import { ShareSheet, type ShareCard } from "../ui/share-card";
+
+/** Obrazek do udostępnienia: rekordy, a bez nich tonaż i najlepsze ćwiczenie. */
+function shareCard(s: SummaryData, name: string | undefined): ShareCard {
+  const recordValue = (r: SummaryData["records"][number]) => (r.record_type === "bodyweight_reps" ? `${r.value} powt.` : `${kg(r.value)} kg`);
+  const recordType = (r: SummaryData["records"][number]) => (r.record_type === "rep_max" ? `${r.reps}RM` : RECORD[r.record_type]);
+  const footer = [name, longDate(s.local_date)].filter(Boolean).join(" · ");
+  const kicker = `${clock(s.duration_s)} · ${sets(s.sets)}`;
+  if (s.records.length) {
+    const [first] = s.records;
+    return {
+      kicker,
+      tone: "amber",
+      title: s.records.length === 1 ? `Nowy rekord ${recordType(first!)}` : `Nowe rekordy: ${s.records.length}`,
+      big: recordValue(first!),
+      lines: s.records.length === 1 ? [[first!.name, recordType(first!) ?? ""], ["tonaż treningu", tonnage(s.tonnage_kg)]] : s.records.map((r) => [`${r.name} ${recordType(r)}`, recordValue(r)]),
+      footer,
+      mood: "flex",
+    };
+  }
+  const best = s.exercises.filter((e) => e.best_e1rm_kg != null).sort((a, b) => b.best_e1rm_kg! - a.best_e1rm_kg!)[0];
+  return {
+    kicker,
+    tone: "accent",
+    title: "Trening zaliczony",
+    big: tonnage(s.tonnage_kg),
+    lines: [
+      ["powtórzenia", String(s.reps)],
+      ["ćwiczenia", String(s.exercises.filter((e) => e.sets > 0).length)],
+      ...(best ? [[`${best.name} 1RM szac.`, `${kg(best.best_e1rm_kg)} kg`] as [string, string]] : []),
+    ],
+    footer,
+    mood: "flex",
+  };
+}
 
 const RECORD: Record<string, string> = {
   e1rm: "1RM szac.",
@@ -61,6 +98,9 @@ export function Summary({ id }: { id: string }) {
   const list = useLoad(() => listSessions(200), []);
   const evil = useTheme() === "red";
   const catalog = useLoad(() => cachedGet<Exercise[]>("/exercises"), []);
+  const me = useLoad(() => cachedGet<Me>("/me").catch(() => undefined), []);
+  const [sharing, setSharing] = useState(false);
+  const card = useMemo(() => (data ? shareCard(data.data, me.data?.display_name) : null), [data, me.data]);
   if (error) return <Screen title="Podsumowanie"><ErrorText>{error}</ErrorText></Screen>;
   if (!data) return <Loading />;
   const s = data.data;
@@ -169,6 +209,14 @@ export function Summary({ id }: { id: string }) {
         <p className="-mt-2 px-1 text-[13px] text-muted">Pominięte: {s.exercises.filter((e) => e.sets === 0).map((e) => e.name).join(", ")}.</p>
       )}
       {data.local && <p className="text-sm text-muted">Trening czeka na wysłanie na serwer. Rekordy i porównanie pojawią się po synchronizacji.</p>}
+
+      <button
+        onClick={() => setSharing(true)}
+        className={`flex min-h-13 items-center justify-center gap-2 rounded-xl border-2 font-mono font-bold ${s.records.length ? "border-amber/70 text-amber" : "border-accent/60 text-accent"}`}
+      >
+        📸 Pochwal się{s.records.length ? " rekordem" : ""}
+      </button>
+      {sharing && card && <ShareSheet card={card} fileName={`pixgym-${s.local_date}.png`} onClose={() => setSharing(false)} />}
 
       <div className="grid grid-cols-2 gap-2.5">
         <a href={href({ name: "workout", id: s.id })} className="card grid min-h-13 place-items-center font-mono font-semibold">

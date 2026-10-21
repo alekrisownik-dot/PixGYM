@@ -1,8 +1,8 @@
 // Service worker: aplikacja otwiera się bez sieci (powłoka z pamięci). Dane i kolejkę
 // zmian offline trzyma sama strona (IndexedDB, src/offline); tu tylko pliki i zdjęcia maszyn.
-const CACHE = "pixgym-shell-v4";
+const CACHE = "pixgym-shell-v5";
 const PHOTOS = "pixgym-photos-v1";
-const SHELL = ["/manifest.webmanifest", "/icon.svg", "/icon-192.png"];
+const SHELL = ["/manifest.webmanifest", "/icon.svg", "/icon-192.png", "/badge.png"];
 
 /**
  * Zapisuje stronę i wszystkie pliki, których potrzebuje (JS, CSS, czcionki z CSS-a).
@@ -109,14 +109,63 @@ self.addEventListener("fetch", (event) => {
   }
 });
 
-// Koniec przerwy: powiadomienie wysyła strona przez service worker, bo tak działa
-// także przy zablokowanym ekranie (Android).
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
+// Przypomnienia z serwera (Web Push): o jutrzejszych wydarzeniach i Bit pytający o trening.
+const BIT_ANSWERS = {
+  yes: ["Trzymam za słowo! 💪", "Tak jest! Szykuję sztangę.", "Widzimy się na siłowni 😎"],
+  no: ["Ok, odpoczynek też jest częścią treningu 😴", "Spoko, przełożymy. Nie zapomnę 😉"],
+};
+const pick = (list) => list[Math.floor(Math.random() * list.length)];
+
+self.addEventListener("push", (event) => {
+  let msg = {};
+  try {
+    msg = event.data ? event.data.json() : {};
+  } catch {
+    msg = { body: event.data && event.data.text() };
+  }
   event.waitUntil(
-    self.clients.matchAll({ type: "window" }).then((list) => {
-      const win = list[0];
-      return win ? win.focus() : self.clients.openWindow("/");
+    self.registration.showNotification(msg.title || "PixGYM", {
+      body: msg.body || "",
+      tag: msg.tag,
+      icon: "/icon-192.png",
+      badge: "/badge.png",
+      data: { url: msg.url || "/", ask: !!msg.ask },
+      actions: msg.ask
+        ? [
+            { action: "yes", title: "💪 Idę" },
+            { action: "no", title: "Nie tym razem" },
+          ]
+        : [],
     }),
   );
+});
+
+function openApp(url) {
+  return self.clients.matchAll({ type: "window" }).then((list) => {
+    const win = list[0];
+    if (!win) return self.clients.openWindow(url);
+    return win.focus().then((w) => (url !== "/" && w && "navigate" in w ? w.navigate(url) : w));
+  });
+}
+
+// Dotknięcie powiadomienia otwiera aplikację. Odpowiedź na pytanie Bita: krótka reakcja Bita.
+// Koniec przerwy też tu trafia (stronę wysyła strona przez service worker, bo tak działa
+// także przy zablokowanym ekranie na Androidzie).
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const data = event.notification.data || {};
+  if (data.ask && (event.action === "yes" || event.action === "no")) {
+    event.waitUntil(
+      self.registration.showNotification("🤖 Bit", {
+        body: pick(BIT_ANSWERS[event.action]),
+        tag: event.notification.tag,
+        icon: "/icon-192.png",
+        badge: "/badge.png",
+        data: { url: "/" },
+        silent: true,
+      }),
+    );
+    return;
+  }
+  event.waitUntil(openApp(data.url || "/"));
 });
