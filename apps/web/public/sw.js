@@ -3,6 +3,7 @@
 const CACHE = "pixgym-shell-v5";
 const PHOTOS = "pixgym-photos-v1";
 const SHELL = ["/manifest.webmanifest", "/icon.svg", "/icon-192.png", "/badge.png"];
+const NAV_TIMEOUT_MS = 3000;
 
 /**
  * Zapisuje stronę i wszystkie pliki, których potrzebuje (JS, CSS, czcionki z CSS-a).
@@ -90,16 +91,18 @@ self.addEventListener("fetch", (event) => {
   }
 
   // Strona: najpierw sieć (żeby szybko dostać nową wersję), bez sieci z pamięci.
+  // Słaby zasięg albo Tailscale bez serwera: zapytanie nie kończy się błędem, tylko wisi,
+  // więc po NAV_TIMEOUT_MS bierzemy stronę z pamięci, a sieć w tle i tak ją odświeży.
   // Nowa wersja od razu zapisuje swoje pliki, żeby działała też bez sieci.
   if (event.request.mode === "navigate") {
-    event.respondWith(
-      fetch(event.request)
-        .then((res) => {
-          if (res.ok) event.waitUntil(cachePage(res.clone()).catch(() => {}));
-          return res;
-        })
-        .catch(() => caches.match("/")),
-    );
+    const net = fetch(event.request).then((res) => {
+      if (res.ok) event.waitUntil(cachePage(res.clone()).catch(() => {}));
+      return res;
+    });
+    event.waitUntil(net.catch(() => {}));
+    const cached = () => caches.match("/").then((hit) => hit || net);
+    const late = new Promise((resolve) => setTimeout(resolve, NAV_TIMEOUT_MS)).then(cached);
+    event.respondWith(Promise.race([net.catch(cached), late]));
     return;
   }
 

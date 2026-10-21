@@ -285,6 +285,7 @@ async function refreshSession(): Promise<boolean> {
   refreshing ??= fetch("/api/v1/auth/refresh", {
     method: "POST",
     headers: { "x-csrf-token": csrfToken() },
+    signal: AbortSignal.timeout(TIMEOUT_MS.GET),
   })
     .then(
       (r) => r.ok,
@@ -299,12 +300,20 @@ async function refreshSession(): Promise<boolean> {
 }
 
 async function ensureCsrf() {
-  if (!csrfToken()) await fetch("/api/v1/health");
+  if (!csrfToken()) await fetch("/api/v1/health", { signal: AbortSignal.timeout(TIMEOUT_MS.GET) });
 }
 
+/**
+ * Słaby zasięg albo Tailscale bez serwera: fetch nie kończy się błędem, tylko wisi.
+ * Po tym czasie traktujemy to jak brak sieci, więc ekrany biorą dane z pamięci telefonu.
+ * Zdjęcia (Blob) wysyłają się dłużej, więc dla nich bez limitu.
+ */
+const TIMEOUT_MS = { GET: 6000, other: 30000 };
+
 async function send(input: string, init: RequestInit): Promise<Response> {
+  const ms = init.body instanceof Blob ? undefined : init.method === "GET" ? TIMEOUT_MS.GET : TIMEOUT_MS.other;
   try {
-    return await fetch(input, init);
+    return await fetch(input, ms ? { ...init, signal: AbortSignal.timeout(ms) } : init);
   } catch {
     throw new NetworkError("offline");
   }

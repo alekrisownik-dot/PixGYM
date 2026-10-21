@@ -90,6 +90,8 @@ export function App() {
 
   const loadMe = useCallback(() => {
     setUnreachable(false);
+    // Ostatnio znane konto od razu: przy słabym zasięgu nie czekamy na serwer z pustym ekranem.
+    void kv.get<Me>("get:/me").then((m) => m && setMe((cur) => (cur === undefined ? m : cur)));
     // Bez sieci wpuszczamy z ostatnio znanym kontem: trening działa offline.
     cachedGet<Me>("/me")
       .then(setMe)
