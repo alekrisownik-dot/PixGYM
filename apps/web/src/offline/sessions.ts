@@ -17,23 +17,63 @@ import {
 } from "../api";
 import { estimate1rm, setTonnage } from "../domain";
 import { kv } from "./db";
-import { enqueue, pendingSessionIds } from "./sync";
+import { enqueue, pendingSessionIds, setStale } from "./sync";
 
 const key = (id: string) => `session:${id}`;
 
+/**
+ * Po tym czasie bez odpowiedzi serwera ekran dostaje kopię z telefonu (słaby zasięg na siłowni),
+ * a gdy odpowiedź dojdzie i jest inna, ekrany wczytują się jeszcze raz (onFreshData).
+ */
+const STALE_AFTER_MS = 1500;
+const fresh = new Set<() => void>();
+let staleServed = 0;
+
+/** Ile razy ekran dostał kopię z telefonu; useLoad sprawdza, czy jego dane mogą być stare. */
+export const staleCount = () => staleServed;
+
+export function onFreshData(fn: () => void): () => void {
+  fresh.add(fn);
+  return () => fresh.delete(fn);
+}
+
+function servedStale() {
+  staleServed++;
+  setStale(true);
+}
+
 /** GET z zapasem: odpowiedź trafia do lokalnej bazy, bez sieci wraca ostatnia znana. */
 export async function cachedGet<T>(path: string): Promise<T> {
-  try {
-    const data = await api.get<T>(path);
-    void kv.set(`get:${path}`, data);
+  const k = `get:${path}`;
+  const cached = kv.get<T>(k);
+  const net = api.get<T>(path).then(async (data) => {
+    await kv.set(k, data);
+    setStale(false);
     return data;
+  });
+  const slow = new Promise<"slow">((r) => setTimeout(() => r("slow"), STALE_AFTER_MS));
+  try {
+    const first = await Promise.race([net, slow]);
+    if (first !== "slow") return first;
   } catch (e) {
     if (e instanceof NetworkError) {
-      const cached = await kv.get<T>(`get:${path}`);
-      if (cached !== undefined) return cached;
+      const local = await cached;
+      if (local !== undefined) {
+        servedStale();
+        return local;
+      }
     }
     throw e;
   }
+  const local = await cached;
+  if (local === undefined) return net;
+  servedStale();
+  // Serwer odpowie później: jeśli coś się zmieniło, ekrany wczytają świeże dane.
+  net.then(
+    (data) => JSON.stringify(data) !== JSON.stringify(local) && fresh.forEach((fn) => fn()),
+    () => {},
+  );
+  return local;
 }
 
 export async function loadSession(id: string): Promise<Session> {
@@ -44,7 +84,10 @@ export async function loadSession(id: string): Promise<Session> {
     await kv.set(key(id), fresh);
     return fresh;
   } catch (e) {
-    if (e instanceof NetworkError && local) return local;
+    if (e instanceof NetworkError && local) {
+      servedStale();
+      return local;
+    }
     throw e;
   }
 }

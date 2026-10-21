@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { ApiError, setLoggedOutHandler, type Me } from "../api";
 import { kv, outbox } from "../offline/db";
-import { cachedGet } from "../offline/sessions";
+import { cachedGet, onFreshData } from "../offline/sessions";
 import { dismissRejected, flush, startSync, subscribe, type SyncState } from "../offline/sync";
 import { Auth } from "../screens/Auth";
 import { ExerciseProgress } from "../screens/ExerciseProgress";
@@ -30,13 +30,22 @@ const TABS: ReadonlyArray<{ route: Route; label: string; icon: PixelIconName; ma
   { route: { name: "me" }, label: "Ja", icon: "user", match: ["me"] },
 ];
 
-/** Pasek stanu synchronizacji: widoczny tylko, gdy coś czeka albo coś poszło nie tak. */
+/**
+ * Pasek stanu synchronizacji: widoczny tylko, gdy coś czeka, coś poszło nie tak albo ekran
+ * pokazuje dane z pamięci telefonu, bo serwer nie odpowiada.
+ */
 function SyncBar() {
   const [s, setS] = useState<SyncState | null>(null);
   useEffect(() => subscribe(setS), []);
-  if (!s || (!s.pending && !s.rejected.length)) return null;
+  if (!s || (!s.pending && !s.rejected.length && !s.stale)) return null;
   return (
     <div className="mx-auto max-w-xl px-4 pt-2">
+      {s.stale && !s.pending && (
+        <p className="flex items-center gap-2 rounded-xl border border-amber/60 bg-amber/10 px-3 py-2 font-mono text-[13px] text-amber">
+          <IconCloudOff size={18} />
+          offline · dane z telefonu, mogą nie być najnowsze
+        </p>
+      )}
       {s.pending > 0 && (
         <p className={`flex items-center gap-2 rounded-xl border px-3 py-2 font-mono text-[13px] ${s.offline ? "border-amber/60 bg-amber/10 text-amber" : "border-line bg-surface text-muted"}`}>
           {s.offline ? <IconCloudOff size={18} /> : <IconRefresh size={18} className="animate-spin" />}
@@ -102,6 +111,8 @@ export function App() {
     setLoggedOutHandler(() => setMe(null));
     loadMe();
     startSync();
+    // Konto pokazane z pamięci telefonu: świeże z serwera (już zapisane w kv) podmienia je.
+    return onFreshData(() => void kv.get<Me>("get:/me").then((m) => m && setMe((cur) => (cur ? m : cur))));
   }, [loadMe]);
 
   const signIn = useCallback((m: Me) => {

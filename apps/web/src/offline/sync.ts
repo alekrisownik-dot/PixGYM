@@ -13,11 +13,13 @@ export interface SyncState {
   syncing: boolean;
   // Ostatnia próba nie doszła do serwera.
   offline: boolean;
+  // Ekran pokazuje dane z pamięci telefonu, bo serwer nie odpowiedział.
+  stale: boolean;
   // Zmiany odrzucone przez serwer (np. błędne dane); nie da się ich ponowić.
   rejected: string[];
 }
 
-let state: SyncState = { pending: 0, syncing: false, offline: !navigator.onLine, rejected: [] };
+let state: SyncState = { pending: 0, syncing: false, offline: !navigator.onLine, stale: false, rejected: [] };
 const listeners = new Set<(s: SyncState) => void>();
 
 function set(patch: Partial<SyncState>) {
@@ -111,6 +113,10 @@ async function doFlush() {
   } finally {
     set({ syncing: false });
   }
+}
+
+export function setStale(stale: boolean) {
+  if (state.stale !== stale) set({ stale });
 }
 
 export function dismissRejected() {
