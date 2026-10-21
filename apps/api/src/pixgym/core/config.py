@@ -27,6 +27,14 @@ class Settings(BaseSettings):
     invite_ttl_s: int = 7 * 24 * 3600
     # Zbudowany front (apps/web/dist). Brak katalogu = tylko API.
     web_dir: str | None = None
+    # Powiadomienia push: klucz VAPID (base64url, 32 bajty). Brak = powiadomienia wyłączone.
+    # Wygeneruj: python -m pixgym.services.push
+    vapid_private_key: str | None = None
+    vapid_subject: str = "mailto:pixgym@example.com"
+    # Katalog kopii zapasowych (kontener backup) do podglądu w aplikacji. Brak = nie pokazujemy.
+    backup_dir: str | None = None
+    # Pętla przypomnień w tle (testy ją wyłączają i wołają push.tick same).
+    reminders_loop: bool = True
 
 
 @lru_cache

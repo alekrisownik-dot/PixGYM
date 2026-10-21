@@ -1,4 +1,6 @@
+import asyncio
 import json
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
@@ -7,14 +9,37 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
 
 from pixgym.api.deps import csrf_middleware
-from pixgym.api.v1 import analytics, auth, body, catalog, events, programs, progress, training
+from pixgym.api.v1 import (
+    analytics,
+    auth,
+    body,
+    catalog,
+    events,
+    programs,
+    progress,
+    push,
+    training,
+)
 from pixgym.core.config import get_settings
 from pixgym.db.session import get_engine
+from pixgym.services import push as push_service
 
-app = FastAPI(title="PixGYM", docs_url="/api/docs", openapi_url="/api/openapi.json")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    """W tle: pętla przypomnień push (o jutrzejszych wydarzeniach i treningu)."""
+    task = asyncio.create_task(push_service.loop()) if get_settings().reminders_loop else None
+    yield
+    if task:
+        task.cancel()
+
+
+app = FastAPI(
+    title="PixGYM", docs_url="/api/docs", openapi_url="/api/openapi.json", lifespan=lifespan
+)
 app.middleware("http")(csrf_middleware)
 
-for module in (auth, training, catalog, programs, progress, analytics, events, body):
+for module in (auth, training, catalog, programs, progress, analytics, events, body, push):
     app.include_router(module.router, prefix="/api/v1")
 
 # Front sam w sobie nie ładuje nic z zewnątrz, więc CSP może być ścisła.

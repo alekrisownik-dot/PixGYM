@@ -69,6 +69,7 @@ class UserSettings(Versioned, Base):
         CheckConstraint("e1rm_max_reps BETWEEN 1 AND 20", name="e1rm_max_reps"),
         CheckConstraint("bar_weight_kg BETWEEN 0 AND 50", name="bar_weight_kg"),
         CheckConstraint("default_rest_s BETWEEN 0 AND 1800", name="default_rest_s"),
+        CheckConstraint("reminder_hour BETWEEN 0 AND 23", name="reminder_hour"),
     )
 
     user_id: Mapped[uuid.UUID] = mapped_column(
@@ -94,6 +95,9 @@ class UserSettings(Versioned, Base):
     active_program_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("programs.id", ondelete="SET NULL")
     )
+    # Powiadomienia: o której godzinie (czas lokalny) przypominać o jutrze i czy Bit pyta o trening.
+    reminder_hour: Mapped[int] = mapped_column(SmallInteger, server_default="19")
+    remind_workouts: Mapped[bool] = mapped_column(Boolean, server_default=true())
 
 
 class RefreshToken(UUIDPk, CreatedAt, Base):

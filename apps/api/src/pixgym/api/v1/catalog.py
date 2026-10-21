@@ -114,7 +114,13 @@ async def delete_photo(photo_id: uuid.UUID, user_id: UserId) -> None:
     await _catalog(user_id, catalog.delete_photo, photo_store(), photo_id)
 
 
-_SETTINGS = (UserSettings.default_rest_s, UserSettings.bar_weight_kg, UserSettings.plate_inventory)
+_SETTINGS = (
+    UserSettings.default_rest_s,
+    UserSettings.bar_weight_kg,
+    UserSettings.plate_inventory,
+    UserSettings.reminder_hour,
+    UserSettings.remind_workouts,
+)
 
 
 @router.get("/me/settings", response_model=SettingsOut)

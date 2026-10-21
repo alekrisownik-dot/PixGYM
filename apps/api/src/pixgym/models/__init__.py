@@ -1,5 +1,5 @@
 from pixgym.models.account import Invite, MfaTotp, RecoveryCode, RefreshToken, User, UserSettings
-from pixgym.models.calendar import CalendarEvent
+from pixgym.models.calendar import CalendarEvent, EventTemplate, PushSubscription, ReminderSent
 from pixgym.models.catalog import (
     Equipment,
     Exercise,
@@ -25,6 +25,7 @@ __all__ = [
     "CalendarEvent",
     "DataJob",
     "Equipment",
+    "EventTemplate",
     "Exercise",
     "ExerciseMuscle",
     "ExercisePhoto",
@@ -33,6 +34,7 @@ __all__ = [
     "MovementPattern",
     "MuscleGroup",
     "PersonalRecord",
+    "PushSubscription",
     "Program",
     "ProgramDay",
     "ProgramExercise",
@@ -41,6 +43,7 @@ __all__ = [
     "ProgressPhoto",
     "RecoveryCode",
     "RefreshToken",
+    "ReminderSent",
     "SessionExercise",
     "SyncConflict",
     "SyncOp",

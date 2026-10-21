@@ -23,6 +23,27 @@ Pierwsze konto (administrator), hasło wpisuje się z klawiatury:
 docker-compose exec api python -m pixgym.admin create-admin TWOJ@EMAIL Imię
 ```
 
+Powiadomienia (przypomnienie dzień wcześniej o wydarzeniach, Bit pytający o trening) wymagają
+HTTPS (Tailscale) i klucza `PIXGYM_VAPID_PRIVATE_KEY` w `.env`
+(`docker-compose run --rm api python -m pixgym.services.push`). Włącza się je na telefonie:
+„Ja” → „Ustawienia” → „Powiadomienia”.
+
+### Kopia zapasowa
+
+Kontener `backup` raz na dobę zapisuje do `backups/RRRR-MM-DD/` zrzut bazy (`pixgym.dump`)
+i zaszyfrowane zdjęcia (`photos.tar.gz`); trzyma 14 dni (`BACKUP_KEEP_DAYS`). Stan widać
+w aplikacji: „Ja” → „Ustawienia” → „Kopia zapasowa” (admin).
+
+```bash
+docker-compose run --rm backup now     # kopia od razu (np. przed aktualizacją)
+sh infra/backup/restore.sh backups/2026-10-21   # odtworzenie (nadpisuje bazę i zdjęcia)
+```
+
+Kopia leży na tym samym dysku, więc chroni przed błędem albo zepsutą aktualizacją, ale nie przed
+awarią dysku: folder `backups/` warto kopiować dalej (dysk zewnętrzny, chmura). Zdjęcia są
+zaszyfrowane kluczem `PIXGYM_PHOTO_KEY`, a `.env` nie trafia do kopii: trzymaj go osobno
+(np. w menedżerze haseł), bez niego zdjęć z kopii nie da się odczytać.
+
 Znajomi zakładają konta z kodu zaproszenia (zakładka „Ja” → „Nowy kod” albo
 `python -m pixgym.admin invite TWOJ@EMAIL`). Reset hasła: `python -m pixgym.admin set-password EMAIL`.
 

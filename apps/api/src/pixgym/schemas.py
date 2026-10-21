@@ -111,6 +111,9 @@ class EventIn(BaseModel):
     title: str = Field(min_length=1, max_length=80)
     kind: EventKind = "event"
     note: str | None = Field(None, max_length=1000)
+    # Emoji z szablonu; puste = ikonka rodzaju.
+    icon: str | None = Field(None, max_length=16)
+    remind: bool = True
 
 
 class EventPatch(BaseModel):
@@ -118,6 +121,8 @@ class EventPatch(BaseModel):
     title: str | None = Field(None, min_length=1, max_length=80)
     kind: EventKind | None = None
     note: str | None = Field(None, max_length=1000)
+    icon: str | None = Field(None, max_length=16)
+    remind: bool | None = None
 
 
 class EventOut(Out):
@@ -126,6 +131,35 @@ class EventOut(Out):
     title: str
     kind: str
     note: str | None
+    icon: str | None
+    remind: bool
+
+
+class EventTemplateIn(BaseModel):
+    title: str = Field(min_length=1, max_length=80)
+    icon: str | None = Field(None, max_length=16)
+    kind: EventKind = "event"
+    note: str | None = Field(None, max_length=1000)
+    remind: bool = True
+
+
+class EventTemplateOut(Out):
+    id: uuid.UUID
+    title: str
+    icon: str | None
+    kind: str
+    note: str | None
+    remind: bool
+
+
+class PushSubscriptionIn(BaseModel):
+    endpoint: str = Field(min_length=10, max_length=2000, pattern=r"^https://")
+    p256dh: str = Field(min_length=10, max_length=200)
+    auth: str = Field(min_length=10, max_length=100)
+
+
+class PushEndpoint(BaseModel):
+    endpoint: str = Field(max_length=2000)
 
 
 class NamedSlug(BaseModel):
@@ -142,12 +176,16 @@ class SettingsOut(Out):
     default_rest_s: int
     bar_weight_kg: Num
     plate_inventory: dict[str, int]
+    reminder_hour: int
+    remind_workouts: bool
 
 
 class SettingsIn(BaseModel):
     default_rest_s: int | None = Field(None, ge=0, le=1800)
     bar_weight_kg: float | None = Field(None, ge=0, le=50)
     plate_inventory: dict[str, int] | None = None
+    reminder_hour: int | None = Field(None, ge=0, le=23)
+    remind_workouts: bool | None = None
 
 
 class SessionIn(BaseModel):
@@ -536,3 +574,10 @@ class PhotoPairOut(BaseModel):
     before_id: uuid.UUID
     after_id: uuid.UUID
     days_between: int
+
+
+class BackupStatusOut(BaseModel):
+    configured: bool
+    count: int = 0
+    last_at: datetime | None = None
+    last_size_bytes: int = 0

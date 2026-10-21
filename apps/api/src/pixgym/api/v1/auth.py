@@ -1,5 +1,8 @@
 """Konto: rejestracja z zaproszenia, logowanie, wylogowanie, profil, zaproszenia (admin)."""
 
+from datetime import datetime
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 from sqlalchemy import select, update
@@ -14,8 +17,17 @@ from pixgym.api.deps import (
     user_tx,
 )
 from pixgym.core import ratelimit
+from pixgym.core.config import get_settings
 from pixgym.models import User, UserSettings
-from pixgym.schemas import InviteListItem, InviteOut, LoginIn, MeIn, MeOut, RegisterIn
+from pixgym.schemas import (
+    BackupStatusOut,
+    InviteListItem,
+    InviteOut,
+    LoginIn,
+    MeIn,
+    MeOut,
+    RegisterIn,
+)
 from pixgym.services import auth
 
 router = APIRouter()
@@ -151,3 +163,24 @@ async def create_invite(request: Request, user_id: UserId) -> InviteOut:
 async def list_invites(user_id: UserId) -> list:
     async with user_tx(user_id) as conn:
         return await conn.run_sync(auth.list_invites, user_id)
+
+
+@router.get("/admin/backups", response_model=BackupStatusOut)
+async def backup_status(user_id: UserId) -> BackupStatusOut:
+    """Stan kopii zapasowych (katalogi RRRR-MM-DD z plikiem OK, robi je kontener backup)."""
+    async with user_tx(user_id) as conn:
+        if not await conn.run_sync(auth.is_admin, user_id):
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "admin_only")
+    root = get_settings().backup_dir
+    if not root or not Path(root).is_dir():
+        return BackupStatusOut(configured=False)
+    done = sorted(d for d in Path(root).glob("20*") if (d / "OK").is_file())
+    if not done:
+        return BackupStatusOut(configured=True)
+    last = done[-1]
+    return BackupStatusOut(
+        configured=True,
+        count=len(done),
+        last_at=datetime.fromisoformat((last / "OK").read_text().strip()),
+        last_size_bytes=sum(f.stat().st_size for f in last.iterdir() if f.is_file()),
+    )

@@ -1,9 +1,11 @@
 """API przez HTTP: logowanie, zaproszenia, CSRF, refresh tokeny, trening, izolacja."""
 
+import asyncio
 import os
 import uuid
 from collections.abc import Iterator
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import pytest
 import redis
@@ -17,6 +19,7 @@ from pixgym.core.ids import uuid7
 from pixgym.db import session as db_session
 from pixgym.models import AuditLog
 from pixgym.seed import builtin_id
+from pixgym.services import push
 
 from .conftest import TEST_DB
 
@@ -71,6 +74,8 @@ def app_env(owner_engine, tmp_path_factory) -> Iterator[None]:
         "PIXGYM_REDIS_URL": settings.redis_url.rsplit("/", 1)[0] + "/15",
         "PIXGYM_DB_NULL_POOL": "true",
         "PIXGYM_PHOTO_DIR": str(tmp_path_factory.mktemp("photos")),
+        "PIXGYM_REMINDERS_LOOP": "false",
+        "PIXGYM_VAPID_PRIVATE_KEY": push.new_private_key(),
     }
     saved = {k: os.environ.get(k) for k in env}
     os.environ.update(env)
@@ -675,6 +680,8 @@ def test_calendar_events(new_client, owner_engine, admin):
         "title": "Zawody w wyciskaniu",
         "kind": "competition",
         "note": None,
+        "icon": None,
+        "remind": True,
     }
     assert api.post("/api/v1/events", json=body).status_code == 201  # ponowienie z kolejki
     assert api.post("/api/v1/events", json={**body, "id": None, "kind": "x"}).status_code == 422
@@ -701,6 +708,192 @@ def test_calendar_events(new_client, owner_engine, admin):
     assert [
         e["title"] for e in api.get("/api/v1/events?start=2027-01-01&end=2027-01-31").json()
     ] == ["Push"]
+
+
+def test_backup_status_admin_only(new_client, owner_engine, admin, tmp_path, monkeypatch):
+    api = new_client()
+    login(api, admin)
+    monkeypatch.delenv("PIXGYM_BACKUP_DIR", raising=False)
+    get_settings.cache_clear()
+    assert api.get("/api/v1/admin/backups").json()["configured"] is False
+
+    (tmp_path / "2026-10-20").mkdir()
+    (tmp_path / "2026-10-20" / "OK").write_text("2026-10-20T03:00:00+02:00\n")
+    (tmp_path / "2026-10-20" / "pixgym.dump").write_bytes(b"x" * 100)
+    (tmp_path / "2026-10-21").mkdir()  # przerwana: bez OK
+    monkeypatch.setenv("PIXGYM_BACKUP_DIR", str(tmp_path))
+    get_settings.cache_clear()
+    got = api.get("/api/v1/admin/backups").json()
+    assert got["count"] == 1 and got["last_size_bytes"] == 126
+    assert got["last_at"].startswith("2026-10-20T03:00")
+
+    bob = new_client()
+    register(bob, invite(owner_engine, admin), "bob-backup")
+    assert bob.get("/api/v1/admin/backups").status_code == 403
+    monkeypatch.undo()
+    get_settings.cache_clear()
+
+
+def test_event_templates(new_client, owner_engine, admin):
+    api = new_client()
+    login(api, admin)
+    body = {"title": " Masaż ", "icon": "💆", "kind": "health", "note": "o 17:00", "remind": False}
+    t = api.post("/api/v1/event-templates", json=body).json()
+    assert {k: t[k] for k in body} == {**body, "title": "Masaż"}
+    assert api.post("/api/v1/event-templates", json={**body, "kind": "x"}).status_code == 422
+
+    t2 = api.put(f"/api/v1/event-templates/{t['id']}", json={**body, "title": "Fizjo"}).json()
+    assert t2["title"] == "Fizjo" and t2["id"] == t["id"]
+    assert [x["title"] for x in api.get("/api/v1/event-templates").json()] == ["Fizjo"]
+
+    # Wydarzenie z szablonu niesie emoji i ustawienie przypomnienia.
+    e = api.post(
+        "/api/v1/events",
+        json={"date": "2026-11-20", "title": "Fizjo", "kind": "health", "icon": "💆"},
+    ).json()
+    assert e["icon"] == "💆" and e["remind"] is True
+    e = api.patch(f"/api/v1/events/{e['id']}", json={"remind": False, "icon": ""}).json()
+    assert e["remind"] is False and e["icon"] is None
+
+    bob = new_client()
+    register(bob, invite(owner_engine, admin), "bob-templates")
+    assert bob.get("/api/v1/event-templates").json() == []
+    assert bob.put(f"/api/v1/event-templates/{t['id']}", json=body).status_code == 404
+    assert bob.delete(f"/api/v1/event-templates/{t['id']}").status_code == 204
+    assert len(api.get("/api/v1/event-templates").json()) == 1
+
+    assert api.delete(f"/api/v1/event-templates/{t['id']}").status_code == 204
+    assert api.get("/api/v1/event-templates").json() == []
+
+
+def _sub(name: str) -> dict:
+    return {
+        "endpoint": f"https://push.example.com/{name}-{uuid7()}",
+        "p256dh": "BPubKeyForTests0123456789",
+        "auth": "AuthSecret0123",
+    }
+
+
+@pytest.fixture
+def outbox(monkeypatch) -> list[tuple[str, dict]]:
+    """Zamiast wysyłki do serwera push: lista (endpoint, wiadomość)."""
+    sent: list[tuple[str, dict]] = []
+
+    def fake(sub, payload):
+        if "gone" in sub["endpoint"]:
+            return False
+        sent.append((sub["endpoint"], payload))
+        return True
+
+    monkeypatch.setattr(push, "_send", fake)
+    return sent
+
+
+def test_push_reminders_day_before(new_client, owner_engine, admin, outbox):
+    api = new_client()
+    register(api, invite(owner_engine, admin), "push")
+    assert len(api.get("/api/v1/push/key").json()["key"]) == 87  # punkt P-256, base64url
+    sub = _sub("phone")
+    assert api.post("/api/v1/push/subscriptions", json=sub).status_code == 204
+    assert api.post("/api/v1/push/subscriptions", json=sub).status_code == 204  # ponownie
+    assert (
+        api.patch("/api/v1/me/settings", json={"reminder_hour": 18}).json()["reminder_hour"] == 18
+    )
+
+    # Wtorek 10.11: zawody (z przypomnieniem), wizyta bez przypomnienia, zaplanowany Push.
+    events = [
+        {"title": "Zawody", "kind": "competition", "note": "ważenie 8:00"},
+        {"title": "Dentysta", "kind": "health", "remind": False},
+        {"title": "Push", "kind": "workout"},
+    ]
+    for e in events:
+        assert api.post("/api/v1/events", json={"date": "2026-11-10", **e}).status_code == 201
+
+    warsaw = ZoneInfo("Europe/Warsaw")
+    mine = lambda: [m for ep, m in outbox if ep == sub["endpoint"]]  # noqa: E731
+    asyncio.run(push.tick(datetime(2026, 11, 9, 17, 30, tzinfo=warsaw)))  # przed 18:00
+    assert mine() == []
+
+    asyncio.run(push.tick(datetime(2026, 11, 9, 18, 5, tzinfo=warsaw)))
+    got = mine()
+    assert [m["title"] for m in got] == ["Jutro: 🏆 Zawody", "🤖 Bit pyta"]
+    assert got[0]["body"] == "ważenie 8:00"
+    assert "Push" in got[1]["body"] and got[1]["ask"] is True
+
+    # Drugi raz tego samego dnia nic nie wysyła.
+    asyncio.run(push.tick(datetime(2026, 11, 9, 20, 0, tzinfo=warsaw)))
+    assert len(mine()) == 2
+
+    # Środa: bez pytań o trening, gdy wyłączone; dzień odpoczynku też ucisza Bita.
+    api.post("/api/v1/events", json={"date": "2026-11-11", "title": "Push", "kind": "workout"})
+    api.patch("/api/v1/me/settings", json={"remind_workouts": False})
+    asyncio.run(push.tick(datetime(2026, 11, 10, 19, 0, tzinfo=warsaw)))
+    assert len(mine()) == 2
+
+    # Wyrejestrowanie: koniec powiadomień.
+    api.post("/api/v1/push/unsubscribe", json={"endpoint": sub["endpoint"]})
+    api.post("/api/v1/events", json={"date": "2026-11-13", "title": "Wyjazd", "kind": "trip"})
+    asyncio.run(push.tick(datetime(2026, 11, 12, 19, 0, tzinfo=warsaw)))
+    assert len(mine()) == 2
+
+
+def test_push_asks_about_planned_workout(new_client, owner_engine, admin, outbox):
+    api = new_client()
+    register(api, invite(owner_engine, admin), "push-plan")
+    sub = _sub("plan")
+    api.post("/api/v1/push/subscriptions", json=sub)
+    days = [
+        {"name": "Push", "weekdays": [1], "blocks": []},  # wtorek
+        {"name": "Pull", "weekdays": [3], "blocks": []},  # czwartek
+    ]
+    plan = api.post("/api/v1/programs", json={"name": "PPL", "days": days}).json()
+    api.put("/api/v1/me/active-program", json={"program_id": plan["id"]})
+    api.post("/api/v1/events", json={"date": "2026-11-12", "title": "Luz", "kind": "rest"})
+
+    warsaw = ZoneInfo("Europe/Warsaw")
+    for day in (9, 10, 11):  # pon → wtorek Push; wt → środa nic; śr → czwartek, ale odpoczynek
+        asyncio.run(push.tick(datetime(2026, 11, day, 19, 30, tzinfo=warsaw)))
+    got = [m for ep, m in outbox if ep == sub["endpoint"] and m.get("ask")]
+    assert len(got) == 1 and "Push" in got[0]["body"] and got[0]["tag"] == "workout-2026-11-10"
+
+
+def test_push_flexible_plan_asks_for_next_day(new_client, owner_engine, admin, outbox):
+    api = new_client()
+    register(api, invite(owner_engine, admin), "push-flex")
+    sub = _sub("flex")
+    api.post("/api/v1/push/subscriptions", json=sub)
+    days = [{"name": n, "blocks": []} for n in ("Push", "Pull")]
+    plan = api.post(
+        "/api/v1/programs", json={"name": "PP", "schedule": "flexible", "days": days}
+    ).json()
+    api.put("/api/v1/me/active-program", json={"program_id": plan["id"]})
+    # Dziś zrobiony Push: jutro wolne, Bit nie pyta.
+    api.post("/api/v1/sessions", json={"program_day_id": plan["days"][0]["id"]})
+    now = datetime.now(ZoneInfo("Europe/Warsaw")).replace(hour=20)
+    asyncio.run(push.tick(now))
+    asyncio.run(push.tick(now + timedelta(days=1)))
+    got = [m["body"] for ep, m in outbox if ep == sub["endpoint"]]
+    # Pojutrze, jeśli to ten sam tydzień: następny w kolejce Pull. Nowy tydzień: też Pull.
+    assert len(got) == 1 and "Pull" in got[0]
+
+
+def test_push_drops_expired_subscription(new_client, owner_engine, admin, outbox):
+    api = new_client()
+    register(api, invite(owner_engine, admin), "push-gone")
+    gone = _sub("gone")
+    api.post("/api/v1/push/subscriptions", json=gone)
+    assert api.post("/api/v1/push/test", json={"endpoint": gone["endpoint"]}).json() == {"sent": 0}
+    # Wygasła subskrypcja została usunięta.
+    r = api.post("/api/v1/push/test", json={"endpoint": gone["endpoint"]})
+    assert r.status_code == 404
+
+    ok = _sub("ok")
+    api.post("/api/v1/push/subscriptions", json=ok)
+    assert api.post("/api/v1/push/test", json={"endpoint": ok["endpoint"]}).json() == {"sent": 1}
+    # Cudzej subskrypcji nie da się użyć.
+    bob = new_client()
+    register(bob, invite(owner_engine, admin), "push-bob")
+    assert bob.post("/api/v1/push/test", json={"endpoint": ok["endpoint"]}).status_code == 404
 
 
 def test_custom_exercise_per_side(new_client, admin):

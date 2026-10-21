@@ -34,12 +34,16 @@ services:
       PIXGYM_PHOTO_DIR: /data/photos
       PIXGYM_SECRET_KEY: ${PIXGYM_SECRET_KEY:?ustaw w .env}
       PIXGYM_WEB_DIR: /web
+      PIXGYM_VAPID_PRIVATE_KEY: ${PIXGYM_VAPID_PRIVATE_KEY:-}
+      PIXGYM_BACKUP_DIR: /backups
     volumes:
       - ./apps/api:/app
       - ./packages:/packages:ro
       - photos:/data/photos
       # Zbudowany front: cd apps/web && npm run build
       - ./apps/web/dist:/web:ro
+      # Tylko do podglądu stanu kopii (ekran admina).
+      - ./backups:/backups:ro
     ports:
       - "127.0.0.1:8000:8000"
     depends_on:
@@ -48,6 +52,24 @@ services:
       redis:
         condition: service_started
     command: sh -c "alembic upgrade head && python -m pixgym.seed && uvicorn pixgym.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  # Kopia zapasowa raz na dobę do ./backups (14 dni). Odtworzenie: infra/backup/restore.sh
+  backup:
+    image: postgres:17-alpine
+    user: "1000:1000"
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-14}
+      TZ: Europe/Warsaw
+    volumes:
+      - ./backups:/backups
+      - photos:/data/photos:ro
+      - ./infra/backup/backup.sh:/backup.sh:ro
+    entrypoint: ["sh", "/backup.sh"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   pgdata:
