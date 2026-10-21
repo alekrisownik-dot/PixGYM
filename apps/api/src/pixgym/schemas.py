@@ -272,7 +272,9 @@ class PlanBlockOut(BlockOut):
     tracking: str
 
 
-DayIcon = Literal["chest", "back", "shoulders", "arms", "legs", "core", "full"]
+DayIcon = Literal[
+    "chest", "back", "shoulders", "arms", "legs", "core", "full", "push", "pull", "upper"
+]
 
 
 class PlanDayIn(BaseModel):

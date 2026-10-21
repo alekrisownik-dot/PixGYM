@@ -48,29 +48,47 @@ export function muscleGroup(slug: string | null | undefined): MuscleGroup | null
   return g ? GROUPS[g]! : null;
 }
 
-/** Ikonka dnia planu: partia albo całe ciało. */
-export type DayIcon = GroupKey | "full";
+/** Ikonka dnia planu: partia (split), push / pull / góra albo całe ciało. */
+export type DayIcon = GroupKey | "push" | "pull" | "upper" | "full";
 
 export const DAY_ICONS: { key: DayIcon; name: string; color: string }[] = [
+  { key: "push", name: "Push", color: GROUPS.chest.color },
+  { key: "pull", name: "Pull", color: GROUPS.back.color },
+  { key: "upper", name: "Góra", color: GROUPS.shoulders.color },
   ...Object.values(GROUPS).map((g) => (g.key === "chest" ? { ...g, name: "Klata" } : g)),
   { key: "full", name: "Całe ciało", color: "var(--color-accent)" },
 ];
 
 export const dayIconInfo = (icon: DayIcon) => DAY_ICONS.find((d) => d.key === icon)!;
 
+// Ruchy pchające i ciągnące (tył barków i przedramiona do ciągnięcia, jak w typowym PPL).
+const PUSH = new Set(["chest", "front_delts", "side_delts", "triceps"]);
+const PULL = new Set(["lats", "upper_back", "traps", "lower_back", "rear_delts", "biceps", "forearms"]);
+
 /**
- * Ikonka dobrana z ćwiczeń dnia: partia z największą liczbą ćwiczeń. Dzień z nogami i górą,
- * w którym żadna partia nie przeważa (najczęstsza poniżej 40%), to całe ciało. Bez ćwiczeń: brak.
+ * Ikonka dobrana z ćwiczeń dnia. Jedna partia z przewagą (co najmniej 60% ćwiczeń) to split na nią.
+ * Inaczej: nogi z górą to całe ciało, sama góra to push, pull albo góra (gdy jest i to, i to;
+ * pojedyncze ćwiczenie z drugiej strony nie psuje push/pull). Bez ćwiczeń: brak.
  */
 export function autoDayIcon(slugs: (string | null | undefined)[]): DayIcon | null {
   const count = new Map<GroupKey, number>();
+  let push = 0;
+  let pull = 0;
   for (const s of slugs) {
     const g = muscleGroup(s);
-    if (g) count.set(g.key, (count.get(g.key) ?? 0) + 1);
+    if (!g) continue;
+    count.set(g.key, (count.get(g.key) ?? 0) + 1);
+    if (PUSH.has(s!)) push++;
+    if (PULL.has(s!)) pull++;
   }
   const total = [...count.values()].reduce((a, b) => a + b, 0);
   const top = [...count.entries()].sort((a, b) => b[1] - a[1])[0];
   if (!top) return null;
-  const mixed = count.has("legs") && count.size >= 3 && top[1] / total < 0.4;
-  return mixed ? "full" : top[0];
+  if (top[1] / total >= 0.6) return top[0];
+  const upper = push + pull;
+  if (count.has("legs")) return upper > 0 ? "full" : top[0];
+  if (upper === 0) return top[0];
+  if (pull / upper <= 0.2) return "push";
+  if (push / upper <= 0.2) return "pull";
+  return "upper";
 }

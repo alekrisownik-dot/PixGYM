@@ -602,11 +602,11 @@ def test_plan_day_icon_saved_and_copied(new_client, admin):
     plan = api.post("/api/v1/programs", json={"name": "Ikonki", "days": days}).json()
     assert [d["icon"] for d in plan["days"]] == ["chest", None]
 
-    days[1]["icon"] = "arms"
+    days[1]["icon"] = "pull"
     plan = api.put(f"/api/v1/programs/{plan['id']}", json={"name": "Ikonki", "days": days}).json()
-    assert [d["icon"] for d in plan["days"]] == ["chest", "arms"]
+    assert [d["icon"] for d in plan["days"]] == ["chest", "pull"]
     copy = api.post(f"/api/v1/programs/{plan['id']}/copy").json()
-    assert [d["icon"] for d in copy["days"]] == ["chest", "arms"]
+    assert [d["icon"] for d in copy["days"]] == ["chest", "pull"]
 
     days[0]["icon"] = "biceps"
     bad = api.post("/api/v1/programs", json={"name": "x", "days": days})
